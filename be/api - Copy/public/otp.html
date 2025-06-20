@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Authentication API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button.secondary {
+            background-color: #f44336;
+        }
+        button.secondary:hover {
+            background-color: #d32f2f;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .response {
+            margin-top: 15px;
+        }
+        .token-info {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .user-info {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 8px;
+        }
+        .user-info-label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>OTP Authentication API Tester</h1>
+    
+    <div class="container">
+        <!-- Register Form -->
+        <div class="card">
+            <h2>Register</h2>
+            <div class="form-group">
+                <label for="register-phone">Phone Number:</label>
+                <input type="text" id="register-phone" placeholder="Enter phone number">
+            </div>
+            <button onclick="register()">Register</button>
+            <div class="response">
+                <h3>Response:</h3>
+                <pre id="register-response">No response yet</pre>
+            </div>
+        </div>
+        
+        <!-- Login Form -->
+        <div class="card">
+            <h2>Login</h2>
+            <div class="form-group">
+                <label for="login-phone">Phone Number:</label>
+                <input type="text" id="login-phone" placeholder="Enter phone number">
+            </div>
+            <button onclick="login()">Login</button>
+            <div class="response">
+                <h3>Response:</h3>
+                <pre id="login-response">No response yet</pre>
+            </div>
+        </div>
+        
+        <!-- Verify OTP Form -->
+        <div class="card">
+            <h2>Verify OTP</h2>
+            <div class="form-group">
+                <label for="verify-phone">Phone Number:</label>
+                <input type="text" id="verify-phone" placeholder="Enter phone number">
+            </div>
+            <div class="form-group">
+                <label for="verify-otp">OTP:</label>
+                <input type="text" id="verify-otp" placeholder="Enter OTP">
+            </div>
+            <div class="form-group">
+                <label for="verify-type">Type:</label>
+                <select id="verify-type">
+                    <option value="register">Register</option>
+                    <option value="login">Login</option>
+                </select>
+            </div>
+            <button onclick="verifyOtp()">Verify OTP</button>
+            <div class="response">
+                <h3>Response:</h3>
+                <pre id="verify-response">No response yet</pre>
+            </div>
+        </div>
+        
+        <!-- Validate Token & Logout Form -->
+        <div class="card">
+            <h2>Token Management</h2>
+            <div class="form-group">
+                <label for="token-input">Token (optional):</label>
+                <input type="text" id="token-input" placeholder="Enter token or use stored token">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="validateToken()">Validate Token</button>
+                <button onclick="logout()" class="secondary">Logout</button>
+            </div>
+            <div class="response">
+                <h3>Response:</h3>
+                <pre id="token-response">No response yet</pre>
+            </div>
+            
+            <!-- User Info Section (shown after successful validation) -->
+            <div id="user-info-section" style="display: none;" class="token-info">
+                <h3>User Information</h3>
+                <div class="user-info" id="user-info-container">
+                    <!-- User info will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base URL for API
+        const baseUrl = 'http://localhost/ramesh-be/be/api';
+        
+        // Register function
+        async function register() {
+            const phoneNumber = document.getElementById('register-phone').value;
+            
+            if (!phoneNumber) {
+                alert('Please enter a phone number');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/public/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone_number: phoneNumber
+                    })
+                });
+                
+                const data = await response.json();
+                document.getElementById('register-response').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('register-response').textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        // Login function
+        async function login() {
+            const phoneNumber = document.getElementById('login-phone').value;
+            
+            if (!phoneNumber) {
+                alert('Please enter a phone number');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/public/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone_number: phoneNumber
+                    })
+                });
+                
+                const data = await response.json();
+                document.getElementById('login-response').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('login-response').textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        // Verify OTP function
+        async function verifyOtp() {
+            const phoneNumber = document.getElementById('verify-phone').value;
+            const otp = document.getElementById('verify-otp').value;
+            const type = document.getElementById('verify-type').value;
+            
+            if (!phoneNumber || !otp) {
+                alert('Please enter both phone number and OTP');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/public/verify-otp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone_number: phoneNumber,
+                        otp: otp,
+                        type: type
+                    })
+                });
+                
+                const data = await response.json();
+                document.getElementById('verify-response').textContent = JSON.stringify(data, null, 2);
+                
+                // If successful and token is returned, store it
+                if (data.status === 'success' && data.data && data.data.token) {
+                    localStorage.setItem('auth_token', data.data.token);
+                    console.log('Token stored in localStorage');
+                }
+            } catch (error) {
+                document.getElementById('verify-response').textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        // Validate Token function
+        async function validateToken() {
+            // Get token from input or localStorage
+            let token = document.getElementById('token-input').value;
+            if (!token) {
+                token = localStorage.getItem('auth_token');
+                if (!token) {
+                    alert('No token available. Please login first or enter a token manually.');
+                    return;
+                }
+            }
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/public/validate-token`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                document.getElementById('token-response').textContent = JSON.stringify(data, null, 2);
+                
+                // If successful, display user info
+                if (data.status === 'success' && data.data && data.data.user) {
+                    displayUserInfo(data.data);
+                } else {
+                    // Hide user info if validation failed
+                    document.getElementById('user-info-section').style.display = 'none';
+                }
+            } catch (error) {
+                document.getElementById('token-response').textContent = `Error: ${error.message}`;
+                document.getElementById('user-info-section').style.display = 'none';
+            }
+        }
+        
+        // Logout function
+        async function logout() {
+            // Get token from input or localStorage
+            let token = document.getElementById('token-input').value;
+            if (!token) {
+                token = localStorage.getItem('auth_token');
+                if (!token) {
+                    alert('No token available. Please login first or enter a token manually.');
+                    return;
+                }
+            }
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/public/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                document.getElementById('token-response').textContent = JSON.stringify(data, null, 2);
+                
+                // If successful, clear the token from localStorage
+                if (data.status === 'success') {
+                    localStorage.removeItem('auth_token');
+                    document.getElementById('user-info-section').style.display = 'none';
+                    alert('Logged out successfully. Token has been removed.');
+                }
+            } catch (error) {
+                document.getElementById('token-response').textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        // Display user info in a formatted way
+        function displayUserInfo(data) {
+            const userInfoSection = document.getElementById('user-info-section');
+            const userInfoContainer = document.getElementById('user-info-container');
+            
+            // Clear previous content
+            userInfoContainer.innerHTML = '';
+            
+            // Add user data
+            const user = data.user;
+            const fields = [
+                { label: 'ID', value: user.id },
+                { label: 'Phone Number', value: user.phone_number },
+                { label: 'Status', value: user.status },
+                { label: 'Created At', value: user.created_at },
+                { label: 'Last Login At', value: user.last_login_at },
+                { label: 'Token Expires', value: data.token_expires_at }
+            ];
+            
+            fields.forEach(field => {
+                const labelElement = document.createElement('div');
+                labelElement.className = 'user-info-label';
+                labelElement.textContent = field.label;
+                
+                const valueElement = document.createElement('div');
+                valueElement.textContent = field.value;
+                
+                userInfoContainer.appendChild(labelElement);
+                userInfoContainer.appendChild(valueElement);
+            });
+            
+            // Show the section
+            userInfoSection.style.display = 'block';
+        }
+        
+        // Check if we have a token on page load and populate the token input
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('auth_token');
+            if (token) {
+                // Optionally auto-validate on page load
+                // validateToken();
+            }
+        });
+    </script>
+</body>
+</html>

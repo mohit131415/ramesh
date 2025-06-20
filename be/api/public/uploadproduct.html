@@ -1,0 +1,2206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Product Management API Tester</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        .api-section {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .response-container {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .nav-tabs {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .btn-api {
+            margin-top: 10px;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .filter-section {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .filter-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .alert-info {
+            margin-bottom: 15px;
+        }
+        .btn-danger {
+            margin-right: 10px;
+        }
+        .product-card {
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        .product-card:hover {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .auth-status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .auth-status.logged-in {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .auth-status.logged-out {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .variant-container, .tag-container {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+        .add-button {
+            background-color: #28a745;
+            color: white;
+            margin-bottom: 15px;
+        }
+        .remove-button {
+            background-color: #dc3545;
+            color: white;
+            margin-top: 10px;
+        }
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .image-preview-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .image-preview-item .remove-image {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            color: #dc3545;
+        }
+        .image-preview-item .primary-badge {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            background-color: rgba(40, 167, 69, 0.7);
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 0.2em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border .75s linear infinite;
+            margin-right: 0.5rem;
+        }
+        @keyframes spinner-border {
+            to { transform: rotate(360deg); }
+        }
+        .subcategory-section {
+            margin-top: 15px;
+            padding-left: 20px;
+            border-left: 2px solid #ddd;
+        }
+        .product-selection, .category-selection {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .tab-pane {
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Comprehensive Product Management API Tester</h1>
+        
+        <!-- Authentication Section -->
+        <div class="api-section" id="authSection">
+            <h3>Authentication</h3>
+            <div class="alert alert-info">
+                Login to get an access token for testing the product management API endpoints.
+            </div>
+            
+            <div id="authStatus" class="auth-status logged-out">
+                <strong>Status:</strong> Not authenticated
+            </div>
+            
+            <div id="loginForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="loginEmail">Email or Username</label>
+                            <input type="text" class="form-control" id="loginEmail" placeholder="Enter email or username">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" placeholder="Password">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="loginBtn" class="btn btn-success btn-api">Login</button>
+                <button type="button" id="logoutBtn" class="btn btn-outline-danger btn-api ms-2" style="display: none;">Logout</button>
+            </div>
+            
+            <div class="mt-3">
+                <div class="form-group">
+                    <label for="accessToken">Access Token</label>
+                    <input type="text" class="form-control" id="accessToken" placeholder="Enter your access token">
+                    <small class="form-text text-muted">Token will be used for API requests</small>
+                </div>
+            </div>
+        </div>
+        
+        <ul class="nav nav-tabs" id="apiTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list" type="button" role="tab" aria-controls="list" aria-selected="true">List Products</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="view-tab" data-bs-toggle="tab" data-bs-target="#view" type="button" role="tab" aria-controls="view" aria-selected="false">View Product</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab" aria-controls="create" aria-selected="false">Create Product</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="update-tab" data-bs-toggle="tab" data-bs-target="#update" type="button" role="tab" aria-controls="update" aria-selected="false">Update Product</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="delete-tab" data-bs-toggle="tab" data-bs-target="#delete" type="button" role="tab" aria-controls="delete" aria-selected="false">Delete Product</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="restore-tab" data-bs-toggle="tab" data-bs-target="#restore" type="button" role="tab" aria-controls="restore" aria-selected="false">Restore Product</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="apiTabsContent">
+            <!-- List Products Tab -->
+            <div class="tab-pane fade show active" id="list" role="tabpanel" aria-labelledby="list-tab">
+                <div class="api-section">
+                    <h3>List All Products</h3>
+                    <div class="alert alert-info">
+                        This endpoint returns all products with pagination and optional filtering.
+                    </div>
+                    
+                    <div class="filter-section">
+                        <div class="filter-title">Filters</div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="listSearch">Search</label>
+                                    <input type="text" class="form-control" id="listSearch" placeholder="Search by name, description, SKU">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="listStatus">Status</label>
+                                    <select class="form-control" id="listStatus">
+                                        <option value="">All Statuses</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                        <option value="archived">Archived</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="listCategory">Category</label>
+                                    <select class="form-control" id="listCategory">
+                                        <option value="">All Categories</option>
+                                        <!-- Categories will be loaded dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="listSubcategory">Subcategory</label>
+                                    <select class="form-control" id="listSubcategory">
+                                        <option value="">All Subcategories</option>
+                                        <!-- Subcategories will be loaded dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="listSortBy">Sort By</label>
+                                    <select class="form-control" id="listSortBy">
+                                        <option value="created_at">Created Date</option>
+                                        <option value="name">Name</option>
+                                        <option value="price">Price</option>
+                                        <option value="display_order">Display Order</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="listSortOrder">Sort Order</label>
+                                    <select class="form-control" id="listSortOrder">
+                                        <option value="desc">Descending</option>
+                                        <option value="asc">Ascending</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="listPage">Page</label>
+                                <input type="number" class="form-control" id="listPage" value="1" min="1">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="listLimit">Items Per Page</label>
+                                <input type="number" class="form-control" id="listLimit" value="10" min="1" max="100">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="listProductsBtn" class="btn btn-primary btn-api">List Products</button>
+                    
+                    <div class="mt-4" id="productsList">
+                        <!-- Product cards will be displayed here -->
+                    </div>
+                    
+                    <div class="response-container" id="listResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- View Product Tab -->
+            <div class="tab-pane fade" id="view" role="tabpanel" aria-labelledby="view-tab">
+                <div class="api-section">
+                    <h3>View Product Details</h3>
+                    <div class="alert alert-info">
+                        This endpoint returns detailed information about a specific product.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="viewProductId">Product ID</label>
+                        <input type="number" class="form-control" id="viewProductId" placeholder="Enter product ID">
+                    </div>
+                    
+                    <button type="button" id="viewProductBtn" class="btn btn-primary btn-api">View Product</button>
+                    
+                    <div class="mt-4" id="productDetails">
+                        <!-- Product details will be displayed here -->
+                    </div>
+                    
+                    <div class="response-container" id="viewResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Create Product Tab -->
+            <div class="tab-pane fade" id="create" role="tabpanel" aria-labelledby="create-tab">
+                <div class="api-section">
+                    <h3>Create New Product</h3>
+                    <div class="alert alert-info">
+                        This endpoint creates a new product with all its details, variants, tags, and images.
+                    </div>
+                    
+                    <form id="createProductForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createName">Product Name *</label>
+                                    <input type="text" class="form-control" id="createName" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createSlug">Slug</label>
+                                    <input type="text" class="form-control" id="createSlug" name="slug">
+                                    <small class="form-text text-muted">Leave empty to auto-generate from name</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createCategory">Category *</label>
+                                    <select class="form-control" id="createCategory" name="category_id" required>
+                                        <option value="">Select Category</option>
+                                        <!-- Categories will be loaded dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createSubcategory">Subcategory *</label>
+                                    <select class="form-control" id="createSubcategory" name="subcategory_id" required>
+                                        <option value="">Select Subcategory</option>
+                                        <!-- Subcategories will be loaded dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="createDescription">Description</label>
+                            <textarea class="form-control" id="createDescription" name="description" rows="4"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="createShortDescription">Short Description</label>
+                            <textarea class="form-control" id="createShortDescription" name="short_description" rows="2" maxlength="500"></textarea>
+                            <small class="form-text text-muted">Maximum 500 characters</small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createHsnCode">HSN Code</label>
+                                    <input type="text" class="form-control" id="createHsnCode" name="hsn_code">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createTaxRate">Tax Rate (%)</label>
+                                    <input type="number" class="form-control" id="createTaxRate" name="tax_rate" step="0.01" min="0" max="100">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createStatus">Status</label>
+                                    <select class="form-control" id="createStatus" name="status">
+                                        <option value="active">Active</option>
+                                        <option value="inactive" selected>Inactive</option>
+                                        <option value="archived">Archived</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createCgstRate">CGST Rate (%)</label>
+                                    <input type="number" class="form-control" id="createCgstRate" name="cgst_rate" step="0.01" min="0" max="100">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createSgstRate">SGST Rate (%)</label>
+                                    <input type="number" class="form-control" id="createSgstRate" name="sgst_rate" step="0.01" min="0" max="100">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createIgstRate">IGST Rate (%)</label>
+                                    <input type="number" class="form-control" id="createIgstRate" name="igst_rate" step="0.01" min="0" max="100">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createDisplayOrder">Display Order</label>
+                                    <input type="number" class="form-control" id="createDisplayOrder" name="display_order" min="0" value="0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createShelfLife">Shelf Life</label>
+                                    <input type="text" class="form-control" id="createShelfLife" name="shelf_life">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createIsVegetarian">Is Vegetarian</label>
+                                    <select class="form-control" id="createIsVegetarian" name="is_vegetarian">
+                                        <option value="">Not Specified</option>
+                                        <option value="1">Yes</option>
+                                        <option value="0">No</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="createIngredients">Ingredients (JSON Array)</label>
+                            <textarea class="form-control" id="createIngredients" name="ingredients" rows="2" placeholder='["ingredient1", "ingredient2"]'></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="createNutritionalInfo">Nutritional Info (JSON Object)</label>
+                            <textarea class="form-control" id="createNutritionalInfo" name="nutritional_info" rows="2" placeholder='{"calories": "100", "protein": "10g"}'></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="createStorageInstructions">Storage Instructions</label>
+                            <textarea class="form-control" id="createStorageInstructions" name="storage_instructions" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="createAttributes">Attributes (JSON Object)</label>
+                            <textarea class="form-control" id="createAttributes" name="attributes" rows="2" placeholder='{"color": "red", "size": "medium"}'></textarea>
+                        </div>
+                        
+                        <h4 class="mt-4">SEO Information</h4>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createMetaTitle">Meta Title</label>
+                                    <input type="text" class="form-control" id="createMetaTitle" name="meta_title">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createMetaDescription">Meta Description</label>
+                                    <textarea class="form-control" id="createMetaDescription" name="meta_description" rows="2"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createMetaKeywords">Meta Keywords</label>
+                                    <input type="text" class="form-control" id="createMetaKeywords" name="meta_keywords">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h4 class="mt-4">Product Variants</h4>
+                        <button type="button" class="btn add-button" id="createAddVariant">Add Variant</button>
+                        <div id="createVariantsContainer">
+                            <!-- Variant forms will be added here dynamically -->
+                        </div>
+                        
+                        <h4 class="mt-4">Product Tags</h4>
+                        <button type="button" class="btn add-button" id="createAddTag">Add Tag</button>
+                        <div id="createTagsContainer">
+                            <!-- Tag forms will be added here dynamically -->
+                        </div>
+                        
+                        <h4 class="mt-4">Product Images</h4>
+                        <div class="form-group">
+                            <label for="createImages">Upload Images</label>
+                            <input type="file" class="form-control" id="createImages" name="images[]" multiple accept="image/*">
+                            <small class="form-text text-muted">You can select multiple images. First image will be set as primary.</small>
+                        </div>
+                        <div class="image-preview" id="createImagePreview">
+                            <!-- Image previews will be displayed here -->
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-api mt-4">Create Product</button>
+                    </form>
+                    
+                    <div class="response-container" id="createResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Update Product Tab -->
+            <div class="tab-pane fade" id="update" role="tabpanel" aria-labelledby="update-tab">
+                <div class="api-section">
+                    <h3>Update Product</h3>
+                    <div class="alert alert-info">
+                        This endpoint updates an existing product with all its details, variants, tags, and images.
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label for="updateProductId">Product ID *</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="updateProductId" required>
+                            <button type="button" id="loadProductBtn" class="btn btn-secondary">Load Product Data</button>
+                        </div>
+                    </div>
+                    
+                    <div id="updateFormContainer" style="display: none;">
+                        <form id="updateProductForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="updateName">Product Name *</label>
+                                        <input type="text" class="form-control" id="updateName" name="name" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="updateSlug">Slug</label>
+                                        <input type="text" class="form-control" id="updateSlug" name="slug">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="updateCategory">Category *</label>
+                                        <select class="form-control" id="updateCategory" name="category_id" required>
+                                            <option value="">Select Category</option>
+                                            <!-- Categories will be loaded dynamically -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="updateSubcategory">Subcategory *</label>
+                                        <select class="form-control" id="updateSubcategory" name="subcategory_id" required>
+                                            <option value="">Select Subcategory</option>
+                                            <!-- Subcategories will be loaded dynamically -->
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="updateDescription">Description</label>
+                                <textarea class="form-control" id="updateDescription" name="description" rows="4"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="updateShortDescription">Short Description</label>
+                                <textarea class="form-control" id="updateShortDescription" name="short_description" rows="2" maxlength="500"></textarea>
+                                <small class="form-text text-muted">Maximum 500 characters</small>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="updateHsnCode">HSN Code</label>
+                                        <input type="text" class="form-control" id="updateHsnCode" name="hsn_code">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="updateTaxRate">Tax Rate (%)</label>
+                                        <input type="number" class="form-control" id="updateTaxRate" name="tax_rate" step="0.01" min="0" max="100">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="updateStatus">Status</label>
+                                        <select class="form-control" id="updateStatus" name="status">
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                            <option value="archived">Archived</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="updateCgstRate">CGST Rate (%)</label>
+                                        <input type="number" class="form-control" id="updateCgstRate" name="cgst_rate" step="0.01" min="0" max="100">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="updateSgstRate">SGST Rate (%)</label>
+                                        <input type="number" class="form-control" id="updateSgstRate" name="sgst_rate" step="0.01" min="0" max="100">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="updateIgstRate">IGST Rate (%)</label>
+                                        <input type="number" class="form-control" id="updateIgstRate" name="igst_rate" step="0.01" min="0" max="100">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="updateDisplayOrder">Display Order</label>
+                                        <input type="number" class="form-control" id="updateDisplayOrder" name="display_order" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="updateShelfLife">Shelf Life</label>
+                                        <input type="text" class="form-control" id="updateShelfLife" name="shelf_life">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="updateIsVegetarian">Is Vegetarian</label>
+                                        <select class="form-control" id="updateIsVegetarian" name="is_vegetarian">
+                                            <option value="">Not Specified</option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="updateIngredients">Ingredients (JSON Array)</label>
+                                <textarea class="form-control" id="updateIngredients" name="ingredients" rows="2" placeholder='["ingredient1", "ingredient2"]'></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="updateNutritionalInfo">Nutritional Info (JSON Object)</label>
+                                <textarea class="form-control" id="updateNutritionalInfo" name="nutritional_info" rows="2" placeholder='{"calories": "100", "protein": "10g"}'></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="updateStorageInstructions">Storage Instructions</label>
+                                <textarea class="form-control" id="updateStorageInstructions" name="storage_instructions" rows="2"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="updateAttributes">Attributes (JSON Object)</label>
+                                <textarea class="form-control" id="updateAttributes" name="attributes" rows="2" placeholder='{"color": "red", "size": "medium"}'></textarea>
+                            </div>
+                            
+                            <h4 class="mt-4">SEO Information</h4>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="updateMetaTitle">Meta Title</label>
+                                        <input type="text" class="form-control" id="updateMetaTitle" name="meta_title">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="updateMetaDescription">Meta Description</label>
+                                        <textarea class="form-control" id="updateMetaDescription" name="meta_description" rows="2"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="updateMetaKeywords">Meta Keywords</label>
+                                        <input type="text" class="form-control" id="updateMetaKeywords" name="meta_keywords">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h4 class="mt-4">Product Variants</h4>
+                            <button type="button" class="btn add-button" id="updateAddVariant">Add Variant</button>
+                            <div id="updateVariantsContainer">
+                                <!-- Variant forms will be added here dynamically -->
+                            </div>
+                            
+                            <h4 class="mt-4">Product Tags</h4>
+                            <button type="button" class="btn add-button" id="updateAddTag">Add Tag</button>
+                            <div id="updateTagsContainer">
+                                <!-- Tag forms will be added here dynamically -->
+                            </div>
+                            
+                            <h4 class="mt-4">Existing Images</h4>
+                            <div id="updateExistingImages">
+                                <!-- Existing images will be displayed here -->
+                            </div>
+                            
+                            <h4 class="mt-4">Upload New Images</h4>
+                            <div class="form-group">
+                                <label for="updateImages">Upload Images</label>
+                                <input type="file" class="form-control" id="updateImages" name="images[]" multiple accept="image/*">
+                                <small class="form-text text-muted">You can select multiple images to add to the product.</small>
+                            </div>
+                            <div class="image-preview" id="updateImagePreview">
+                                <!-- Image previews will be displayed here -->
+                            </div>
+                            
+                            <input type="hidden" id="updateDeletedImageIds" name="delete_image_ids" value="">
+                            <input type="hidden" id="updatePrimaryImageId" name="primary_image_id" value="">
+                            
+                            <button type="submit" class="btn btn-primary btn-api mt-4">Update Product</button>
+                        </form>
+                    </div>
+                    
+                    <div class="response-container" id="updateResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Delete Product Tab -->
+            <div class="tab-pane fade" id="delete" role="tabpanel" aria-labelledby="delete-tab">
+                <div class="api-section">
+                    <h3>Delete Product</h3>
+                    <div class="alert alert-warning">
+                        <strong>Warning:</strong> This endpoint deletes a product (soft delete). Admin or Super Admin role is required.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="deleteProductId">Product ID *</label>
+                        <input type="number" class="form-control" id="deleteProductId" required>
+                    </div>
+                    
+                    <button type="button" id="deleteProductBtn" class="btn btn-danger btn-api">Delete Product</button>
+                    
+                    <div class="response-container" id="deleteResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Restore Product Tab -->
+            <div class="tab-pane fade" id="restore" role="tabpanel" aria-labelledby="restore-tab">
+                <div class="api-section">
+                    <h3>Restore Product</h3>
+                    <div class="alert alert-info">
+                        This endpoint restores a previously deleted product. Super Admin role is required.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="restoreProductId">Product ID *</label>
+                        <input type="number" class="form-control" id="restoreProductId" required>
+                    </div>
+                    
+                    <button type="button" id="restoreProductBtn" class="btn btn-success btn-api">Restore Product</button>
+                    
+                    <div class="response-container" id="restoreResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Base API URL - adjust this to match your setup
+        // IMPORTANT: Note the duplicate "api" in the URL path as specified by the user
+        const baseUrl = window.location.origin + '/ramesh-be/be/api/api';
+        
+        // Store user data and tokens
+        let userData = null;
+        let accessToken = '';
+        let categories = [];
+        let subcategories = [];
+        let deletedImageIds = [];
+        let primaryImageId = null;
+        
+        // Helper function to get access token
+        function getAccessToken() {
+            return document.getElementById('accessToken').value;
+        }
+        
+        // Helper function to debug FormData
+        function logFormData(formData) {
+            console.log('FormData contents:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${typeof value === 'object' ? 'File or Object' : value}`);
+            }
+        }
+        
+        // Helper function to make API requests
+        async function apiRequest(url, method, data = null, token = null) {
+            const headers = {
+                'Accept': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const options = {
+                method,
+                headers
+            };
+            
+            // Handle FormData separately for file uploads
+            if (data instanceof FormData) {
+                // Don't set Content-Type for FormData, browser will set it with boundary
+                options.body = data;
+                
+                // Log FormData contents for debugging
+                logFormData(data);
+                
+                // If we're using method override (_method=PUT), change the actual method to POST
+                if (data.has('_method') && data.get('_method') === 'PUT') {
+                    options.method = 'POST';
+                }
+            } else if (data && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+                headers['Content-Type'] = 'application/json';
+                options.body = JSON.stringify(data);
+                console.log('Request body:', options.body);
+            }
+            
+            try {
+                console.log(`Making ${method} request to ${url}`);
+                console.log('Headers:', headers);
+                if (data) console.log('Data:', data instanceof FormData ? 'FormData object' : data);
+                
+                const response = await fetch(url, options);
+                const responseData = await response.json();
+                
+                console.log('Response:', responseData);
+                return responseData;
+            } catch (error) {
+                console.error('API Request Error:', error);
+                return {
+                    status: 'error',
+                    message: error.message,
+                    data: null
+                };
+            }
+        }
+        
+        // Helper function to display response
+        function displayResponse(elementId, response) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<pre>${JSON.stringify(response, null, 2)}</pre>`;
+        }
+        
+        // Helper function to build query string from filters
+        function buildQueryString(filters) {
+            const params = new URLSearchParams();
+            
+            for (const key in filters) {
+                if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+                    params.append(key, filters[key]);
+                }
+            }
+            
+            return params.toString();
+        }
+        
+        // Helper function to format date for display
+        function formatDate(dateString) {
+            if (!dateString) return 'Not set';
+            
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        }
+        
+        // Helper function to update authentication status UI
+        function updateAuthStatusUI() {
+            const authStatus = document.getElementById('authStatus');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            if (accessToken) {
+                authStatus.className = 'auth-status logged-in';
+                authStatus.innerHTML = `<strong>Status:</strong> Authenticated${userData ? ' as ' + userData.username : ''}`;
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+            } else {
+                authStatus.className = 'auth-status logged-out';
+                authStatus.innerHTML = '<strong>Status:</strong> Not authenticated';
+                loginBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'none';
+            }
+        }
+        
+        // Function to load categories
+        async function loadCategories() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                console.error('Access token is required to load categories');
+                return;
+            }
+            
+            try {
+                const response = await apiRequest(`${baseUrl}/categories?limit=100`, 'GET', null, token);
+                
+                if (response.status === 'success' && response.data) {
+                    categories = response.data;
+                    
+                    // Populate category dropdowns
+                    populateCategoryDropdowns();
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+        
+        // Function to populate category dropdowns
+        function populateCategoryDropdowns() {
+            const dropdowns = [
+                document.getElementById('listCategory'),
+                document.getElementById('createCategory'),
+                document.getElementById('updateCategory')
+            ];
+            
+            dropdowns.forEach(dropdown => {
+                if (!dropdown) return;
+                
+                // Clear existing options except the first one
+                while (dropdown.options.length > 1) {
+                    dropdown.remove(1);
+                }
+                
+                // Add category options
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    dropdown.appendChild(option);
+                });
+            });
+        }
+        
+        // Function to load subcategories by category ID
+        async function loadSubcategories(categoryId, targetDropdownId) {
+    const token = getAccessToken();
+    
+    if (!token) {
+        console.error('Access token is required to load subcategories');
+        return;
+    }
+    
+    const dropdown = document.getElementById(targetDropdownId);
+    
+    if (!dropdown) return;
+    
+    // Clear existing options except the first one
+    while (dropdown.options.length > 1) {
+        dropdown.remove(1);
+    }
+    
+    if (!categoryId) {
+        return;
+    }
+    
+    try {
+        // Corrected API endpoint for subcategories - note the /api/ segment in the path
+        const response = await apiRequest(`${baseUrl}/categories/${categoryId}/subcategories`, 'GET', null, token);
+        
+        if (response.status === 'success' && response.data) {
+            // Store subcategories for the selected category
+            subcategories = response.data;
+            
+            // Add subcategory options
+            subcategories.forEach(subcategory => {
+                const option = document.createElement('option');
+                option.value = subcategory.id;
+                option.textContent = subcategory.name;
+                dropdown.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading subcategories:', error);
+    }
+}
+        
+        // Function to create variant template
+        function createVariantTemplate(containerId, prefix, data = null) {
+            const variantId = new Date().getTime();
+            const container = document.getElementById(containerId);
+            
+            const variantHtml = `
+                <div class="variant-container" data-id="${variantId}">
+                    ${data && data.id ? `<input type="hidden" name="${prefix}_variant_id_${variantId}" value="${data.id}">` : ''}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="${prefix}_variant_name_${variantId}">Variant Name *</label>
+                                <input type="text" class="form-control" id="${prefix}_variant_name_${variantId}" name="${prefix}_variant_name_${variantId}" value="${data ? data.variant_name || '' : ''}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="${prefix}_variant_sku_${variantId}">SKU *</label>
+                                <input type="text" class="form-control" id="${prefix}_variant_sku_${variantId}" name="${prefix}_variant_sku_${variantId}" value="${data ? data.sku || '' : ''}" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="${prefix}_variant_price_${variantId}">Price *</label>
+                                <input type="number" class="form-control" id="${prefix}_variant_price_${variantId}" name="${prefix}_variant_price_${variantId}" step="0.01" min="0" value="${data ? data.price || '' : ''}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="${prefix}_variant_sale_price_${variantId}">Sale Price</label>
+                                <input type="number" class="form-control" id="${prefix}_variant_sale_price_${variantId}" name="${prefix}_variant_sale_price_${variantId}" step="0.01" min="0" value="${data && data.sale_price ? data.sale_price : ''}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="${prefix}_variant_discount_${variantId}">Discount (%)</label>
+                                <input type="number" class="form-control" id="${prefix}_variant_discount_${variantId}" name="${prefix}_variant_discount_${variantId}" step="0.01" min="0" max="100" value="${data && data.discount_percentage ? data.discount_percentage : ''}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="${prefix}_variant_weight_${variantId}">Weight</label>
+                                <input type="number" class="form-control" id="${prefix}_variant_weight_${variantId}" name="${prefix}_variant_weight_${variantId}" step="0.001" min="0" value="${data && data.weight ? data.weight : ''}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="${prefix}_variant_weight_unit_${variantId}">Weight Unit</label>
+                                <select class="form-control" id="${prefix}_variant_weight_unit_${variantId}" name="${prefix}_variant_weight_unit_${variantId}">
+                                    <option value="g" ${data && data.weight_unit === 'g' ? 'selected' : ''}>Grams (g)</option>
+                                    <option value="kg" ${data && data.weight_unit === 'kg' ? 'selected' : ''}>Kilograms (kg)</option>
+                                    <option value="mg" ${data && data.weight_unit === 'mg' ? 'selected' : ''}>Milligrams (mg)</option>
+                                    <option value="lb" ${data && data.weight_unit === 'lb' ? 'selected' : ''}>Pounds (lb)</option>
+                                    <option value="oz" ${data && data.weight_unit === 'oz' ? 'selected' : ''}>Ounces (oz)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="${prefix}_variant_status_${variantId}">Status</label>
+                                <select class="form-control" id="${prefix}_variant_status_${variantId}" name="${prefix}_variant_status_${variantId}">
+                                    <option value="active" ${data && data.status === 'active' ? 'selected' : ''}>Active</option>
+                                    <option value="inactive" ${data && data.status === 'inactive' ? 'selected' : 'selected'}>Inactive</option>
+                                    <option value="archived" ${data && data.status === 'archived' ? 'selected' : ''}>Archived</option>
+                                </select>
+                                <small class="form-text text-muted">At least one variant must be active</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="${prefix}_variant_min_qty_${variantId}">Min Order Quantity</label>
+                                <input type="number" class="form-control" id="${prefix}_variant_min_qty_${variantId}" name="${prefix}_variant_min_qty_${variantId}" min="1" value="${data && data.min_order_quantity ? data.min_order_quantity : '1'}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="${prefix}_variant_max_qty_${variantId}">Max Order Quantity</label>
+                                <input type="number" class="form-control" id="${prefix}_variant_max_qty_${variantId}" name="${prefix}_variant_max_qty_${variantId}" min="1" value="${data && data.max_order_quantity ? data.max_order_quantity : ''}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="${prefix}_variant_display_order_${variantId}">Display Order</label>
+                                <input type="number" class="form-control" id="${prefix}_variant_display_order_${variantId}" name="${prefix}_variant_display_order_${variantId}" min="0" value="${data && data.display_order ? data.display_order : '0'}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="${prefix}_variant_dimensions_${variantId}">Dimensions (JSON)</label>
+                        <textarea class="form-control" id="${prefix}_variant_dimensions_${variantId}" name="${prefix}_variant_dimensions_${variantId}" rows="2" placeholder='{"length": 10, "width": 5, "height": 2}'>${data && data.dimensions ? data.dimensions : ''}</textarea>
+                    </div>
+                    <button type="button" class="btn remove-button" data-id="${variantId}">Remove Variant</button>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', variantHtml);
+            
+            // Add event listener to remove button
+            document.querySelector(`#${containerId} .variant-container[data-id="${variantId}"] .remove-button`).addEventListener('click', function() {
+                document.querySelector(`#${containerId} .variant-container[data-id="${variantId}"]`).remove();
+            });
+        }
+        
+        // Function to create tag template
+        function createTagTemplate(containerId, prefix, tagValue = '') {
+            const tagId = new Date().getTime();
+            const container = document.getElementById(containerId);
+            
+            const tagHtml = `
+                <div class="tag-container" data-id="${tagId}">
+                    <div class="form-group">
+                        <label for="${prefix}_tag_${tagId}">Tag Name</label>
+                        <input type="text" class="form-control" id="${prefix}_tag_${tagId}" name="${prefix}_tag_${tagId}" value="${tagValue}">
+                    </div>
+                    <button type="button" class="btn remove-button" data-id="${tagId}">Remove Tag</button>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', tagHtml);
+            
+            // Add event listener to remove button
+            document.querySelector(`#${containerId} .tag-container[data-id="${tagId}"] .remove-button`).addEventListener('click', function() {
+                document.querySelector(`#${containerId} .tag-container[data-id="${tagId}"]`).remove();
+            });
+        }
+        
+        // Function to create product cards
+        function createProductCards(products) {
+            const container = document.getElementById('productsList');
+            container.innerHTML = '';
+            
+            if (!products || products.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No products found</div>';
+                return;
+            }
+            
+            const row = document.createElement('div');
+            row.className = 'row';
+            
+            products.forEach(product => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4 mb-4';
+                
+                const card = document.createElement('div');
+                card.className = 'card product-card h-100';
+                card.onclick = () => {
+                    document.getElementById('viewProductId').value = product.id;
+                    document.getElementById('viewProductBtn').click();
+                    document.getElementById('view-tab').click();
+                };
+                
+                // Status badge
+                let statusBadge = '';
+                switch (product.status) {
+                    case 'active':
+                        statusBadge = '<span class="badge bg-success">Active</span>';
+                        break;
+                    case 'inactive':
+                        statusBadge = '<span class="badge bg-warning text-dark">Inactive</span>';
+                        break;
+                    case 'archived':
+                        statusBadge = '<span class="badge bg-danger">Archived</span>';
+                        break;
+                    default:
+                        statusBadge = '<span class="badge bg-secondary">Unknown</span>';
+                }
+                
+                // Deleted badge
+                let deletedBadge = '';
+                if (product.deleted_at) {
+                    deletedBadge = '<span class="badge bg-danger ms-1">Deleted</span>';
+                }
+                
+                // Image
+                let imageUrl = 'https://via.placeholder.com/150?text=No+Image';
+                if (product.images && product.images.length > 0) {
+                    const primaryImage = product.images.find(img => img.is_primary) || product.images[0];
+                    imageUrl = primaryImage.image_path;
+                }
+                
+                // Variants info
+                let variantsInfo = '';
+                if (product.variants && product.variants.length > 0) {
+                    const activeVariants = product.variants.filter(v => v.status === 'active').length;
+                    variantsInfo = `<small class="text-muted">${activeVariants} active variants of ${product.variants.length} total</small>`;
+                } else {
+                    variantsInfo = '<small class="text-muted">No variants</small>';
+                }
+                
+                card.innerHTML = `
+                    <img src="${imageUrl}" class="card-img-top" alt="${product.name}" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="card-title mb-0">${product.name}</h5>
+                            <div>
+                                ${statusBadge}
+                                ${deletedBadge}
+                            </div>
+                        </div>
+                        <h6 class="card-subtitle mb-2 text-muted">${product.category_name || ''} > ${product.subcategory_name || ''}</h6>
+                        <p class="card-text">${product.short_description || ''}</p>
+                        <div class="mb-2">
+                            ${variantsInfo}
+                        </div>
+                        <div class="mt-2 small text-muted">ID: ${product.id}</div>
+                    </div>
+                `;
+                
+                col.appendChild(card);
+                row.appendChild(col);
+            });
+            
+            container.appendChild(row);
+        }
+        
+        // Function to display product details
+        function displayProductDetails(product) {
+            const container = document.getElementById('productDetails');
+            
+            if (!product) {
+                container.innerHTML = '<div class="alert alert-warning">No product found</div>';
+                return;
+            }
+            
+            // Status badge
+            let statusBadge = '';
+            switch (product.status) {
+                case 'active':
+                    statusBadge = '<span class="badge bg-success">Active</span>';
+                    break;
+                case 'inactive':
+                    statusBadge = '<span class="badge bg-warning text-dark">Inactive</span>';
+                    break;
+                case 'archived':
+                    statusBadge = '<span class="badge bg-danger">Archived</span>';
+                    break;
+                default:
+                    statusBadge = '<span class="badge bg-secondary">Unknown</span>';
+            }
+            
+            // Deleted badge
+            let deletedBadge = '';
+            if (product.deleted_at) {
+                deletedBadge = '<span class="badge bg-danger ms-1">Deleted</span>';
+            }
+            
+            // Format dates
+            const createdAt = product.created_at ? formatDate(product.created_at) : 'Unknown';
+            const updatedAt = product.updated_at ? formatDate(product.updated_at) : 'Never';
+            const deletedAt = product.deleted_at ? formatDate(product.deleted_at) : 'Not deleted';
+            
+            // Images
+            let imagesHtml = '<p>No images available</p>';
+            if (product.images && product.images.length > 0) {
+                imagesHtml = '<div class="row">';
+                product.images.forEach(image => {
+                    imagesHtml += `
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="position-relative">
+                                <img src="${image.image_path}" class="img-fluid rounded" alt="${product.name}">
+                                ${image.is_primary ? '<span class="badge bg-success position-absolute bottom-0 start-0 m-2">Primary</span>' : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                imagesHtml += '</div>';
+            }
+            
+            // Variants
+            let variantsHtml = '<p>No variants available</p>';
+            if (product.variants && product.variants.length > 0) {
+                variantsHtml = '<div class="table-responsive"><table class="table table-striped table-sm">';
+                variantsHtml += `
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>SKU</th>
+                            <th>Price</th>
+                            <th>Sale Price</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                `;
+                
+                product.variants.forEach(variant => {
+                    variantsHtml += `
+                        <tr>
+                            <td>${variant.variant_name}</td>
+                            <td>${variant.sku}</td>
+                            <td>₹${variant.price}</td>
+                            <td>${variant.sale_price ? '₹' + variant.sale_price : '-'}</td>
+                            <td>
+                                <span class="badge ${variant.status === 'active' ? 'bg-success' : variant.status === 'inactive' ? 'bg-warning text-dark' : 'bg-danger'}">
+                                    ${variant.status}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                variantsHtml += '</tbody></table></div>';
+            }
+            
+            // Tags
+            let tagsHtml = '<p>No tags available</p>';
+            if (product.tags && product.tags.length > 0) {
+                tagsHtml = '<div class="d-flex flex-wrap gap-2">';
+                product.tags.forEach(tag => {
+                    tagsHtml += `<span class="badge bg-info">${tag.name}</span>`;
+                });
+                tagsHtml += '</div>';
+            }
+            
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h3>${product.name}</h3>
+                                <div class="mb-2">
+                                    ${statusBadge} ${deletedBadge}
+                                </div>
+                                <p><strong>Category:</strong> ${product.category_name || 'N/A'} > ${product.subcategory_name || 'N/A'}</p>
+                                <p><strong>Description:</strong> ${product.description || 'No description'}</p>
+                                <p><strong>Short Description:</strong> ${product.short_description || 'No short description'}</p>
+                                
+                                <div class="mb-3">
+                                    <h5>Product Information</h5>
+                                    <p><strong>HSN Code:</strong> ${product.hsn_code || 'N/A'}</p>
+                                    <p><strong>Tax Rate:</strong> ${product.tax_rate ? product.tax_rate + '%' : 'N/A'}</p>
+                                    <p><strong>CGST Rate:</strong> ${product.cgst_rate ? product.cgst_rate + '%' : 'N/A'}</p>
+                                    <p><strong>SGST Rate:</strong> ${product.sgst_rate ? product.sgst_rate + '%' : 'N/A'}</p>
+                                    <p><strong>IGST Rate:</strong> ${product.igst_rate ? product.igst_rate + '%' : 'N/A'}</p>
+                                    <p><strong>Display Order:</strong> ${product.display_order || '0'}</p>
+                                    <p><strong>Shelf Life:</strong> ${product.shelf_life || 'N/A'}</p>
+                                    <p><strong>Is Vegetarian:</strong> ${product.is_vegetarian === 1 ? 'Yes' : product.is_vegetarian === 0 ? 'No' : 'Not specified'}</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5>Additional Information</h5>
+                                    <p><strong>Ingredients:</strong> ${product.ingredients || 'N/A'}</p>
+                                    <p><strong>Nutritional Info:</strong> ${product.nutritional_info || 'N/A'}</p>
+                                    <p><strong>Storage Instructions:</strong> ${product.storage_instructions || 'N/A'}</p>
+                                    <p><strong>Attributes:</strong> ${product.attributes || 'N/A'}</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5>SEO Information</h5>
+                                    <p><strong>Meta Title:</strong> ${product.meta_title || 'N/A'}</p>
+                                    <p><strong>Meta Description:</strong> ${product.meta_description || 'N/A'}</p>
+                                    <p><strong>Meta Keywords:</strong> ${product.meta_keywords || 'N/A'}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <h5>Product Information</h5>
+                                    <p><strong>ID:</strong> ${product.id}</p>
+                                    <p><strong>Created By:</strong> ${product.created_by_name || 'System'}</p>
+                                    <p><strong>Created At:</strong> ${createdAt}</p>
+                                    <p><strong>Updated By:</strong> ${product.updated_by_name || 'Never updated'}</p>
+                                    <p><strong>Updated At:</strong> ${updatedAt}</p>
+                                    <p><strong>Deleted By:</strong> ${product.deleted_by_name || 'Not deleted'}</p>
+                                    <p><strong>Deleted At:</strong> ${deletedAt}</p>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-sm btn-primary" onclick="loadProductForUpdate(${product.id})">Edit</button>
+                                    ${!product.deleted_at ? 
+                                        `<button type="button" class="btn btn-sm btn-danger" onclick="prepareDeleteProduct(${product.id})">Delete</button>` : 
+                                        `<button type="button" class="btn btn-sm btn-success" onclick="prepareRestoreProduct(${product.id})">Restore</button>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h5>Product Images</h5>
+                            ${imagesHtml}
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h5>Product Variants</h5>
+                            ${variantsHtml}
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h5>Product Tags</h5>
+                            ${tagsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Function to display existing images for update
+        function displayExistingImages(images) {
+            const container = document.getElementById('updateExistingImages');
+            
+            if (!images || images.length === 0) {
+                container.innerHTML = '<p>No existing images</p>';
+                return;
+            }
+            
+            let html = '<div class="row">';
+            
+            images.forEach(image => {
+                html += `
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="card">
+                            <img src="${image.image_path}" class="card-img-top" alt="Product Image" style="height: 150px; object-fit: cover;">
+                            <div class="card-body p-2">
+                                <div class="form-check">
+                                    <input class="form-check-input delete-image-checkbox" type="checkbox" value="${image.id}" id="delete_image_${image.id}" data-image-id="${image.id}">
+                                    <label class="form-check-label" for="delete_image_${image.id}">
+                                        Delete
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input primary-image-radio" type="radio" name="primary_image" value="${image.id}" id="primary_image_${image.id}" ${image.is_primary ? 'checked' : ''}>
+                                    <label class="form-check-label" for="primary_image_${image.id}">
+                                        Primary
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+            
+            // Add event listeners for delete checkboxes
+            document.querySelectorAll('.delete-image-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateDeletedImageIds();
+                });
+            });
+            
+            // Add event listeners for primary radio buttons
+            document.querySelectorAll('.primary-image-radio').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    updatePrimaryImageId();
+                });
+            });
+        }
+        
+        // Function to update deleted image IDs
+        function updateDeletedImageIds() {
+            const checkboxes = document.querySelectorAll('.delete-image-checkbox:checked');
+            deletedImageIds = Array.from(checkboxes).map(checkbox => checkbox.value);
+            document.getElementById('updateDeletedImageIds').value = deletedImageIds.join(',');
+        }
+        
+        // Function to update primary image ID
+        function updatePrimaryImageId() {
+            const radio = document.querySelector('.primary-image-radio:checked');
+            primaryImageId = radio ? radio.value : null;
+            document.getElementById('updatePrimaryImageId').value = primaryImageId || '';
+        }
+        
+        // Function to load product data for update
+        function loadProductForUpdate(productId) {
+            document.getElementById('updateProductId').value = productId;
+            document.getElementById('loadProductBtn').click();
+            document.getElementById('update-tab').click();
+        }
+        
+        // Function to prepare delete product
+        function prepareDeleteProduct(productId) {
+            document.getElementById('deleteProductId').value = productId;
+            document.getElementById('delete-tab').click();
+        }
+        
+        // Function to prepare restore product
+        function prepareRestoreProduct(productId) {
+            document.getElementById('restoreProductId').value = productId;
+            document.getElementById('restore-tab').click();
+        }
+        
+        // Function to collect variant data
+        function collectVariantData(prefix) {
+    const variants = [];
+    const variantContainers = document.querySelectorAll(`#${prefix}VariantsContainer .variant-container`);
+    
+    variantContainers.forEach(container => {
+        const variantId = container.getAttribute('data-id');
+        const variant = {};
+        
+        // Check if this is an existing variant
+        const idInput = container.querySelector(`input[name="${prefix}_variant_id_${variantId}"]`);
+        if (idInput) {
+            variant.id = idInput.value;
+        }
+        
+        variant.variant_name = document.getElementById(`${prefix}_variant_name_${variantId}`).value;
+        variant.sku = document.getElementById(`${prefix}_variant_sku_${variantId}`).value;
+        variant.price = document.getElementById(`${prefix}_variant_price_${variantId}`).value;
+        
+        const salePrice = document.getElementById(`${prefix}_variant_sale_price_${variantId}`).value;
+        if (salePrice) variant.sale_price = salePrice;
+        
+        const discount = document.getElementById(`${prefix}_variant_discount_${variantId}`).value;
+        if (discount) variant.discount_percentage = discount;
+        
+        const weight = document.getElementById(`${prefix}_variant_weight_${variantId}`).value;
+        if (weight) variant.weight = weight;
+        
+        variant.weight_unit = document.getElementById(`${prefix}_variant_weight_unit_${variantId}`).value;
+        variant.status = document.getElementById(`${prefix}_variant_status_${variantId}`).value;
+        
+        const minQty = document.getElementById(`${prefix}_variant_min_qty_${variantId}`).value;
+        if (minQty) variant.min_order_quantity = minQty;
+        
+        const maxQty = document.getElementById(`${prefix}_variant_max_qty_${variantId}`).value;
+        if (maxQty) variant.max_order_quantity = maxQty;
+        
+        const displayOrder = document.getElementById(`${prefix}_variant_display_order_${variantId}`).value;
+        if (displayOrder) variant.display_order = displayOrder;
+        
+        const dimensions = document.getElementById(`${prefix}_variant_dimensions_${variantId}`).value;
+        if (dimensions) variant.dimensions = dimensions;
+        
+        variants.push(variant);
+    });
+    
+    return variants;
+}
+        
+        // Function to collect tag data
+        function collectTagData(prefix) {
+            const tags = [];
+            const tagContainers = document.querySelectorAll(`#${prefix}TagsContainer .tag-container`);
+            
+            tagContainers.forEach(container => {
+                const tagId = container.getAttribute('data-id');
+                const tagValue = document.getElementById(`${prefix}_tag_${tagId}`).value;
+                
+                if (tagValue) {
+                    tags.push(tagValue);
+                }
+            });
+            
+            return tags;
+        }
+        
+        // Login functionality
+        document.getElementById('loginBtn').addEventListener('click', async function() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                alert('Email/username and password are required');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/auth/login`, 'POST', { email, password });
+            
+            if (response.status === 'success' && response.data) {
+                // Store tokens and user data
+                accessToken = response.data.access_token;
+                userData = response.data.user;
+                
+                // Update access token input
+                document.getElementById('accessToken').value = accessToken;
+                
+                // Store in localStorage
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('userData', JSON.stringify(userData));
+                
+                // Update UI
+                updateAuthStatusUI();
+                
+                // Load categories
+                loadCategories();
+                
+                alert('Login successful!');
+            } else {
+                alert('Login failed: ' + (response.message || 'Unknown error'));
+            }
+        });
+        
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            if (!accessToken) {
+                alert('Not logged in');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/auth/logout`, 'POST', {}, accessToken);
+            
+            // Clear tokens and user data regardless of response
+            accessToken = '';
+            userData = null;
+            
+            // Clear access token input
+            document.getElementById('accessToken').value = '';
+            
+            // Remove from localStorage
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('userData');
+            
+            // Update UI
+            updateAuthStatusUI();
+            
+            alert('Logged out successfully.');
+        });
+        
+        // List Products
+        document.getElementById('listProductsBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const page = document.getElementById('listPage').value;
+            const limit = document.getElementById('listLimit').value;
+            const search = document.getElementById('listSearch').value;
+            const status = document.getElementById('listStatus').value;
+            const category = document.getElementById('listCategory').value;
+            const subcategory = document.getElementById('listSubcategory').value;
+            const sortBy = document.getElementById('listSortBy').value;
+            const sortOrder = document.getElementById('listSortOrder').value;
+            
+            const filters = { 
+                page, 
+                limit, 
+                search, 
+                status, 
+                category_id: category, 
+                subcategory_id: subcategory,
+                sort_by: sortBy,
+                sort_order: sortOrder
+            };
+            
+            const queryString = buildQueryString(filters);
+            
+            const response = await apiRequest(`${baseUrl}/comprehensive-products?${queryString}`, 'GET', null, token);
+            displayResponse('listResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                createProductCards(response.data);
+            }
+        });
+        
+        // View Product
+        document.getElementById('viewProductBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const productId = document.getElementById('viewProductId').value;
+            
+            if (!productId) {
+                alert('Product ID is required');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/comprehensive-products/${productId}`, 'GET', null, token);
+            displayResponse('viewResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                displayProductDetails(response.data);
+            }
+        });
+        
+        // Create Product
+        document.getElementById('createProductForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            // Create FormData object
+            const formData = new FormData();
+            
+            // Add basic product info
+            formData.append('name', document.getElementById('createName').value);
+            formData.append('slug', document.getElementById('createSlug').value);
+            formData.append('category_id', document.getElementById('createCategory').value);
+            formData.append('subcategory_id', document.getElementById('createSubcategory').value);
+            formData.append('description', document.getElementById('createDescription').value);
+            formData.append('short_description', document.getElementById('createShortDescription').value);
+            formData.append('hsn_code', document.getElementById('createHsnCode').value);
+            formData.append('tax_rate', document.getElementById('createTaxRate').value);
+            formData.append('cgst_rate', document.getElementById('createCgstRate').value);
+            formData.append('sgst_rate', document.getElementById('createSgstRate').value);
+            formData.append('igst_rate', document.getElementById('createIgstRate').value);
+            formData.append('status', document.getElementById('createStatus').value);
+            formData.append('display_order', document.getElementById('createDisplayOrder').value);
+            formData.append('shelf_life', document.getElementById('createShelfLife').value);
+            formData.append('is_vegetarian', document.getElementById('createIsVegetarian').value);
+            formData.append('ingredients', document.getElementById('createIngredients').value);
+            formData.append('nutritional_info', document.getElementById('createNutritionalInfo').value);
+            formData.append('storage_instructions', document.getElementById('createStorageInstructions').value);
+            formData.append('attributes', document.getElementById('createAttributes').value);
+            formData.append('meta_title', document.getElementById('createMetaTitle').value);
+            formData.append('meta_description', document.getElementById('createMetaDescription').value);
+            formData.append('meta_keywords', document.getElementById('createMetaKeywords').value);
+            
+            // Add variants
+            const variants = collectVariantData('create');
+
+            // Check if at least one variant is active
+            const hasActiveVariant = variants.some(variant => variant.status === 'active');
+            if (!hasActiveVariant) {
+                alert('Error: At least one product variant must be active');
+                return;
+            }
+
+            formData.append('variants', JSON.stringify(variants));
+            
+            // Add tags
+            const tags = collectTagData('create');
+            formData.append('tags', JSON.stringify(tags));
+            
+            // Add images
+            const imageFiles = document.getElementById('createImages').files;
+            for (let i = 0; i < imageFiles.length; i++) {
+                formData.append('images[]', imageFiles[i]);
+            }
+            
+            // Send request
+            const response = await apiRequest(`${baseUrl}/comprehensive-products`, 'POST', formData, token);
+            displayResponse('createResponse', response);
+            
+            if (response.status === 'success') {
+                alert('Product created successfully!');
+                this.reset();
+                
+                // Clear variants and tags containers
+                document.getElementById('createVariantsContainer').innerHTML = '';
+                document.getElementById('createTagsContainer').innerHTML = '';
+                document.getElementById('createImagePreview').innerHTML = '';
+                
+                // Add default variant
+                createVariantTemplate('createVariantsContainer', 'create');
+                
+                // Refresh the products list
+                document.getElementById('listProductsBtn').click();
+            }
+        });
+        
+        // Load Product for Update
+        document.getElementById('loadProductBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const productId = document.getElementById('updateProductId').value;
+            
+            if (!productId) {
+                alert('Product ID is required');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/comprehensive-products/${productId}`, 'GET', null, token);
+            
+            if (response.status === 'success' && response.data) {
+                const product = response.data;
+                
+                // Populate form fields
+                document.getElementById('updateName').value = product.name || '';
+                document.getElementById('updateSlug').value = product.slug || '';
+                document.getElementById('updateCategory').value = product.category_id || '';
+                
+                // Load subcategories for the selected category
+                await loadSubcategories(product.category_id, 'updateSubcategory');
+                
+                document.getElementById('updateSubcategory').value = product.subcategory_id || '';
+                document.getElementById('updateDescription').value = product.description || '';
+                document.getElementById('updateShortDescription').value = product.short_description || '';
+                document.getElementById('updateHsnCode').value = product.hsn_code || '';
+                document.getElementById('updateTaxRate').value = product.tax_rate || '';
+                document.getElementById('updateCgstRate').value = product.cgst_rate || '';
+                document.getElementById('updateSgstRate').value = product.sgst_rate || '';
+                document.getElementById('updateIgstRate').value = product.igst_rate || '';
+                document.getElementById('updateStatus').value = product.status || 'inactive';
+                document.getElementById('updateDisplayOrder').value = product.display_order || '0';
+                document.getElementById('updateShelfLife').value = product.shelf_life || '';
+                document.getElementById('updateIsVegetarian').value = product.is_vegetarian !== null ? product.is_vegetarian.toString() : '';
+                document.getElementById('updateIngredients').value = product.ingredients || '';
+                document.getElementById('updateNutritionalInfo').value = product.nutritional_info || '';
+                document.getElementById('updateStorageInstructions').value = product.storage_instructions || '';
+                document.getElementById('updateAttributes').value = product.attributes || '';
+                document.getElementById('updateMetaTitle').value = product.meta_title || '';
+                document.getElementById('updateMetaDescription').value = product.meta_description || '';
+                document.getElementById('updateMetaKeywords').value = product.meta_keywords || '';
+                
+                // Clear existing variants and tags
+                document.getElementById('updateVariantsContainer').innerHTML = '';
+                document.getElementById('updateTagsContainer').innerHTML = '';
+                
+                // Add variants
+                if (product.variants && product.variants.length > 0) {
+                    product.variants.forEach(variant => {
+                        createVariantTemplate('updateVariantsContainer', 'update', variant);
+                    });
+                } else {
+                    createVariantTemplate('updateVariantsContainer', 'update');
+                }
+                
+                // Add tags
+                if (product.tags && product.tags.length > 0) {
+                    product.tags.forEach(tag => {
+                        createTagTemplate('updateTagsContainer', 'update', tag.name);
+                    });
+                }
+                
+                // Display existing images
+                if (product.images) {
+                    displayExistingImages(product.images);
+                }
+                
+                // Reset deleted images and primary image
+                deletedImageIds = [];
+                primaryImageId = product.images && product.images.find(img => img.is_primary) ? 
+                    product.images.find(img => img.is_primary).id : null;
+                
+                document.getElementById('updateDeletedImageIds').value = '';
+                document.getElementById('updatePrimaryImageId').value = primaryImageId || '';
+                
+                // Show the form
+                document.getElementById('updateFormContainer').style.display = 'block';
+                
+                alert('Product data loaded successfully!');
+            } else {
+                displayResponse('updateResponse', response);
+            }
+        });
+        
+        // Update Product
+        document.getElementById('updateProductForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const token = getAccessToken();
+    
+    if (!token) {
+        alert('Access token is required');
+        return;
+    }
+    
+    const productId = document.getElementById('updateProductId').value;
+    
+    if (!productId) {
+        alert('Product ID is required');
+        return;
+    }
+    
+    // Create FormData object
+    const formData = new FormData();
+    
+    // Add method override for PUT
+    formData.append('_method', 'PUT');
+    
+    // Add basic product info
+    formData.append('name', document.getElementById('updateName').value);
+    formData.append('slug', document.getElementById('updateSlug').value);
+    formData.append('category_id', document.getElementById('updateCategory').value);
+    formData.append('subcategory_id', document.getElementById('updateSubcategory').value);
+    formData.append('description', document.getElementById('updateDescription').value);
+    formData.append('short_description', document.getElementById('updateShortDescription').value);
+    formData.append('hsn_code', document.getElementById('updateHsnCode').value);
+    formData.append('tax_rate', document.getElementById('updateTaxRate').value);
+    formData.append('cgst_rate', document.getElementById('updateCgstRate').value);
+    formData.append('sgst_rate', document.getElementById('updateSgstRate').value);
+    formData.append('igst_rate', document.getElementById('updateIgstRate').value);
+    formData.append('status', document.getElementById('updateStatus').value);
+    formData.append('display_order', document.getElementById('updateDisplayOrder').value);
+    formData.append('shelf_life', document.getElementById('updateShelfLife').value);
+    formData.append('is_vegetarian', document.getElementById('updateIsVegetarian').value);
+    
+    // Properly format JSON strings for arrays and objects
+    const ingredients = document.getElementById('updateIngredients').value;
+    formData.append('ingredients', ingredients);
+    
+    const nutritionalInfo = document.getElementById('updateNutritionalInfo').value;
+    formData.append('nutritional_info', nutritionalInfo);
+    
+    formData.append('storage_instructions', document.getElementById('updateStorageInstructions').value);
+    
+    const attributes = document.getElementById('updateAttributes').value;
+    formData.append('attributes', attributes);
+    
+    formData.append('meta_title', document.getElementById('updateMetaTitle').value);
+    formData.append('meta_description', document.getElementById('updateMetaDescription').value);
+    formData.append('meta_keywords', document.getElementById('updateMetaKeywords').value);
+    
+    // Add variants - ensure proper JSON encoding
+    const variants = collectVariantData('update');
+    
+    // Check if at least one variant is active
+    const hasActiveVariant = variants.some(variant => variant.status === 'active');
+    if (!hasActiveVariant) {
+        alert('Error: At least one product variant must be active');
+        return;
+    }
+    
+    // Check for duplicate variants
+    const skus = new Set();
+    const duplicateSKUs = [];
+    variants.forEach(variant => {
+        if (skus.has(variant.sku)) {
+            duplicateSKUs.push(variant.sku);
+        }
+        skus.add(variant.sku);
+    });
+    
+    if (duplicateSKUs.length > 0) {
+        if (!confirm(`Warning: You have duplicate SKUs: ${duplicateSKUs.join(', ')}. This may cause issues. Continue anyway?`)) {
+            return;
+        }
+    }
+    
+    formData.append('variants', JSON.stringify(variants));
+    
+    // Add tags - ensure proper JSON encoding and remove duplicates
+    const tags = collectTagData('update');
+    const uniqueTags = [...new Set(tags)]; // Remove duplicates
+    formData.append('tags', JSON.stringify(uniqueTags));
+    
+    // Add deleted image IDs
+    if (deletedImageIds.length > 0) {
+        formData.append('delete_image_ids', JSON.stringify(deletedImageIds));
+    }
+    
+    // Add primary image ID
+    if (primaryImageId) {
+        formData.append('primary_image_id', primaryImageId);
+    }
+    
+    // Add new images
+    const imageFiles = document.getElementById('updateImages').files;
+    for (let i = 0; i < imageFiles.length; i++) {
+        formData.append('images[]', imageFiles[i]);
+    }
+    
+    // Log the form data for debugging
+    console.log('Form data being sent:');
+    for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+    }
+    
+    // Send request
+    const response = await apiRequest(`${baseUrl}/comprehensive-products/${productId}`, 'POST', formData, token);
+    displayResponse('updateResponse', response);
+    
+    if (response.status === 'success') {
+        alert('Product updated successfully!');
+        
+        // Refresh the products list
+        document.getElementById('listProductsBtn').click();
+    }
+});
+        
+        // Delete Product
+        document.getElementById('deleteProductBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const productId = document.getElementById('deleteProductId').value;
+            
+            if (!productId) {
+                alert('Product ID is required');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to delete this product? This action can be undone by a Super Admin.')) {
+                const response = await apiRequest(`${baseUrl}/comprehensive-products/${productId}`, 'DELETE', null, token);
+                displayResponse('deleteResponse', response);
+                
+                if (response.status === 'success') {
+                    alert('Product deleted successfully!');
+                    
+                    // Refresh the products list
+                    document.getElementById('listProductsBtn').click();
+                }
+            }
+        });
+        
+        // Restore Product
+        document.getElementById('restoreProductBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const productId = document.getElementById('restoreProductId').value;
+            
+            if (!productId) {
+                alert('Product ID is required');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/comprehensive-products/${productId}/restore`, 'POST', null, token);
+            displayResponse('restoreResponse', response);
+            
+            if (response.status === 'success') {
+                alert('Product restored successfully!');
+                
+                // Refresh the products list
+                document.getElementById('listProductsBtn').click();
+            }
+        });
+        
+        // Category change event handlers
+        document.getElementById('createCategory').addEventListener('change', function() {
+            loadSubcategories(this.value, 'createSubcategory');
+        });
+        
+        document.getElementById('updateCategory').addEventListener('change', function() {
+            loadSubcategories(this.value, 'updateSubcategory');
+        });
+        
+        document.getElementById('listCategory').addEventListener('change', function() {
+            loadSubcategories(this.value, 'listSubcategory');
+        });
+        
+        // Add variant button event listeners
+        document.getElementById('createAddVariant').addEventListener('click', function() {
+            createVariantTemplate('createVariantsContainer', 'create');
+        });
+        
+        document.getElementById('updateAddVariant').addEventListener('click', function() {
+            createVariantTemplate('updateVariantsContainer', 'update');
+        });
+        
+        // Add tag button event listeners
+        document.getElementById('createAddTag').addEventListener('click', function() {
+            createTagTemplate('createTagsContainer', 'create');
+        });
+        
+        document.getElementById('updateAddTag').addEventListener('click', function() {
+            createTagTemplate('updateTagsContainer', 'update');
+        });
+        
+        // Image preview for create
+        document.getElementById('createImages').addEventListener('change', function() {
+            const preview = document.getElementById('createImagePreview');
+            preview.innerHTML = '';
+            
+            if (this.files.length > 0) {
+                for (let i = 0; i < this.files.length; i++) {
+                    const file = this.files[i];
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const div = document.createElement('div');
+                        div.className = 'image-preview-item';
+                        
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Image Preview';
+                        
+                        if (i === 0) {
+                            const badge = document.createElement('div');
+                            badge.className = 'primary-badge';
+                            badge.textContent = 'Primary';
+                            div.appendChild(badge);
+                        }
+                        
+                        div.appendChild(img);
+                        preview.appendChild(div);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+        
+        // Image preview for update
+        document.getElementById('updateImages').addEventListener('change', function() {
+            const preview = document.getElementById('updateImagePreview');
+            preview.innerHTML = '';
+            
+            if (this.files.length > 0) {
+                for (let i = 0; i < this.files.length; i++) {
+                    const file = this.files[i];
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const div = document.createElement('div');
+                        div.className = 'image-preview-item';
+                        
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Image Preview';
+                        
+                        div.appendChild(img);
+                        preview.appendChild(div);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+        
+        // Initialize from localStorage on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load tokens and user data from localStorage
+            accessToken = localStorage.getItem('accessToken') || '';
+            
+            try {
+                const userDataStr = localStorage.getItem('userData');
+                if (userDataStr) {
+                    userData = JSON.parse(userDataStr);
+                }
+            } catch (e) {
+                console.error('Error parsing user data from localStorage:', e);
+                userData = null;
+            }
+            
+            // Set access token input
+            if (accessToken) {
+                document.getElementById('accessToken').value = accessToken;
+                
+                // Load categories
+                loadCategories();
+            }
+            
+            // Update UI
+            updateAuthStatusUI();
+            
+            // Add default variant to create form
+            createVariantTemplate('createVariantsContainer', 'create');
+            
+            // Save token to localStorage when changed manually
+            document.getElementById('accessToken').addEventListener('change', function() {
+                accessToken = this.value;
+                localStorage.setItem('accessToken', accessToken);
+                updateAuthStatusUI();
+                
+                // Load categories when token changes
+                if (accessToken) {
+                    loadCategories();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

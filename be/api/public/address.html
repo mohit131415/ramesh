@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Address API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.delete {
+            background-color: #dc3545;
+        }
+        button.delete:hover {
+            background-color: #c82333;
+        }
+        .response {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            border-left: 4px solid #28a745;
+            background-color: #d4edda;
+        }
+        .error {
+            border-left: 4px solid #dc3545;
+            background-color: #f8d7da;
+        }
+        .info {
+            background-color: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+        .address-list {
+            display: grid;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .address-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        .address-item.default {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        .address-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .address-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .address-actions button {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>User Address API Tester</h1>
+        
+        <div class="info">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>First, get a valid JWT token by logging in through the authentication API</li>
+                <li>Enter your JWT token in the field below</li>
+                <li>Test the various address endpoints</li>
+                <li>Maximum 5 addresses per user (configurable)</li>
+                <li>First address is automatically set as default</li>
+            </ol>
+        </div>
+
+        <!-- Token Input -->
+        <div class="section">
+            <h3>Authentication Token</h3>
+            <div class="form-group">
+                <label for="token">JWT Token:</label>
+                <input type="text" id="token" placeholder="Enter your JWT token here">
+            </div>
+        </div>
+
+        <!-- Get Address Limits -->
+        <div class="section">
+            <h3>Get Address Limits</h3>
+            <button onclick="getAddressLimits()">Get Address Limits</button>
+            <div id="limitsResponse" class="response"></div>
+        </div>
+
+        <!-- Get All Addresses -->
+        <div class="section">
+            <h3>Get All User Addresses</h3>
+            <button onclick="getAllAddresses()">Get All Addresses</button>
+            <div id="allAddressesResponse" class="response"></div>
+            <div id="addressList" class="address-list"></div>
+        </div>
+
+        <!-- Get Default Address -->
+        <div class="section">
+            <h3>Get Default Address</h3>
+            <button onclick="getDefaultAddress()">Get Default Address</button>
+            <div id="defaultAddressResponse" class="response"></div>
+        </div>
+
+        <!-- Create Address -->
+        <div class="section">
+            <h3>Create New Address</h3>
+            <div class="form-group">
+                <label for="createAddressType">Address Type:</label>
+                <select id="createAddressType">
+                    <option value="home">Home</option>
+                    <option value="work">Work</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="createLabel">Label (Optional):</label>
+                <input type="text" id="createLabel" placeholder="e.g., Mom's House, Office">
+            </div>
+            <div class="form-group">
+                <label for="createContactName">Contact Name (Optional):</label>
+                <input type="text" id="createContactName" placeholder="Contact person name">
+            </div>
+            <div class="form-group">
+                <label for="createContactPhone">Contact Phone (Optional):</label>
+                <input type="text" id="createContactPhone" placeholder="Contact phone number">
+            </div>
+            <div class="form-group">
+                <label for="createAddressLine1">Address Line 1 (Required):</label>
+                <input type="text" id="createAddressLine1" placeholder="Street address, building number">
+            </div>
+            <div class="form-group">
+                <label for="createAddressLine2">Address Line 2 (Optional):</label>
+                <input type="text" id="createAddressLine2" placeholder="Apartment, suite, unit, building, floor">
+            </div>
+            <div class="form-group">
+                <label for="createCity">City (Required):</label>
+                <input type="text" id="createCity" placeholder="City name">
+            </div>
+            <div class="form-group">
+                <label for="createState">State (Required):</label>
+                <input type="text" id="createState" placeholder="State name">
+            </div>
+            <div class="form-group">
+                <label for="createPostalCode">Postal Code (Required):</label>
+                <input type="text" id="createPostalCode" placeholder="Postal/ZIP code">
+            </div>
+            <div class="form-group">
+                <label for="createCountry">Country:</label>
+                <input type="text" id="createCountry" value="India" placeholder="Country name">
+            </div>
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="createIsDefault">
+                    <label for="createIsDefault">Set as default address</label>
+                </div>
+            </div>
+            <button onclick="createAddress()">Create Address</button>
+            <div id="createResponse" class="response"></div>
+        </div>
+
+        <!-- Get Single Address -->
+        <div class="section">
+            <h3>Get Single Address</h3>
+            <div class="form-group">
+                <label for="getAddressId">Address ID:</label>
+                <input type="number" id="getAddressId" placeholder="Enter address ID">
+            </div>
+            <button onclick="getSingleAddress()">Get Address</button>
+            <div id="singleAddressResponse" class="response"></div>
+        </div>
+
+        <!-- Update Address -->
+        <div class="section">
+            <h3>Update Address</h3>
+            <div class="form-group">
+                <label for="updateAddressId">Address ID:</label>
+                <input type="number" id="updateAddressId" placeholder="Enter address ID to update">
+            </div>
+            <div class="form-group">
+                <label for="updateAddressType">Address Type:</label>
+                <select id="updateAddressType">
+                    <option value="">-- Keep Current --</option>
+                    <option value="home">Home</option>
+                    <option value="work">Work</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="updateLabel">Label:</label>
+                <input type="text" id="updateLabel" placeholder="Leave empty to keep current">
+            </div>
+            <div class="form-group">
+                <label for="updateContactName">Contact Name:</label>
+                <input type="text" id="updateContactName" placeholder="Leave empty to keep current">
+            </div>
+            <div class="form-group">
+                <label for="updateContactPhone">Contact Phone:</label>
+                <input type="text" id="updateContactPhone" placeholder="Leave empty to keep current">
+            </div>
+            <div class="form-group">
+                <label for="updateAddressLine1">Address Line 1:</label>
+                <input type="text" id="updateAddressLine1" placeholder="Leave empty to keep current">
+            </div>
+            <div class="form-group">
+                <label for="updateAddressLine2">Address Line 2:</label>
+                <input type="text" id="updateAddressLine2" placeholder="Leave empty to keep current">
+            </div>
+            <div class="form-group">
+                <label for="updateCity">City:</label>
+                <input type="text" id="updateCity" placeholder="Leave empty to keep current">
+            </div>
+            <div class="form-group">
+                <label for="updateState">State:</label>
+                <input type="text" id="updateState" placeholder="Leave empty to keep current">
+            </div>
+            <div class="form-group">
+                <label for="updatePostalCode">Postal Code:</label>
+                <input type="text" id="updatePostalCode" placeholder="Leave empty to keep current">
+            </div>
+            <div class="form-group">
+                <label for="updateCountry">Country:</label>
+                <input type="text" id="updateCountry" placeholder="Leave empty to keep current">
+            </div>
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="updateIsDefault">
+                    <label for="updateIsDefault">Set as default address</label>
+                </div>
+            </div>
+            <button onclick="updateAddress()">Update Address</button>
+            <div id="updateResponse" class="response"></div>
+        </div>
+
+        <!-- Delete Address -->
+        <div class="section">
+            <h3>Delete Address</h3>
+            <div class="form-group">
+                <label for="deleteAddressId">Address ID:</label>
+                <input type="number" id="deleteAddressId" placeholder="Enter address ID to delete">
+            </div>
+            <button class="delete" onclick="deleteAddress()">Delete Address</button>
+            <div id="deleteResponse" class="response"></div>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = window.location.origin + '/api/api';
+
+        function getAuthHeaders() {
+            const token = document.getElementById('token').value.trim();
+            if (!token) {
+                alert('Please enter a JWT token first');
+                return null;
+            }
+            return {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        function displayResponse(elementId, response, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = JSON.stringify(response, null, 2);
+            element.className = `response ${isError ? 'error' : 'success'}`;
+        }
+
+        function displayAddressList(addresses) {
+            const listElement = document.getElementById('addressList');
+            if (!addresses || addresses.length === 0) {
+                listElement.innerHTML = '<p>No addresses found</p>';
+                return;
+            }
+
+            listElement.innerHTML = addresses.map(address => `
+                <div class="address-item ${address.is_default ? 'default' : ''}">
+                    <div class="address-header">
+                        <strong>${address.label || address.address_type.toUpperCase()}</strong>
+                        ${address.is_default ? '<span style="color: #28a745; font-weight: bold;">DEFAULT</span>' : ''}
+                    </div>
+                    <div>
+                        <strong>ID:</strong> ${address.id}<br>
+                        <strong>Type:</strong> ${address.address_type}<br>
+                        ${address.contact_name ? `<strong>Contact:</strong> ${address.contact_name}<br>` : ''}
+                        ${address.contact_phone ? `<strong>Phone:</strong> ${address.contact_phone}<br>` : ''}
+                        <strong>Address:</strong> ${address.address_line1}<br>
+                        ${address.address_line2 ? `${address.address_line2}<br>` : ''}
+                        <strong>City:</strong> ${address.city}, ${address.state} ${address.postal_code}<br>
+                        <strong>Country:</strong> ${address.country}
+                    </div>
+                    <div class="address-actions">
+                        <button onclick="loadAddressForUpdate(${address.id})">Load for Update</button>
+                        <button onclick="document.getElementById('getAddressId').value = ${address.id}">Load for Get</button>
+                        <button onclick="document.getElementById('deleteAddressId').value = ${address.id}">Load for Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadAddressForUpdate(addressId) {
+            // First get the address details
+            getSingleAddressById(addressId).then(address => {
+                if (address) {
+                    document.getElementById('updateAddressId').value = address.id;
+                    document.getElementById('updateAddressType').value = address.address_type;
+                    document.getElementById('updateLabel').value = address.label || '';
+                    document.getElementById('updateContactName').value = address.contact_name || '';
+                    document.getElementById('updateContactPhone').value = address.contact_phone || '';
+                    document.getElementById('updateAddressLine1').value = address.address_line1;
+                    document.getElementById('updateAddressLine2').value = address.address_line2 || '';
+                    document.getElementById('updateCity').value = address.city;
+                    document.getElementById('updateState').value = address.state;
+                    document.getElementById('updatePostalCode').value = address.postal_code;
+                    document.getElementById('updateCountry').value = address.country;
+                    document.getElementById('updateIsDefault').checked = address.is_default;
+                    
+                    // Scroll to update section
+                    document.querySelector('h3').scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        }
+
+        async function getSingleAddressById(addressId) {
+            const headers = getAuthHeaders();
+            if (!headers) return null;
+
+            try {
+                const response = await fetch(`${baseUrl}/public/user/addresses/${addressId}`, {
+                    method: 'GET',
+                    headers: headers
+                });
+
+                const data = await response.json();
+                return data.status === 'success' ? data.data : null;
+            } catch (error) {
+                console.error('Error fetching address:', error);
+                return null;
+            }
+        }
+
+        async function getAddressLimits() {
+            const headers = getAuthHeaders();
+            if (!headers) return;
+
+            try {
+                const response = await fetch(`${baseUrl}/public/user/addresses/limits/info`, {
+                    method: 'GET',
+                    headers: headers
+                });
+
+                const data = await response.json();
+                displayResponse('limitsResponse', data, data.status !== 'success');
+            } catch (error) {
+                displayResponse('limitsResponse', { error: error.message }, true);
+            }
+        }
+
+        async function getAllAddresses() {
+            const headers = getAuthHeaders();
+            if (!headers) return;
+
+            try {
+                const response = await fetch(`${baseUrl}/public/user/addresses`, {
+                    method: 'GET',
+                    headers: headers
+                });
+
+                const data = await response.json();
+                displayResponse('allAddressesResponse', data, data.status !== 'success');
+                
+                if (data.status === 'success' && data.data) {
+                    displayAddressList(data.data);
+                }
+            } catch (error) {
+                displayResponse('allAddressesResponse', { error: error.message }, true);
+            }
+        }
+
+        async function getDefaultAddress() {
+            const headers = getAuthHeaders();
+            if (!headers) return;
+
+            try {
+                const response = await fetch(`${baseUrl}/public/user/addresses/default/get`, {
+                    method: 'GET',
+                    headers: headers
+                });
+
+                const data = await response.json();
+                displayResponse('defaultAddressResponse', data, data.status !== 'success');
+            } catch (error) {
+                displayResponse('defaultAddressResponse', { error: error.message }, true);
+            }
+        }
+
+        async function createAddress() {
+            const headers = getAuthHeaders();
+            if (!headers) return;
+
+            const addressData = {
+                address_type: document.getElementById('createAddressType').value,
+                label: document.getElementById('createLabel').value || null,
+                contact_name: document.getElementById('createContactName').value || null,
+                contact_phone: document.getElementById('createContactPhone').value || null,
+                address_line1: document.getElementById('createAddressLine1').value,
+                address_line2: document.getElementById('createAddressLine2').value || null,
+                city: document.getElementById('createCity').value,
+                state: document.getElementById('createState').value,
+                postal_code: document.getElementById('createPostalCode').value,
+                country: document.getElementById('createCountry').value || 'India',
+                is_default: document.getElementById('createIsDefault').checked
+            };
+
+            try {
+                const response = await fetch(`${baseUrl}/public/user/addresses`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(addressData)
+                });
+
+                const data = await response.json();
+                displayResponse('createResponse', data, data.status !== 'success');
+                
+                if (data.status === 'success') {
+                    // Clear form
+                    document.getElementById('createAddressLine1').value = '';
+                    document.getElementById('createAddressLine2').value = '';
+                    document.getElementById('createCity').value = '';
+                    document.getElementById('createState').value = '';
+                    document.getElementById('createPostalCode').value = '';
+                    document.getElementById('createLabel').value = '';
+                    document.getElementById('createContactName').value = '';
+                    document.getElementById('createContactPhone').value = '';
+                    document.getElementById('createIsDefault').checked = false;
+                    
+                    // Refresh address list
+                    getAllAddresses();
+                }
+            } catch (error) {
+                displayResponse('createResponse', { error: error.message }, true);
+            }
+        }
+
+        async function getSingleAddress() {
+            const addressId = document.getElementById('getAddressId').value;
+            if (!addressId) {
+                alert('Please enter an address ID');
+                return;
+            }
+
+            const headers = getAuthHeaders();
+            if (!headers) return;
+
+            try {
+                const response = await fetch(`${baseUrl}/public/user/addresses/${addressId}`, {
+                    method: 'GET',
+                    headers: headers
+                });
+
+                const data = await response.json();
+                displayResponse('singleAddressResponse', data, data.status !== 'success');
+            } catch (error) {
+                displayResponse('singleAddressResponse', { error: error.message }, true);
+            }
+        }
+
+        async function updateAddress() {
+            const addressId = document.getElementById('updateAddressId').value;
+            if (!addressId) {
+                alert('Please enter an address ID');
+                return;
+            }
+
+            const headers = getAuthHeaders();
+            if (!headers) return;
+
+            // Build update data - only include fields that have values
+            const updateData = {};
+            
+            const addressType = document.getElementById('updateAddressType').value;
+            if (addressType) updateData.address_type = addressType;
+            
+            const label = document.getElementById('updateLabel').value;
+            if (label !== '') updateData.label = label || null;
+            
+            const contactName = document.getElementById('updateContactName').value;
+            if (contactName !== '') updateData.contact_name = contactName || null;
+            
+            const contactPhone = document.getElementById('updateContactPhone').value;
+            if (contactPhone !== '') updateData.contact_phone = contactPhone || null;
+            
+            const addressLine1 = document.getElementById('updateAddressLine1').value;
+            if (addressLine1) updateData.address_line1 = addressLine1;
+            
+            const addressLine2 = document.getElementById('updateAddressLine2').value;
+            if (addressLine2 !== '') updateData.address_line2 = addressLine2 || null;
+            
+            const city = document.getElementById('updateCity').value;
+            if (city) updateData.city = city;
+            
+            const state = document.getElementById('updateState').value;
+            if (state) updateData.state = state;
+            
+            const postalCode = document.getElementById('updatePostalCode').value;
+            if (postalCode) updateData.postal_code = postalCode;
+            
+            const country = document.getElementById('updateCountry').value;
+            if (country) updateData.country = country;
+            
+            // Always include is_default if checkbox is checked
+            if (document.getElementById('updateIsDefault').checked) {
+                updateData.is_default = true;
+            }
+
+            if (Object.keys(updateData).length === 0) {
+                alert('Please provide at least one field to update');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${baseUrl}/public/user/addresses/${addressId}`, {
+                    method: 'PUT',
+                    headers: headers,
+                    body: JSON.stringify(updateData)
+                });
+
+                const data = await response.json();
+                displayResponse('updateResponse', data, data.status !== 'success');
+                
+                if (data.status === 'success') {
+                    // Refresh address list
+                    getAllAddresses();
+                }
+            } catch (error) {
+                displayResponse('updateResponse', { error: error.message }, true);
+            }
+        }
+
+        async function deleteAddress() {
+            const addressId = document.getElementById('deleteAddressId').value;
+            if (!addressId) {
+                alert('Please enter an address ID');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete this address?')) {
+                return;
+            }
+
+            const headers = getAuthHeaders();
+            if (!headers) return;
+
+            try {
+                const response = await fetch(`${baseUrl}/public/user/addresses/${addressId}`, {
+                    method: 'DELETE',
+                    headers: headers
+                });
+
+                const data = await response.json();
+                displayResponse('deleteResponse', data, data.status !== 'success');
+                
+                if (data.status === 'success') {
+                    // Clear the input
+                    document.getElementById('deleteAddressId').value = '';
+                    // Refresh address list
+                    getAllAddresses();
+                }
+            } catch (error) {
+                displayResponse('deleteResponse', { error: error.message }, true);
+            }
+        }
+
+        // Auto-load address limits and addresses on page load if token is available
+        window.addEventListener('load', function() {
+            const token = document.getElementById('token').value;
+            if (token) {
+                getAddressLimits();
+                getAllAddresses();
+            }
+        });
+    </script>
+</body>
+</html>
+    

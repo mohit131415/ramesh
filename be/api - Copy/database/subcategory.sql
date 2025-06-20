@@ -1,0 +1,22 @@
+  CREATE TABLE `subcategories` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `category_id` INT(11) NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `slug` VARCHAR(255) DEFAULT NULL,
+    `description` TEXT DEFAULT NULL,
+    `image` VARCHAR(255) DEFAULT NULL,
+    `meta_title` VARCHAR(255) DEFAULT NULL,
+    `meta_description` TEXT DEFAULT NULL,
+    `meta_keywords` TEXT DEFAULT NULL,
+    `status` ENUM('active', 'inactive') DEFAULT 'active',
+    `display_order` INT(11) DEFAULT '0',
+    `created_by` INT(11) DEFAULT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    `updated_by` INT(11) DEFAULT NULL,
+    `deleted_by` INT(11) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `category_id` (`category_id`),
+    KEY `created_by` (`created_by`)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

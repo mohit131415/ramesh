@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Related Products API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .panel {
+            flex: 1;
+            min-width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Related Products API Tester</h1>
+    
+    <div class="container">
+        <div class="panel">
+            <h2>Get Related Products</h2>
+            <input type="number" id="productId" placeholder="Enter Product ID">
+            <input type="number" id="limit" placeholder="Limit (default: 4)" value="4">
+            <button id="getRelatedProducts">Get Related Products</button>
+            <div id="relatedProductsResult">
+                <pre>Results will appear here...</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base URL for API
+        const BASE_URL = 'http://localhost/ramesh-be/be/api';
+        
+        // Helper function to display results
+        function displayResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            if (isError) {
+                element.innerHTML = `<pre class="error">${JSON.stringify(data, null, 2)}</pre>`;
+            } else {
+                element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+        }
+        
+        // Get related products
+        document.getElementById('getRelatedProducts').addEventListener('click', async () => {
+            const productId = document.getElementById('productId').value;
+            const limit = document.getElementById('limit').value;
+            
+            if (!productId) {
+                displayResult('relatedProductsResult', { error: 'Please enter a product ID' }, true);
+                return;
+            }
+            
+            try {
+                let url = `${BASE_URL}/api/open/products/${productId}/related`;
+                if (limit) {
+                    url += `?limit=${limit}`;
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                displayResult('relatedProductsResult', data);
+            } catch (error) {
+                displayResult('relatedProductsResult', { error: error.message }, true);
+            }
+        });
+    </script>
+</body>
+</html>

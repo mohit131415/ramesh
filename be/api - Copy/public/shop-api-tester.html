@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 20px;
+        }
+        .panel {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #444;
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .result {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: #D8000C;
+            background-color: #FFD2D2;
+        }
+        .success {
+            color: #4F8A10;
+            background-color: #DFF2BF;
+        }
+        .debug-info {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Product API Tester</h1>
+    
+    <div class="container">
+        <div class="panel">
+            <h2>List All Products</h2>
+            <div>
+                <label for="listPage">Page:</label>
+                <input type="number" id="listPage" value="1" min="1">
+                
+                <label for="listLimit">Limit:</label>
+                <input type="number" id="listLimit" value="10" min="1" max="100">
+            </div>
+            <button onclick="listProducts()">List Products</button>
+            <div id="listResult" class="result"></div>
+        </div>
+        
+        <div class="panel">
+            <h2>Get Product by ID</h2>
+            <div>
+                <label for="productId">Product ID:</label>
+                <input type="number" id="productId" placeholder="Enter product ID">
+            </div>
+            <button onclick="getProduct()">Get Product</button>
+            <div id="productResult" class="result"></div>
+        </div>
+        
+        <div class="panel">
+            <h2>Get Product by Slug</h2>
+            <div>
+                <label for="productSlug">Product Slug:</label>
+                <input type="text" id="productSlug" placeholder="Enter product slug">
+            </div>
+            <button onclick="getProductBySlug()">Get Product</button>
+            <div id="slugResult" class="result"></div>
+        </div>
+        
+        <div class="panel">
+            <h2>Search Products</h2>
+            <div>
+                <label for="searchQuery">Search Query:</label>
+                <input type="text" id="searchQuery" placeholder="Enter search term">
+                
+                <label for="searchPage">Page:</label>
+                <input type="number" id="searchPage" value="1" min="1">
+                
+                <label for="searchLimit">Limit:</label>
+                <input type="number" id="searchLimit" value="10" min="1" max="100">
+            </div>
+            <button onclick="searchProducts()">Search Products</button>
+            <div id="searchDebug" class="debug-info"></div>
+            <div id="searchResult" class="result"></div>
+        </div>
+        
+        <div class="panel">
+            <h2>Get Products by Category</h2>
+            <div>
+                <label for="categoryId">Category ID:</label>
+                <input type="number" id="categoryId" placeholder="Enter category ID">
+                
+                <label for="categoryPage">Page:</label>
+                <input type="number" id="categoryPage" value="1" min="1">
+                
+                <label for="categoryLimit">Limit:</label>
+                <input type="number" id="categoryLimit" value="10" min="1" max="100">
+            </div>
+            <button onclick="getProductsByCategory()">Get Products</button>
+            <div id="categoryResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Base URL for API
+        const baseUrl = 'http://localhost/ramesh-be/be/api';
+        
+        // Helper function to display results
+        function displayResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = JSON.stringify(data, null, 2);
+            element.className = isError ? 'result error' : 'result success';
+        }
+        
+        // Helper function to display debug info
+        function displayDebug(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+            }
+        }
+        
+        // Helper function to make API requests
+        async function fetchAPI(endpoint, params = {}) {
+            try {
+                // Build query string from params
+                const queryString = Object.keys(params)
+                    .filter(key => params[key] !== undefined && params[key] !== '')
+                    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+                    .join('&');
+                
+                const url = `${baseUrl}${endpoint}${queryString ? '?' + queryString : ''}`;
+                console.log('Fetching:', url);
+                
+                // For debugging
+                if (endpoint.includes('search')) {
+                    displayDebug('searchDebug', `Request URL: ${url}`);
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                return { data, error: null };
+            } catch (error) {
+                console.error('API Error:', error);
+                return { data: null, error: error.message };
+            }
+        }
+        
+        // List all products
+        async function listProducts() {
+            const page = document.getElementById('listPage').value;
+            const limit = document.getElementById('listLimit').value;
+            
+            const { data, error } = await fetchAPI('/api/public/products', { page, limit });
+            
+            if (error) {
+                displayResult('listResult', { error }, true);
+            } else {
+                displayResult('listResult', data);
+            }
+        }
+        
+        // Get product by ID
+        async function getProduct() {
+            const productId = document.getElementById('productId').value;
+            
+            if (!productId) {
+                displayResult('productResult', { error: 'Please enter a product ID' }, true);
+                return;
+            }
+            
+            const { data, error } = await fetchAPI(`/api/public/products/${productId}`);
+            
+            if (error) {
+                displayResult('productResult', { error }, true);
+            } else {
+                displayResult('productResult', data);
+            }
+        }
+        
+        // Get product by slug
+        async function getProductBySlug() {
+            const productSlug = document.getElementById('productSlug').value;
+            
+            if (!productSlug) {
+                displayResult('slugResult', { error: 'Please enter a product slug' }, true);
+                return;
+            }
+            
+            const { data, error } = await fetchAPI(`/api/public/products/slug/${productSlug}`);
+            
+            if (error) {
+                displayResult('slugResult', { error }, true);
+            } else {
+                displayResult('slugResult', data);
+            }
+        }
+        
+        // Search products
+        async function searchProducts() {
+            const query = document.getElementById('searchQuery').value;
+            const page = document.getElementById('searchPage').value;
+            const limit = document.getElementById('searchLimit').value;
+            
+            if (!query) {
+                displayResult('searchResult', { error: 'Please enter a search term' }, true);
+                return;
+            }
+            
+            // Use 'q' parameter instead of 'query'
+            const { data, error } = await fetchAPI('/api/public/products/search', { 
+                q: query, 
+                page, 
+                limit 
+            });
+            
+            if (error) {
+                displayResult('searchResult', { error }, true);
+            } else {
+                displayResult('searchResult', data);
+            }
+        }
+        
+        // Get products by category
+        async function getProductsByCategory() {
+            const categoryId = document.getElementById('categoryId').value;
+            const page = document.getElementById('categoryPage').value;
+            const limit = document.getElementById('categoryLimit').value;
+            
+            if (!categoryId) {
+                displayResult('categoryResult', { error: 'Please enter a category ID' }, true);
+                return;
+            }
+            
+            const { data, error } = await fetchAPI(`/api/public/products/category/${categoryId}`, { 
+                page, limit 
+            });
+            
+            if (error) {
+                displayResult('categoryResult', { error }, true);
+            } else {
+                displayResult('categoryResult', data);
+            }
+        }
+    </script>
+</body>
+</html>

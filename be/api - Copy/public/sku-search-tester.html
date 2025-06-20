@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKU Search API Tester</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        .api-section {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .response-container {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .btn-api {
+            margin-top: 10px;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .auth-status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .auth-status.logged-in {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .auth-status.logged-out {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .product-card {
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .product-details {
+            margin-top: 20px;
+        }
+        .badge {
+            margin-right: 5px;
+        }
+        .json-key {
+            color: #7d3c98;
+        }
+        .json-string {
+            color: #2e86c1;
+        }
+        .json-number {
+            color: #e67e22;
+        }
+        .json-boolean {
+            color: #c0392b;
+        }
+        .json-null {
+            color: #bdc3c7;
+        }
+        .spinner-border {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">SKU Search API Tester</h1>
+        
+        <!-- Authentication Section -->
+        <div class="api-section" id="authSection">
+            <h3>Authentication</h3>
+            <div class="alert alert-info">
+                Login to get an access token for testing the SKU search API endpoint.
+            </div>
+            
+            <div id="authStatus" class="auth-status logged-out">
+                <strong>Status:</strong> Not authenticated
+            </div>
+            
+            <div id="loginForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="loginEmail">Email or Username</label>
+                            <input type="text" class="form-control" id="loginEmail" placeholder="Enter email or username">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" placeholder="Password">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="loginBtn" class="btn btn-success btn-api">
+                    <span class="spinner-border d-none" id="loginSpinner"></span>
+                    Login
+                </button>
+                <button type="button" id="logoutBtn" class="btn btn-outline-danger btn-api ms-2" style="display: none;">Logout</button>
+            </div>
+            
+            <div class="response-container" id="loginResponse">
+                <pre>Response will appear here</pre>
+            </div>
+            
+            <div class="mt-4">
+                <div class="form-group">
+                    <label for="accessToken">Access Token</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="accessToken" placeholder="Enter your access token">
+                        <button class="btn btn-outline-secondary" type="button" id="copyTokenBtn">Copy</button>
+                    </div>
+                    <small class="form-text text-muted">This token will be used for all API requests below.</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SKU Search Section -->
+        <div class="api-section" id="skuSearchSection">
+            <h3>Search Products by SKU</h3>
+            <div class="alert alert-info">
+                This endpoint searches for products by SKU and returns matching products with their details.
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label for="skuInput">SKU</label>
+                        <input type="text" class="form-control" id="skuInput" placeholder="Enter SKU to search">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button type="button" id="searchSkuBtn" class="btn btn-primary btn-api d-block w-100">
+                            <span class="spinner-border d-none" id="searchSpinner"></span>
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4" id="searchResults">
+                <!-- Search results will be displayed here -->
+            </div>
+            
+            <div class="response-container" id="searchResponse">
+                <pre>Response will appear here</pre>
+            </div>
+        </div>
+        
+        <!-- Product Details Section -->
+        <div class="api-section d-none" id="productDetailsSection">
+            <h3>Product Details</h3>
+            <div id="productDetails">
+                <!-- Product details will be displayed here -->
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Base API URL - adjust this to match your setup
+        const baseUrl = window.location.origin + '/ramesh-be/be/api';
+        
+        // Store user data and tokens
+        let userData = null;
+        let accessToken = '';
+        
+        // Helper function to get access token
+        function getAccessToken() {
+            return document.getElementById('accessToken').value;
+        }
+        
+        // Helper function to make API requests
+        async function apiRequest(url, method, data = null, token = null) {
+            const headers = {
+                'Accept': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const options = {
+                method,
+                headers
+            };
+            
+            if (data && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+                headers['Content-Type'] = 'application/json';
+                options.body = JSON.stringify(data);
+            }
+            
+            try {
+                console.log(`Making ${method} request to ${url}`);
+                console.log('Headers:', headers);
+                if (data) console.log('Data:', data);
+                
+                const response = await fetch(url, options);
+                const responseData = await response.json();
+                
+                console.log('Response:', responseData);
+                return responseData;
+            } catch (error) {
+                console.error('API Request Error:', error);
+                return {
+                    status: 'error',
+                    message: error.message,
+                    data: null
+                };
+            }
+        }
+        
+        // Helper function to display response
+        function displayResponse(elementId, response) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<pre>${syntaxHighlight(JSON.stringify(response, null, 2))}</pre>`;
+        }
+        
+        // Helper function to add syntax highlighting to JSON
+        function syntaxHighlight(json) {
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+        
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Helper function to format dates
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        }
+        
+        // Function to update authentication status UI
+        function updateAuthStatusUI() {
+            const authStatus = document.getElementById('authStatus');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            if (accessToken) {
+                authStatus.className = 'auth-status logged-in';
+                authStatus.innerHTML = `<strong>Status:</strong> Authenticated${userData ? ' as ' + userData.username : ''}`;
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+            } else {
+                authStatus.className = 'auth-status logged-out';
+                authStatus.innerHTML = '<strong>Status:</strong> Not authenticated';
+                loginBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'none';
+            }
+        }
+        
+        // Function to display product cards
+        function displayProductCards(products) {
+            const resultsContainer = document.getElementById('searchResults');
+            resultsContainer.innerHTML = '';
+            
+            if (!products || products.length === 0) {
+                resultsContainer.innerHTML = '<div class="alert alert-info">No products found matching this SKU.</div>';
+                return;
+            }
+            
+            const row = document.createElement('div');
+            row.className = 'row';
+            
+            products.forEach(product => {
+                const col = document.createElement('div');
+                col.className = 'col-md-6 mb-3';
+                
+                // Status badge
+                let statusBadge = '';
+                switch (product.status) {
+                    case 'active':
+                        statusBadge = '<span class="badge bg-success">Active</span>';
+                        break;
+                    case 'inactive':
+                        statusBadge = '<span class="badge bg-warning text-dark">Inactive</span>';
+                        break;
+                    default:
+                        statusBadge = '<span class="badge bg-secondary">Unknown</span>';
+                }
+                
+                // Vegetarian badge
+                let vegetarianBadge = '';
+                if (product.is_vegetarian === 1) {
+                    vegetarianBadge = '<span class="badge bg-success">Vegetarian</span>';
+                } else if (product.is_vegetarian === 0) {
+                    vegetarianBadge = '<span class="badge bg-danger">Non-Vegetarian</span>';
+                }
+                
+                col.innerHTML = `
+                    <div class="card product-card">
+                        <div class="card-body">
+                            <h5 class="card-title">${escapeHtml(product.name)}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">SKU: ${escapeHtml(product.variant_sku || product.sku || 'N/A')}</h6>
+                            <div class="mb-2">
+                                ${statusBadge}
+                                ${vegetarianBadge}
+                            </div>
+                            <p class="card-text">${escapeHtml(product.short_description || product.description || 'No description available').substring(0, 100)}${(product.description && product.description.length > 100) ? '...' : ''}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Price:</strong> ₹${product.variant_price || product.price || 'N/A'}
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary view-details-btn" data-product-id="${product.id}">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                row.appendChild(col);
+            });
+            
+            resultsContainer.appendChild(row);
+            
+            // Add event listeners to view details buttons
+            document.querySelectorAll('.view-details-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-product-id');
+                    displayProductDetails(products.find(p => p.id == productId));
+                });
+            });
+        }
+        
+        // Function to display product details
+        function displayProductDetails(product) {
+            if (!product) return;
+            
+            const detailsSection = document.getElementById('productDetailsSection');
+            const detailsContainer = document.getElementById('productDetails');
+            
+            detailsSection.classList.remove('d-none');
+            
+            // Status badge
+            let statusBadge = '';
+            switch (product.status) {
+                case 'active':
+                    statusBadge = '<span class="badge bg-success">Active</span>';
+                    break;
+                case 'inactive':
+                    statusBadge = '<span class="badge bg-warning text-dark">Inactive</span>';
+                    break;
+                default:
+                    statusBadge = '<span class="badge bg-secondary">Unknown</span>';
+            }
+            
+            // Vegetarian badge
+            let vegetarianBadge = '';
+            if (product.is_vegetarian === 1) {
+                vegetarianBadge = '<span class="badge bg-success">Vegetarian</span>';
+            } else if (product.is_vegetarian === 0) {
+                vegetarianBadge = '<span class="badge bg-danger">Non-Vegetarian</span>';
+            }
+            
+            // Format dates
+            const createdAt = product.created_at ? formatDate(product.created_at) : 'N/A';
+            const updatedAt = product.updated_at ? formatDate(product.updated_at) : 'N/A';
+            
+            detailsContainer.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h4>${escapeHtml(product.name)}</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Basic Information</h5>
+                                <p><strong>ID:</strong> ${product.id}</p>
+                                <p><strong>SKU:</strong> ${escapeHtml(product.variant_sku || product.sku || 'N/A')}</p>
+                                <p><strong>Status:</strong> ${statusBadge}</p>
+                                <p><strong>Vegetarian:</strong> ${vegetarianBadge}</p>
+                                <p><strong>Category:</strong> ${escapeHtml(product.category_name || 'N/A')}</p>
+                                <p><strong>Subcategory:</strong> ${escapeHtml(product.subcategory_name || 'N/A')}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Pricing & Inventory</h5>
+                                <p><strong>Price:</strong> ₹${product.variant_price || product.price || 'N/A'}</p>
+                                <p><strong>Sale Price:</strong> ₹${product.variant_sale_price || product.sale_price || 'N/A'}</p>
+                                <p><strong>Stock Quantity:</strong> ${product.variant_stock_quantity || product.stock_quantity || 'N/A'}</p>
+                                <p><strong>HSN Code:</strong> ${escapeHtml(product.hsn_code || 'N/A')}</p>
+                                <p><strong>Tax Rate:</strong> ${product.tax_rate || 'N/A'}%</p>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Description</h5>
+                                <p>${escapeHtml(product.description || 'No description available')}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <h5>System Information</h5>
+                                <p><strong>Created At:</strong> ${createdAt}</p>
+                                <p><strong>Updated At:</strong> ${updatedAt}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-secondary" id="closeDetailsBtn">Close Details</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add event listener to close button
+            document.getElementById('closeDetailsBtn').addEventListener('click', function() {
+                detailsSection.classList.add('d-none');
+            });
+            
+            // Scroll to details section
+            detailsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Login functionality
+        document.getElementById('loginBtn').addEventListener('click', async function() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                alert('Email/username and password are required');
+                return;
+            }
+            
+            // Show spinner
+            this.disabled = true;
+            document.getElementById('loginSpinner').classList.remove('d-none');
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/login`, 'POST', { email, password });
+            displayResponse('loginResponse', response);
+            
+            // Hide spinner
+            this.disabled = false;
+            document.getElementById('loginSpinner').classList.add('d-none');
+            
+            if (response.status === 'success' && response.data) {
+                // Store tokens and user data
+                accessToken = response.data.access_token || response.data.token;
+                userData = response.data.user;
+                
+                // Update access token input
+                document.getElementById('accessToken').value = accessToken;
+                
+                // Store in localStorage
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('userData', JSON.stringify(userData));
+                
+                // Update UI
+                updateAuthStatusUI();
+                
+                alert('Login successful! You can now use the SKU search API endpoint.');
+            }
+        });
+        
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            if (!accessToken) {
+                alert('Not logged in');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/logout`, 'POST', {}, accessToken);
+            displayResponse('loginResponse', response);
+            
+            // Clear tokens and user data regardless of response
+            accessToken = '';
+            userData = null;
+            
+            // Clear access token input
+            document.getElementById('accessToken').value = '';
+            
+            // Remove from localStorage
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('userData');
+            
+            // Update UI
+            updateAuthStatusUI();
+            
+            alert('Logged out successfully.');
+        });
+        
+        // Copy token button
+        document.getElementById('copyTokenBtn').addEventListener('click', function() {
+            const tokenInput = document.getElementById('accessToken');
+            tokenInput.select();
+            document.execCommand('copy');
+            alert('Token copied to clipboard!');
+        });
+        
+        // Search by SKU functionality
+        document.getElementById('searchSkuBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const sku = document.getElementById('skuInput').value;
+            
+            if (!sku) {
+                alert('SKU is required');
+                return;
+            }
+            
+            // Show spinner
+            this.disabled = true;
+            document.getElementById('searchSpinner').classList.remove('d-none');
+            
+            // Hide product details section
+            document.getElementById('productDetailsSection').classList.add('d-none');
+            
+            const response = await apiRequest(`${baseUrl}/api/products/search/sku?sku=${encodeURIComponent(sku)}`, 'GET', null, token);
+            displayResponse('searchResponse', response);
+            
+            // Hide spinner
+            this.disabled = false;
+            document.getElementById('searchSpinner').classList.add('d-none');
+            
+            if (response.status === 'success' && response.data) {
+                displayProductCards(response.data);
+            } else {
+                document.getElementById('searchResults').innerHTML = `
+                    <div class="alert alert-danger">
+                        ${response.message || 'An error occurred while searching for products'}
+                    </div>
+                `;
+            }
+        });
+        
+        // Initialize from localStorage on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load tokens and user data from localStorage
+            accessToken = localStorage.getItem('accessToken') || '';
+            
+            try {
+                const userDataStr = localStorage.getItem('userData');
+                if (userDataStr) {
+                    userData = JSON.parse(userDataStr);
+                }
+            } catch (e) {
+                console.error('Error parsing user data from localStorage:', e);
+                userData = null;
+            }
+            
+            // Set access token input
+            if (accessToken) {
+                document.getElementById('accessToken').value = accessToken;
+            }
+            
+            // Update UI
+            updateAuthStatusUI();
+            
+            // Save token to localStorage when changed manually
+            document.getElementById('accessToken').addEventListener('change', function() {
+                accessToken = this.value;
+                localStorage.setItem('accessToken', accessToken);
+                updateAuthStatusUI();
+            });
+            
+            // Add enter key support for SKU search
+            document.getElementById('skuInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('searchSkuBtn').click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subcategory API Tester</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .container {
+            max-width: 1200px;
+            margin-top: 30px;
+        }
+        .json-key {
+            color: #d63384;
+        }
+        .json-string {
+            color: #20c997;
+        }
+        .json-number {
+            color: #0d6efd;
+        }
+        .json-boolean {
+            color: #fd7e14;
+        }
+        .json-null {
+            color: #6c757d;
+        }
+        .api-url {
+            font-family: monospace;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Subcategory API Tester</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">List Subcategories by Category</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="baseUrl" class="form-label">Base URL:</label>
+                    <input type="text" class="form-control" id="baseUrl" value="http://localhost/ramesh-be/be">
+                    <div class="form-text">Adjust this to match your server configuration</div>
+                </div>
+                
+                <form id="subcategoriesForm" class="mb-3">
+                    <div class="mb-3">
+                        <label for="categoryId" class="form-label">Category ID:</label>
+                        <input type="number" class="form-control" id="categoryId" value="5" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Get Subcategories</button>
+                </form>
+                
+                <div class="mb-3">
+                    <h6>API URL:</h6>
+                    <div class="api-url" id="apiUrl">URL will appear here...</div>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Response Status:</h6>
+                    <div id="responseStatus" class="alert alert-info">Waiting for request...</div>
+                </div>
+                
+                <h6>Response Data:</h6>
+                <pre id="subcategoriesResponse">Results will appear here...</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update the API URL display when inputs change
+        function updateApiUrl() {
+            const baseUrl = document.getElementById('baseUrl').value.trim();
+            const categoryId = document.getElementById('categoryId').value;
+            // Notice the duplicated "api" in the path to match your working URL
+            const apiUrl = `${baseUrl}/api/api/subcategories?category_id=${categoryId}`;
+            document.getElementById('apiUrl').textContent = apiUrl;
+            return apiUrl;
+        }
+        
+        // Initialize the API URL display
+        updateApiUrl();
+        
+        // Update API URL when inputs change
+        document.getElementById('baseUrl').addEventListener('input', updateApiUrl);
+        document.getElementById('categoryId').addEventListener('input', updateApiUrl);
+        
+        // Format JSON with syntax highlighting
+        function formatJSON(json) {
+            if (typeof json !== 'string') {
+                json = JSON.stringify(json, null, 2);
+            }
+            return json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                    let cls = 'json-number';
+                    if (/^"/.test(match)) {
+                        if (/:$/.test(match)) {
+                            cls = 'json-key';
+                        } else {
+                            cls = 'json-string';
+                        }
+                    } else if (/true|false/.test(match)) {
+                        cls = 'json-boolean';
+                    } else if (/null/.test(match)) {
+                        cls = 'json-null';
+                    }
+                    return '<span class="' + cls + '">' + match + '</span>';
+                });
+        }
+
+        document.getElementById('subcategoriesForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const apiUrl = updateApiUrl();
+            const responseElement = document.getElementById('subcategoriesResponse');
+            const statusElement = document.getElementById('responseStatus');
+            
+            responseElement.innerHTML = 'Loading...';
+            statusElement.className = 'alert alert-info';
+            statusElement.textContent = 'Sending request...';
+            
+            try {
+                console.log('Fetching from URL:', apiUrl);
+                const response = await fetch(apiUrl);
+                const statusText = `Status: ${response.status} ${response.statusText}`;
+                
+                if (response.ok) {
+                    statusElement.className = 'alert alert-success';
+                } else {
+                    statusElement.className = 'alert alert-danger';
+                }
+                statusElement.textContent = statusText;
+                
+                const data = await response.json();
+                responseElement.innerHTML = formatJSON(data);
+            } catch (error) {
+                console.error('Error:', error);
+                statusElement.className = 'alert alert-danger';
+                statusElement.textContent = `Error: ${error.message}`;
+                responseElement.textContent = `Failed to fetch data: ${error.message}\n\nPossible causes:\n- Server is not running\n- CORS policy is blocking the request\n- URL is incorrect\n- Network error`;
+            }
+        });
+    </script>
+</body>
+</html>

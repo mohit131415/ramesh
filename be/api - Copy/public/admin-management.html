@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Management API Tester</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        .api-section {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .response-container {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .nav-tabs {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .btn-api {
+            margin-top: 10px;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .filter-section {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .filter-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .alert-info {
+            margin-bottom: 15px;
+        }
+        .btn-danger {
+            margin-right: 10px;
+        }
+        .admin-card {
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        .admin-card:hover {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .profile-image-preview {
+            max-width: 150px;
+            max-height: 150px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: none;
+        }
+        .auth-status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .auth-status.logged-in {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .auth-status.logged-out {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Admin Management API Tester</h1>
+        
+        <!-- Authentication Section -->
+        <div class="api-section" id="authSection">
+            <h3>Authentication</h3>
+            <div class="alert alert-info">
+                Login to get an access token for testing the admin management API endpoints.
+            </div>
+            
+            <div id="authStatus" class="auth-status logged-out">
+                <strong>Status:</strong> Not authenticated
+            </div>
+            
+            <div id="loginForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="loginEmail">Email or Username</label>
+                            <input type="text" class="form-control" id="loginEmail" placeholder="Enter email or username">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" placeholder="Password">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="loginBtn" class="btn btn-success btn-api">Login</button>
+                <button type="button" id="logoutBtn" class="btn btn-outline-danger btn-api ms-2" style="display: none;">Logout</button>
+            </div>
+            
+            <div class="response-container" id="loginResponse">
+                <pre>Response will appear here</pre>
+            </div>
+            
+            <div class="mt-4">
+                <div class="form-group">
+                    <label for="accessToken">Access Token</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="accessToken" placeholder="Enter your access token">
+                        <button class="btn btn-outline-secondary" type="button" id="copyTokenBtn">Copy</button>
+                    </div>
+                    <small class="form-text text-muted">This token will be used for all API requests below.</small>
+                </div>
+            </div>
+        </div>
+        
+        <ul class="nav nav-tabs" id="apiTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list" type="button" role="tab" aria-controls="list" aria-selected="true">List Admins</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="view-tab" data-bs-toggle="tab" data-bs-target="#view" type="button" role="tab" aria-controls="view" aria-selected="false">View Admin</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab" aria-controls="create" aria-selected="false">Create Admin</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="update-tab" data-bs-toggle="tab" data-bs-target="#update" type="button" role="tab" aria-controls="update" aria-selected="false">Update Admin</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="delete-tab" data-bs-toggle="tab" data-bs-target="#delete" type="button" role="tab" aria-controls="delete" aria-selected="false">Delete Admin</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="apiTabsContent">
+            <!-- List Admins Tab -->
+            <div class="tab-pane fade show active" id="list" role="tabpanel" aria-labelledby="list-tab">
+                <div class="api-section">
+                    <h3>List All Admins</h3>
+                    <div class="alert alert-info">
+                        This endpoint returns all admins with pagination and optional filtering.
+                    </div>
+                    
+                    <div class="filter-section">
+                        <div class="filter-title">Filters</div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="listSearch">Search</label>
+                                    <input type="text" class="form-control" id="listSearch" placeholder="Search by name, email, username">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="listRole">Role</label>
+                                    <select class="form-control" id="listRole">
+                                        <option value="">All Roles</option>
+                                        <option value="super_admin">Super Admin</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="listStatus">Status</label>
+                                    <select class="form-control" id="listStatus">
+                                        <option value="">All Statuses</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                        <option value="suspended">Suspended</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="listPage">Page</label>
+                                <input type="number" class="form-control" id="listPage" value="1" min="1">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="listLimit">Items Per Page</label>
+                                <input type="number" class="form-control" id="listLimit" value="10" min="1" max="100">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="listAdminsBtn" class="btn btn-primary btn-api">List Admins</button>
+                    
+                    <div class="mt-4" id="adminsList">
+                        <!-- Admin cards will be displayed here -->
+                    </div>
+                    
+                    <div class="response-container" id="listResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- View Admin Tab -->
+            <div class="tab-pane fade" id="view" role="tabpanel" aria-labelledby="view-tab">
+                <div class="api-section">
+                    <h3>View Admin Details</h3>
+                    <div class="alert alert-info">
+                        This endpoint returns detailed information about a specific admin.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="viewAdminId">Admin ID</label>
+                        <input type="number" class="form-control" id="viewAdminId" placeholder="Enter admin ID">
+                    </div>
+                    
+                    <button type="button" id="viewAdminBtn" class="btn btn-primary btn-api">View Admin</button>
+                    
+                    <div class="mt-4" id="adminDetails">
+                        <!-- Admin details will be displayed here -->
+                    </div>
+                    
+                    <div class="response-container" id="viewResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Create Admin Tab -->
+            <div class="tab-pane fade" id="create" role="tabpanel" aria-labelledby="create-tab">
+                <div class="api-section">
+                    <h3>Create New Admin</h3>
+                    <div class="alert alert-info">
+                        This endpoint creates a new admin. Super Admin role is required.
+                    </div>
+                    
+                    <form id="createAdminForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createUsername">Username *</label>
+                                    <input type="text" class="form-control" id="createUsername" name="username" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createEmail">Email *</label>
+                                    <input type="email" class="form-control" id="createEmail" name="email" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createPassword">Password *</label>
+                                    <input type="password" class="form-control" id="createPassword" name="password" required>
+                                    <small class="form-text text-muted">Minimum 8 characters</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createRole">Role *</label>
+                                    <select class="form-control" id="createRole" name="role" required>
+                                        <option value="admin">Admin</option>
+                                        <option value="super_admin">Super Admin</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createFirstName">First Name *</label>
+                                    <input type="text" class="form-control" id="createFirstName" name="first_name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createLastName">Last Name *</label>
+                                    <input type="text" class="form-control" id="createLastName" name="last_name" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createPhone">Phone</label>
+                                    <input type="text" class="form-control" id="createPhone" name="phone">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createStatus">Status</label>
+                                    <select class="form-control" id="createStatus" name="status">
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                        <option value="suspended">Suspended</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="createProfileImage">Profile Image</label>
+                            <input type="file" class="form-control" id="createProfileImage" name="profile_image" accept="image/*">
+                            <img id="createImagePreview" class="profile-image-preview" src="#" alt="Profile Image Preview">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-api">Create Admin</button>
+                    </form>
+                    
+                    <div class="response-container" id="createResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Update Admin Tab -->
+            <div class="tab-pane fade" id="update" role="tabpanel" aria-labelledby="update-tab">
+                <div class="api-section">
+                    <h3>Update Admin</h3>
+                    <div class="alert alert-info">
+                        This endpoint updates an existing admin. Super admins can update all fields for any admin.
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label for="updateAdminId">Admin ID *</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="updateAdminId" required>
+                            <button type="button" id="loadAdminBtn" class="btn btn-secondary">Load Admin Data</button>
+                        </div>
+                    </div>
+                    
+                    <form id="updateAdminForm">
+                        <input type="hidden" id="updateAdminIdHidden" name="id">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateUsername">Username</label>
+                                    <input type="text" class="form-control" id="updateUsername" name="username">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateEmail">Email</label>
+                                    <input type="email" class="form-control" id="updateEmail" name="email">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updatePassword">Password</label>
+                                    <input type="password" class="form-control" id="updatePassword" name="password">
+                                    <small class="form-text text-muted">Leave empty to keep current password</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateRole">Role</label>
+                                    <select class="form-control" id="updateRole" name="role">
+                                        <option value="">No Change</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="super_admin">Super Admin</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateFirstName">First Name</label>
+                                    <input type="text" class="form-control" id="updateFirstName" name="first_name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateLastName">Last Name</label>
+                                    <input type="text" class="form-control" id="updateLastName" name="last_name">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updatePhone">Phone</label>
+                                    <input type="text" class="form-control" id="updatePhone" name="phone">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateStatus">Status</label>
+                                    <select class="form-control" id="updateStatus" name="status">
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                        <option value="suspended">Suspended</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="updateProfileImage">Profile Image</label>
+                            <input type="file" class="form-control" id="updateProfileImage" name="profile_image" accept="image/*">
+                            <small class="form-text text-muted">Leave empty to keep current image</small>
+                            <div id="currentImageContainer" class="mt-2" style="display: none;">
+                                <label>Current Image:</label>
+                                <img id="currentImage" class="profile-image-preview" style="display: block;" src="#" alt="Current Profile Image">
+                            </div>
+                            <img id="updateImagePreview" class="profile-image-preview" src="#" alt="Profile Image Preview">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-api">Update Admin</button>
+                    </form>
+                    
+                    <div class="response-container" id="updateResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Delete Admin Tab -->
+            <div class="tab-pane fade" id="delete" role="tabpanel" aria-labelledby="delete-tab">
+                <div class="api-section">
+                    <h3>Delete Admin</h3>
+                    <div class="alert alert-warning">
+                        <strong>Warning:</strong> This endpoint deletes an admin (soft delete). Super Admin role is required.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="deleteAdminId">Admin ID *</label>
+                        <input type="number" class="form-control" id="deleteAdminId" required>
+                    </div>
+                    
+                    <button type="button" id="deleteAdminBtn" class="btn btn-danger btn-api">Delete Admin</button>
+                    
+                    <div class="response-container" id="deleteResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Base API URL - adjust this to match your setup
+        const baseUrl = window.location.origin + '/ramesh-be/be/api';
+        
+        // Store user data and tokens
+        let userData = null;
+        let accessToken = '';
+        let refreshToken = '';
+        
+        // Helper function to get access token
+        function getAccessToken() {
+            return document.getElementById('accessToken').value;
+        }
+        
+        // Helper function to make API requests
+        async function apiRequest(url, method, data = null, token = null) {
+            const headers = {
+                'Accept': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const options = {
+                method,
+                headers
+            };
+            
+            // Handle FormData separately for file uploads
+            if (data instanceof FormData) {
+                // Don't set Content-Type for FormData, browser will set it with boundary
+                options.body = data;
+            } else if (data && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+                headers['Content-Type'] = 'application/json';
+                options.body = JSON.stringify(data);
+            }
+            
+            try {
+                console.log(`Making ${method} request to ${url}`);
+                console.log('Headers:', headers);
+                if (data) console.log('Data:', data instanceof FormData ? 'FormData object' : data);
+                
+                const response = await fetch(url, options);
+                const responseData = await response.json();
+                
+                console.log('Response:', responseData);
+                return responseData;
+            } catch (error) {
+                console.error('API Request Error:', error);
+                return {
+                    status: 'error',
+                    message: error.message,
+                    data: null
+                };
+            }
+        }
+        
+        // Helper function to display response
+        function displayResponse(elementId, response) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<pre>${JSON.stringify(response, null, 2)}</pre>`;
+        }
+        
+        // Helper function to build query string from filters
+        function buildQueryString(filters) {
+            const params = new URLSearchParams();
+            
+            for (const key in filters) {
+                if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+                    params.append(key, filters[key]);
+                }
+            }
+            
+            return params.toString();
+        }
+        
+        // Helper function to create admin cards
+        function createAdminCards(admins) {
+            const container = document.getElementById('adminsList');
+            container.innerHTML = '';
+            
+            if (!admins || admins.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No admins found</div>';
+                return;
+            }
+            
+            const row = document.createElement('div');
+            row.className = 'row';
+            
+            admins.forEach(admin => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4';
+                
+                const card = document.createElement('div');
+                card.className = 'card admin-card';
+                card.onclick = () => {
+                    document.getElementById('viewAdminId').value = admin.id;
+                    document.getElementById('viewAdminBtn').click();
+                    document.getElementById('view-tab').click();
+                };
+                
+                const cardBody = document.createElement('div');
+                cardBody.className = 'card-body';
+                
+                // Profile image
+                let profileImage = '';
+                if (admin.profile_image_url) {
+                    profileImage = `<img src="${admin.profile_image_url}" class="img-thumbnail mb-2" style="width: 50px; height: 50px; object-fit: cover;" alt="Profile Image">`;
+                } else {
+                    profileImage = `<div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
+                        <span>${admin.first_name.charAt(0)}${admin.last_name.charAt(0)}</span>
+                    </div>`;
+                }
+                
+                // Role badge
+                const roleBadge = admin.role === 'super_admin' 
+                    ? '<span class="badge bg-danger">Super Admin</span>' 
+                    : '<span class="badge bg-primary">Admin</span>';
+                
+                // Status badge
+                let statusBadge = '';
+                switch (admin.status) {
+                    case 'active':
+                        statusBadge = '<span class="badge bg-success">Active</span>';
+                        break;
+                    case 'inactive':
+                        statusBadge = '<span class="badge bg-warning text-dark">Inactive</span>';
+                        break;
+                    case 'suspended':
+                        statusBadge = '<span class="badge bg-danger">Suspended</span>';
+                        break;
+                    default:
+                        statusBadge = '<span class="badge bg-secondary">Unknown</span>';
+                }
+                
+                cardBody.innerHTML = `
+                    <div class="d-flex align-items-center mb-2">
+                        ${profileImage}
+                        <h5 class="card-title mb-0 ms-2">${admin.first_name} ${admin.last_name}</h5>
+                    </div>
+                    <h6 class="card-subtitle mb-2 text-muted">@${admin.username}</h6>
+                    <p class="card-text">${admin.email}</p>
+                    <div class="d-flex">
+                        ${roleBadge} 
+                        <span class="mx-1"></span>
+                        ${statusBadge}
+                    </div>
+                    <div class="mt-2 small text-muted">ID: ${admin.id}</div>
+                `;
+                
+                card.appendChild(cardBody);
+                col.appendChild(card);
+                row.appendChild(col);
+            });
+            
+            container.appendChild(row);
+        }
+        
+        // Helper function to display admin details
+        function displayAdminDetails(admin) {
+            const container = document.getElementById('adminDetails');
+            
+            if (!admin) {
+                container.innerHTML = '<div class="alert alert-warning">No admin found</div>';
+                return;
+            }
+            
+            // Profile image
+            let profileImage = '';
+            if (admin.profile_image_url) {
+                profileImage = `<img src="${admin.profile_image_url}" class="img-thumbnail mb-3" style="width: 150px; height: 150px; object-fit: cover;" alt="Profile Image">`;
+            } else {
+                profileImage = `<div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 150px; height: 150px; font-size: 3rem;">
+                    <span>${admin.first_name.charAt(0)}${admin.last_name.charAt(0)}</span>
+                </div>`;
+            }
+            
+            // Role badge
+            const roleBadge = admin.role === 'super_admin' 
+                ? '<span class="badge bg-danger">Super Admin</span>' 
+                : '<span class="badge bg-primary">Admin</span>';
+            
+            // Status badge
+            let statusBadge = '';
+            switch (admin.status) {
+                case 'active':
+                    statusBadge = '<span class="badge bg-success">Active</span>';
+                    break;
+                case 'inactive':
+                    statusBadge = '<span class="badge bg-warning text-dark">Inactive</span>';
+                    break;
+                case 'suspended':
+                    statusBadge = '<span class="badge bg-danger">Suspended</span>';
+                    break;
+                default:
+                    statusBadge = '<span class="badge bg-secondary">Unknown</span>';
+            }
+            
+            // Format dates
+            const createdAt = new Date(admin.created_at).toLocaleString();
+            const updatedAt = new Date(admin.updated_at).toLocaleString();
+            const lastLoginAt = admin.last_login_at ? new Date(admin.last_login_at).toLocaleString() : 'Never';
+            
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                ${profileImage}
+                                <div class="mt-2">
+                                    ${roleBadge} ${statusBadge}
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <h3>${admin.first_name} ${admin.last_name}</h3>
+                                <p class="text-muted">@${admin.username}</p>
+                                
+                                <div class="mb-3">
+                                    <h5>Contact Information</h5>
+                                    <p><strong>Email:</strong> ${admin.email}</p>
+                                    <p><strong>Phone:</strong> ${admin.phone || 'Not provided'}</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5>Account Information</h5>
+                                    <p><strong>ID:</strong> ${admin.id}</p>
+                                    <p><strong>Created By:</strong> ${admin.created_by_name || 'System'}</p>
+                                    <p><strong>Created At:</strong> ${createdAt}</p>
+                                    <p><strong>Updated At:</strong> ${updatedAt}</p>
+                                    <p><strong>Last Login:</strong> ${lastLoginAt}</p>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-sm btn-primary" onclick="loadAdminForUpdate(${admin.id})">Edit</button>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="prepareDeleteAdmin(${admin.id})">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Function to load admin data for update
+        function loadAdminForUpdate(adminId) {
+            document.getElementById('updateAdminId').value = adminId;
+            document.getElementById('loadAdminBtn').click();
+            document.getElementById('update-tab').click();
+        }
+        
+        // Function to prepare delete admin
+        function prepareDeleteAdmin(adminId) {
+            document.getElementById('deleteAdminId').value = adminId;
+            document.getElementById('delete-tab').click();
+        }
+        
+        // Function to update authentication status UI
+        function updateAuthStatusUI() {
+            const authStatus = document.getElementById('authStatus');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            if (accessToken) {
+                authStatus.className = 'auth-status logged-in';
+                authStatus.innerHTML = `<strong>Status:</strong> Authenticated${userData ? ' as ' + userData.username : ''}`;
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+            } else {
+                authStatus.className = 'auth-status logged-out';
+                authStatus.innerHTML = '<strong>Status:</strong> Not authenticated';
+                loginBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'none';
+            }
+        }
+        
+        // Login functionality
+        document.getElementById('loginBtn').addEventListener('click', async function() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                displayResponse('loginResponse', { 
+                    status: 'error', 
+                    message: 'Email/username and password are required',
+                    data: null
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/login`, 'POST', { email, password });
+            displayResponse('loginResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                // Store tokens and user data
+                accessToken = response.data.access_token;
+                refreshToken = response.data.refresh_token;
+                userData = response.data.user;
+                
+                // Update access token input
+                document.getElementById('accessToken').value = accessToken;
+                
+                // Store in localStorage
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                localStorage.setItem('userData', JSON.stringify(userData));
+                
+                // Update UI
+                updateAuthStatusUI();
+                
+                alert('Login successful! You can now use the admin management API endpoints.');
+            }
+        });
+        
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            if (!accessToken) {
+                displayResponse('loginResponse', { 
+                    status: 'error', 
+                    message: 'Not logged in',
+                    data: null
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/logout`, 'POST', {}, accessToken);
+            displayResponse('loginResponse', response);
+            
+            // Clear tokens and user data regardless of response
+            accessToken = '';
+            refreshToken = '';
+            userData = null;
+            
+            // Clear access token input
+            document.getElementById('accessToken').value = '';
+            
+            // Remove from localStorage
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('userData');
+            
+            // Update UI
+            updateAuthStatusUI();
+            
+            alert('Logged out successfully.');
+        });
+        
+        // Copy token button
+        document.getElementById('copyTokenBtn').addEventListener('click', function() {
+            const tokenInput = document.getElementById('accessToken');
+            tokenInput.select();
+            document.execCommand('copy');
+            alert('Token copied to clipboard!');
+        });
+        
+        // List Admins
+        document.getElementById('listAdminsBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                displayResponse('listResponse', { 
+                    status: 'error', 
+                    message: 'Access token is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const page = document.getElementById('listPage').value;
+            const limit = document.getElementById('listLimit').value;
+            const search = document.getElementById('listSearch').value;
+            const role = document.getElementById('listRole').value;
+            const status = document.getElementById('listStatus').value;
+            
+            const filters = { page, limit, search, role, status };
+            const queryString = buildQueryString(filters);
+            
+            const response = await apiRequest(`${baseUrl}/api/admins?${queryString}`, 'GET', null, token);
+            displayResponse('listResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                createAdminCards(response.data);
+            }
+        });
+        
+        // View Admin
+        document.getElementById('viewAdminBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                displayResponse('viewResponse', { 
+                    status: 'error', 
+                    message: 'Access token is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const adminId = document.getElementById('viewAdminId').value;
+            
+            if (!adminId) {
+                displayResponse('viewResponse', { 
+                    status: 'error', 
+                    message: 'Admin ID is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/admins/${adminId}`, 'GET', null, token);
+            displayResponse('viewResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                displayAdminDetails(response.data);
+            }
+        });
+        
+        // Create Admin
+        document.getElementById('createAdminForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = getAccessToken();
+            
+            if (!token) {
+                displayResponse('createResponse', { 
+                    status: 'error', 
+                    message: 'Access token is required',
+                    data: null
+                });
+                return;
+            }
+            
+            // Create FormData object for file upload
+            const formData = new FormData(this);
+            
+            const response = await apiRequest(`${baseUrl}/api/admins`, 'POST', formData, token);
+            displayResponse('createResponse', response);
+            
+            if (response.status === 'success') {
+                alert('Admin created successfully!');
+                this.reset();
+                document.getElementById('createImagePreview').style.display = 'none';
+            }
+        });
+        
+        // Load Admin for Update
+        document.getElementById('loadAdminBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                displayResponse('updateResponse', { 
+                    status: 'error', 
+                    message: 'Access token is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const adminId = document.getElementById('updateAdminId').value;
+            
+            if (!adminId) {
+                displayResponse('updateResponse', { 
+                    status: 'error', 
+                    message: 'Admin ID is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/admins/${adminId}`, 'GET', null, token);
+            
+            if (response.status === 'success' && response.data) {
+                const admin = response.data;
+                
+                // Populate form fields
+                document.getElementById('updateAdminIdHidden').value = admin.id;
+                document.getElementById('updateUsername').value = admin.username;
+                document.getElementById('updateEmail').value = admin.email;
+                document.getElementById('updateFirstName').value = admin.first_name;
+                document.getElementById('updateLastName').value = admin.last_name;
+                document.getElementById('updatePhone').value = admin.phone || '';
+                
+                // Set select fields with current values
+                const roleSelect = document.getElementById('updateRole');
+                roleSelect.value = admin.role;
+                
+                const statusSelect = document.getElementById('updateStatus');
+                statusSelect.value = admin.status;
+                
+                console.log("Current admin status:", admin.status);
+                console.log("Status select value after setting:", statusSelect.value);
+                
+                // Show current profile image if exists
+                if (admin.profile_image_url) {
+                    document.getElementById('currentImageContainer').style.display = 'block';
+                    document.getElementById('currentImage').src = admin.profile_image_url;
+                } else {
+                    document.getElementById('currentImageContainer').style.display = 'none';
+                }
+                
+                // Clear password field
+                document.getElementById('updatePassword').value = '';
+                
+                // Clear file input
+                document.getElementById('updateProfileImage').value = '';
+                document.getElementById('updateImagePreview').style.display = 'none';
+                
+                alert('Admin data loaded successfully!');
+            } else {
+                displayResponse('updateResponse', response);
+            }
+        });
+        
+        // Update Admin
+        document.getElementById('updateAdminForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = getAccessToken();
+            
+            if (!token) {
+                displayResponse('updateResponse', { 
+                    status: 'error', 
+                    message: 'Access token is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const adminId = document.getElementById('updateAdminId').value;
+            
+            if (!adminId) {
+                displayResponse('updateResponse', { 
+                    status: 'error', 
+                    message: 'Admin ID is required',
+                    data: null
+                });
+                return;
+            }
+            
+            // Create FormData object for file upload
+            const formData = new FormData(this);
+            
+            // Debug: Log all form data entries before sending
+            console.log("Form data entries before processing:");
+            for (const pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+            
+            // Explicitly get values from select elements
+            const role = document.getElementById('updateRole').value;
+            const status = document.getElementById('updateStatus').value;
+            
+            // If role is selected, add it to formData
+            if (role && role !== '') {
+                formData.set('role', role);
+            }
+            
+            // If status is selected, add it to formData
+            if (status && status !== '') {
+                formData.set('status', status);
+            }
+            
+            console.log("Status value being sent:", status);
+            
+            // Debug: Log all form data entries after processing
+            console.log("Form data entries after processing:");
+            for (const pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/admins/${adminId}`, 'PUT', formData, token);
+            displayResponse('updateResponse', response);
+            
+            if (response.status === 'success') {
+                alert('Admin updated successfully!');
+                // Reload the admin data to show the updated information
+                document.getElementById('loadAdminBtn').click();
+            }
+        });
+        
+        // Delete Admin
+        document.getElementById('deleteAdminBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                displayResponse('deleteResponse', { 
+                    status: 'error', 
+                    message: 'Access token is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const adminId = document.getElementById('deleteAdminId').value;
+            
+            if (!adminId) {
+                displayResponse('deleteResponse', { 
+                    status: 'error', 
+                    message: 'Admin ID is required',
+                    data: null
+                });
+                return;
+            }
+            
+            if (confirm('Are you sure you want to delete this admin? This action cannot be undone.')) {
+                const response = await apiRequest(`${baseUrl}/api/admins/${adminId}`, 'DELETE', null, token);
+                displayResponse('deleteResponse', response);
+                
+                if (response.status === 'success') {
+                    alert('Admin deleted successfully!');
+                }
+            }
+        });
+        
+        // Profile image preview for create form
+        document.getElementById('createProfileImage').addEventListener('change', function() {
+            const file = this.files[0];
+            const preview = document.getElementById('createImagePreview');
+            
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+        
+        // Profile image preview for update form
+        document.getElementById('updateProfileImage').addEventListener('change', function() {
+            const file = this.files[0];
+            const preview = document.getElementById('updateImagePreview');
+            
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+        
+        // Initialize from localStorage on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load tokens and user data from localStorage
+            accessToken = localStorage.getItem('accessToken') || '';
+            refreshToken = localStorage.getItem('refreshToken') || '';
+            
+            try {
+                const userDataStr = localStorage.getItem('userData');
+                if (userDataStr) {
+                    userData = JSON.parse(userDataStr);
+                }
+            } catch (e) {
+                console.error('Error parsing user data from localStorage:', e);
+                userData = null;
+            }
+            
+            // Set access token input
+            if (accessToken) {
+                document.getElementById('accessToken').value = accessToken;
+            }
+            
+            // Update UI
+            updateAuthStatusUI();
+            
+            // Save token to localStorage when changed manually
+            document.getElementById('accessToken').addEventListener('change', function() {
+                accessToken = this.value;
+                localStorage.setItem('accessToken', accessToken);
+                updateAuthStatusUI();
+            });
+        });
+    </script>
+</body>
+</html>

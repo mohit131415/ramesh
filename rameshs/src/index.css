@@ -1,0 +1,1093 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&family=Cinzel:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap");
+
+/* Add these imports at the top of the file */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Playfair+Display:wght@400;500;600&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 20 14.3% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 14.3% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14.3% 4.1%;
+    --primary: 47.9 95.8% 53.1%;
+    --primary-foreground: 26 83.3% 14.1%;
+    --secondary: 60 4.8% 95.9%;
+    --secondary-foreground: 24 9.8% 10%;
+    --muted: 60 4.8% 95.9%;
+    --muted-foreground: 25 5.3% 44.7%;
+    --accent: 60 4.8% 95.9%;
+    --accent-foreground: 24 9.8% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 20 5.9% 90%;
+    --input: 20 5.9% 90%;
+    --ring: 20 14.3% 4.1%;
+    --radius: 0.5rem;
+
+    /* Custom colors */
+    --cream: 48 33% 97%;
+    --gold: 41 50% 63%; /* This is #D3AE6E in HSL */
+    --gold-dark: 41 50% 53%; /* Darker version */
+    --gold-light: 41 50% 73%; /* Lighter version */
+    --maroon: 0 59% 40%;
+    --maroon-dark: 0 59% 30%;
+
+    /* Pink colors - Pantone 197C */
+    --pink: 350 85% 85%;
+    --pink-light: 350 100% 88%;
+    --pink-lighter: 350 100% 94%;
+    --pink-dark: 350 50% 75%;
+    --pink-darker: 350 40% 65%;
+
+    /* Light pink background - #fff9fb */
+    --light-pink-bg: 340 100% 99%;
+  }
+
+  .dark {
+    --background: 20 14.3% 4.1%;
+    --foreground: 60 9.1% 97.8%;
+    --card: 20 14.3% 4.1%;
+    --card-foreground: 60 9.1% 97.8%;
+    --popover: 20 14.3% 4.1%;
+    --popover-foreground: 60 9.1% 97.8%;
+    --primary: 47.9 95.8% 53.1%;
+    --primary-foreground: 26 83.3% 14.1%;
+    --secondary: 12 6.5% 15.1%;
+    --secondary-foreground: 60 9.1% 97.8%;
+    --muted: 12 6.5% 15.1%;
+    --muted-foreground: 24 5.4% 63.9%;
+    --accent: 12 6.5% 15.1%;
+    --accent-foreground: 60 9.1% 97.8%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 12 6.5% 15.1%;
+    --input: 12 6.5% 15.1%;
+    --ring: 35.5 91.7% 32.9%;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Playfair Display", serif;
+  }
+
+  .font-serif {
+    font-family: "Playfair Display", serif;
+  }
+
+  .font-garamond {
+    font-family: "Cormorant Garamond", serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Premium headings */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif;
+  }
+}
+
+/* Font families */
+.font-sans {
+  font-family: "Poppins", sans-serif;
+}
+
+.font-serif {
+  font-family: "Playfair Display", "Cormorant Garamond", serif;
+}
+
+.font-display {
+  font-family: "Cormorant Garamond", serif;
+}
+
+/* Custom font classes */
+.font-cinzel {
+  font-family: "Cinzel", serif;
+}
+
+.font-eb-garamond {
+  font-family: "EB Garamond", serif;
+}
+
+/* Add these custom font classes */
+.font-heritage {
+  font-family: "Cormorant Garamond", serif;
+}
+
+/* Custom colors */
+.bg-cream {
+  background-color: hsl(var(--cream));
+}
+
+.bg-gold {
+  background-color: hsl(var(--gold));
+}
+
+.bg-gold-dark {
+  background-color: hsl(var(--gold-dark));
+}
+
+.bg-maroon {
+  background-color: hsl(var(--maroon));
+}
+
+.bg-maroon-dark {
+  background-color: hsl(var(--maroon-dark));
+}
+
+.text-gold {
+  color: hsl(var(--gold));
+}
+
+.text-gold-dark {
+  color: hsl(var(--gold-dark));
+}
+
+.text-maroon {
+  color: hsl(var(--maroon));
+}
+
+.border-gold {
+  border-color: hsl(var(--gold));
+}
+
+.border-gold-dark {
+  border-color: hsl(var(--gold-dark));
+}
+
+.border-maroon {
+  border-color: hsl(var(--maroon));
+}
+
+.fill-gold {
+  fill: hsl(var(--gold));
+}
+
+/* Pink color utilities */
+.bg-pink {
+  background-color: hsl(var(--pink));
+}
+
+.bg-pink-light {
+  background-color: hsl(var(--pink-light));
+}
+
+.bg-pink-lighter {
+  background-color: hsl(var(--pink-lighter));
+}
+
+.bg-pink-dark {
+  background-color: hsl(var(--pink-dark));
+}
+
+.bg-pink-darker {
+  background-color: hsl(var(--pink-darker));
+}
+
+.text-pink {
+  color: hsl(var(--pink));
+}
+
+.text-pink-dark {
+  color: hsl(var(--pink-dark));
+}
+
+.text-pink-darker {
+  color: hsl(var(--pink-darker));
+}
+
+.border-pink {
+  border-color: hsl(var(--pink));
+}
+
+.border-pink-dark {
+  border-color: hsl(var(--pink-dark));
+}
+
+.fill-pink {
+  fill: hsl(var(--pink));
+}
+
+/* Light pink background */
+.bg-light-pink {
+  background-color: hsl(var(--light-pink-bg));
+}
+
+/* Pink gradient border similar to gold gradient border */
+.pink-gradient-border {
+  position: relative;
+}
+
+.pink-gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: 2px;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(248, 185, 193, 0.3),
+    rgba(248, 185, 193, 0.6),
+    rgba(248, 185, 193, 0.3),
+    transparent
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Heritage styling with pink */
+.heritage-border-pink {
+  @apply relative;
+}
+
+.heritage-border-pink::before {
+  content: "";
+  @apply absolute inset-0 border-2 border-pink/30 pointer-events-none;
+}
+
+.heritage-border-pink::after {
+  content: "";
+  @apply absolute inset-4 border border-pink/20 pointer-events-none;
+}
+
+/* Pink accent animations */
+.pink-accent-pulse {
+  animation: pinkPulse 3s infinite alternate cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes pinkPulse {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+/* Shine effect for pink elements */
+.pink-shine {
+  background: linear-gradient(
+    to right,
+    rgba(248, 185, 193, 0.1) 0%,
+    rgba(248, 185, 193, 0.3) 20%,
+    rgba(248, 185, 193, 0.5) 50%,
+    rgba(248, 185, 193, 0.3) 80%,
+    rgba(248, 185, 193, 0.1) 100%
+  );
+  background-size: 200% auto;
+  animation: shine 3s linear infinite;
+}
+
+/* Pink pattern */
+.pink-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f8b9c1' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Pink heritage background */
+.bg-heritage-pink {
+  background: linear-gradient(to right, #fff8f9, #fff0f2, #fff8f9);
+}
+
+/* Pink glow effects */
+.pink-glow {
+  filter: drop-shadow(0 0 3px rgba(248, 185, 193, 0.5));
+}
+
+.pink-glow-hover:hover {
+  filter: drop-shadow(0 0 5px rgba(248, 185, 193, 0.7));
+  transition: filter 0.3s ease;
+}
+
+/* Add these gold gradient styles to your existing CSS */
+
+.gold-gradient-border {
+  position: relative;
+}
+
+.gold-gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: 2px;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(211, 174, 110, 0.3),
+    rgba(211, 174, 110, 0.6),
+    rgba(211, 174, 110, 0.3),
+    transparent
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Heritage styling elements */
+.heritage-border {
+  @apply relative;
+}
+
+.heritage-border::before {
+  content: "";
+  @apply absolute inset-0 border-2 border-gold/30 pointer-events-none;
+}
+
+.heritage-border::after {
+  content: "";
+  @apply absolute inset-4 border border-gold/20 pointer-events-none;
+}
+
+/* Heritage marquee styles */
+.heritage-marquee-mask {
+  mask-image: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 1) 5%,
+    rgba(0, 0, 0, 1) 95%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 1) 5%,
+    rgba(0, 0, 0, 1) 95%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+.heritage-divider {
+  position: relative;
+  height: 1px;
+  width: 100px;
+  background: linear-gradient(to right, transparent, rgba(211, 174, 110, 0.6), transparent);
+  margin: 1.5rem auto;
+}
+
+.heritage-divider::before,
+.heritage-divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: rgba(211, 174, 110, 0.6);
+  border-radius: 50%;
+}
+
+.heritage-divider::before {
+  left: 30%;
+}
+
+.heritage-divider::after {
+  right: 30%;
+}
+
+/* Pink divider */
+.pink-divider {
+  position: relative;
+  height: 1px;
+  width: 100px;
+  background: linear-gradient(to right, transparent, rgba(248, 185, 193, 0.6), transparent);
+  margin: 1.5rem auto;
+}
+
+.pink-divider::before,
+.pink-divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: rgba(248, 185, 193, 0.6);
+  border-radius: 50%;
+}
+
+.pink-divider::before {
+  left: 30%;
+}
+
+.pink-divider::after {
+  right: 30%;
+}
+
+/* Decorative dashed border */
+.dashed-gold-border {
+  background-image: linear-gradient(to right, rgba(211, 174, 110, 0.4) 50%, transparent 50%);
+  background-size: 8px 1px;
+  background-repeat: repeat-x;
+}
+
+.dashed-gold-border-vertical {
+  background-image: linear-gradient(to bottom, rgba(211, 174, 110, 0.4) 50%, transparent 50%);
+  background-size: 1px 8px;
+  background-repeat: repeat-y;
+}
+
+/* Pink dashed border */
+.dashed-pink-border {
+  background-image: linear-gradient(to right, rgba(248, 185, 193, 0.4) 50%, transparent 50%);
+  background-size: 8px 1px;
+  background-repeat: repeat-x;
+}
+
+.dashed-pink-border-vertical {
+  background-image: linear-gradient(to bottom, rgba(248, 185, 193, 0.4) 50%, transparent 50%);
+  background-size: 1px 8px;
+  background-repeat: repeat-y;
+}
+
+/* Decorative elements */
+.decorative-corner {
+  @apply absolute w-6 h-6;
+}
+
+.decorative-corner-tl {
+  @apply top-0 left-0 border-t-2 border-l-2 border-gold;
+}
+
+.decorative-corner-tr {
+  @apply top-0 right-0 border-t-2 border-r-2 border-gold;
+}
+
+.decorative-corner-bl {
+  @apply bottom-0 left-0 border-b-2 border-l-2 border-gold;
+}
+
+.decorative-corner-br {
+  @apply bottom-0 right-0 border-b-2 border-r-2 border-gold;
+}
+
+/* Pink decorative corners */
+.decorative-corner-pink-tl {
+  @apply top-0 left-0 border-t-2 border-l-2 border-pink;
+}
+
+.decorative-corner-pink-tr {
+  @apply top-0 right-0 border-t-2 border-r-2 border-pink;
+}
+
+.decorative-corner-pink-bl {
+  @apply bottom-0 left-0 border-b-2 border-l-2 border-pink;
+}
+
+.decorative-corner-pink-br {
+  @apply bottom-0 right-0 border-b-2 border-r-2 border-pink;
+}
+
+/* Navigation hover effects */
+.nav-link-hover {
+  @apply relative;
+}
+
+.nav-link-hover::after {
+  content: "";
+  @apply absolute bottom-0 left-0 w-0 h-0.5 bg-gold transition-all duration-300;
+}
+
+.nav-link-hover:hover::after {
+  @apply w-full;
+}
+
+/* Pink navigation hover effect */
+.nav-link-hover-pink {
+  @apply relative;
+}
+
+.nav-link-hover-pink::after {
+  content: "";
+  @apply absolute bottom-0 left-0 w-0 h-0.5 bg-pink transition-all duration-300;
+}
+
+.nav-link-hover-pink:hover::after {
+  @apply w-full;
+}
+
+/* Gold accent animations */
+.gold-accent-pulse {
+  animation: goldPulse 3s infinite alternate cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes goldPulse {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+/* Shine effect for gold elements */
+@keyframes shine {
+  0% {
+    transform: translateX(-100%);
+  }
+  20%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.gold-shine {
+  background: linear-gradient(
+    to right,
+    rgba(211, 174, 110, 0.1) 0%,
+    rgba(211, 174, 110, 0.3) 20%,
+    rgba(211, 174, 110, 0.5) 50%,
+    rgba(211, 174, 110, 0.3) 80%,
+    rgba(211, 174, 110, 0.1) 100%
+  );
+  background-size: 200% auto;
+  animation: shine 3s linear infinite;
+}
+
+/* Heritage pattern background */
+.heritage-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d3ae6e' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Add a subtle gold gradient for the header */
+.bg-heritage-gold {
+  background: linear-gradient(to right, #f8f5f0, #f5ebd7, #f8f5f0);
+}
+
+/* Add this to your existing CSS file */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Add a subtle gradient mask to indicate more content */
+.scroll-mask-right {
+  mask-image: linear-gradient(to right, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 90%, transparent 100%);
+}
+
+.scroll-mask-left {
+  mask-image: linear-gradient(to left, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to left, black 90%, transparent 100%);
+}
+
+/* Smooth scrolling for the section */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Highlight effect for the section when in view */
+.section-highlight {
+  position: relative;
+}
+
+.section-highlight::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(to right, transparent, #d3ae6e, transparent);
+  transform: scaleX(0);
+  transition: transform 0.8s ease-out;
+}
+
+.section-highlight.in-view::before {
+  transform: scaleX(1);
+}
+
+/* Pink section highlight */
+.section-highlight-pink {
+  position: relative;
+}
+
+.section-highlight-pink::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(to right, transparent, #f8b9c1, transparent);
+  transform: scaleX(0);
+  transition: transform 0.8s ease-out;
+}
+
+.section-highlight-pink.in-view::before {
+  transform: scaleX(1);
+}
+
+/* Add this to your existing index.css file */
+
+.bg-heritage-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d3ae6e' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Heritage corners animation */
+@keyframes cornerFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.corner-animate {
+  animation: cornerFadeIn 0.5s ease-out forwards;
+}
+
+/* Add these styles to your existing index.css file */
+
+/* 3D perspective container */
+.perspective-1000 {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+/* Gold shimmer animation */
+@keyframes shimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(211, 174, 110, 0) 0%,
+    rgba(211, 174, 110, 0.1) 20%,
+    rgba(211, 174, 110, 0.2) 40%,
+    rgba(211, 174, 110, 0.3) 50%,
+    rgba(211, 174, 110, 0.3) 50%,
+    rgba(211, 174, 110, 0.2) 60%,
+    rgba(211, 174, 110, 0.1) 80%,
+    rgba(211, 174, 110, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: enhancedShimmer 3s infinite linear;
+}
+
+/* Pink shimmer animation */
+.pink-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(248, 185, 193, 0) 0%,
+    rgba(248, 185, 193, 0.1) 20%,
+    rgba(248, 185, 193, 0.2) 40%,
+    rgba(248, 185, 193, 0.3) 50%,
+    rgba(248, 185, 193, 0.2) 60%,
+    rgba(248, 185, 193, 0.1) 80%,
+    rgba(248, 185, 193, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: enhancedShimmer 3s infinite linear;
+}
+
+/* Floating orb animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.floating-orb {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Explosion animation */
+@keyframes explode {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+.explode {
+  animation: explode 0.5s forwards;
+}
+
+/* Glow effect for gold elements */
+.gold-glow {
+  filter: drop-shadow(0 0 3px rgba(211, 174, 110, 0.5));
+}
+
+.gold-glow-hover:hover {
+  filter: drop-shadow(0 0 5px rgba(211, 174, 110, 0.7));
+  transition: filter 0.3s ease;
+}
+
+/* Floating animation for decorative elements */
+@keyframes floatUpDown {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.float-animation {
+  animation: floatUpDown 3s ease-in-out infinite;
+}
+
+/* Pulse animation for highlights */
+@keyframes pulseFade {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.pulse-fade {
+  animation: pulseFade 2s ease-in-out infinite;
+}
+
+/* Elegant border animation */
+@keyframes borderGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(211, 174, 110, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(211, 174, 110, 0.6);
+  }
+}
+
+.border-glow {
+  animation: borderGlow 2.5s ease-in-out infinite;
+}
+
+/* Pink border glow animation */
+@keyframes pinkBorderGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(248, 185, 193, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(248, 185, 193, 0.6);
+  }
+}
+
+.border-pink-glow {
+  animation: pinkBorderGlow 2.5s ease-in-out infinite;
+}
+
+/* Gold accent variations for legacy messages */
+.gold-accent-1 {
+  background: radial-gradient(
+    circle,
+    rgba(211, 174, 110, 0.2) 0%,
+    rgba(211, 174, 110, 0.1) 70%,
+    rgba(211, 174, 110, 0) 100%
+  );
+}
+
+.gold-accent-2 {
+  background: radial-gradient(
+    circle,
+    rgba(211, 174, 110, 0.2) 0%,
+    rgba(211, 174, 110, 0.1) 70%,
+    rgba(211, 174, 110, 0) 100%
+  );
+}
+
+.gold-accent-3 {
+  background: radial-gradient(
+    circle,
+    rgba(211, 174, 110, 0.2) 0%,
+    rgba(211, 174, 110, 0.1) 70%,
+    rgba(211, 174, 110, 0) 100%
+  );
+}
+
+.gold-accent-4 {
+  background: radial-gradient(
+    circle,
+    rgba(211, 174, 110, 0.2) 0%,
+    rgba(211, 174, 110, 0.1) 70%,
+    rgba(211, 174, 110, 0) 100%
+  );
+}
+
+/* Pink accent variations */
+.pink-accent-1 {
+  background: radial-gradient(
+    circle,
+    rgba(248, 185, 193, 0.2) 0%,
+    rgba(248, 185, 193, 0.1) 70%,
+    rgba(248, 185, 193, 0) 100%
+  );
+}
+
+.pink-accent-2 {
+  background: radial-gradient(
+    circle,
+    rgba(224, 157, 165, 0.2) 0%,
+    rgba(224, 157, 165, 0.1) 70%,
+    rgba(224, 157, 165, 0) 100%
+  );
+}
+
+.pink-accent-3 {
+  background: radial-gradient(
+    circle,
+    rgba(255, 197, 205, 0.2) 0%,
+    rgba(255, 197, 205, 0.1) 70%,
+    rgba(255, 197, 205, 0) 100%
+  );
+}
+
+.pink-accent-4 {
+  background: radial-gradient(
+    circle,
+    rgba(199, 133, 141, 0.2) 0%,
+    rgba(199, 133, 141, 0.1) 70%,
+    rgba(199, 133, 141, 0) 100%
+  );
+}
+
+/* Add these styles to your CSS file */
+.bg-navy-blue {
+  background-color: #0a2342;
+}
+
+.stroke-pink-500 {
+  -webkit-text-stroke: 2px #ff6b81;
+  text-stroke: 2px #ff6b81;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Marquee styles */
+.marquee-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.marquee-content {
+  display: inline-flex;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+/* Custom text shadow for the gold outline */
+.gold-outline-text {
+  color: transparent;
+  -webkit-text-stroke: 2px #d3ae6e;
+  text-shadow: -1px 1px 0 #d3ae6e, 1px 1px 0 #d3ae6e, 1px -1px 0 #d3ae6e, -1px -1px 0 #d3ae6e;
+}
+
+/* Custom text shadow for the pink outline */
+.pink-outline-text {
+  color: transparent;
+  -webkit-text-stroke: 2px #f8b9c1;
+  text-shadow: -1px 1px 0 #f8b9c1, 1px 1px 0 #f8b9c1, 1px -1px 0 #f8b9c1, -1px -1px 0 #f8b9c1;
+}
+
+/* Add this to your existing CSS */
+.bg-radial-gradient {
+  background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.4) 100%);
+}
+
+/* Enhanced gold shimmer effect for luxury look */
+@keyframes enhancedShimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(211, 174, 110, 0) 0%,
+    rgba(211, 174, 110, 0.1) 20%,
+    rgba(211, 174, 110, 0.3) 40%,
+    rgba(211, 174, 110, 0.5) 50%,
+    rgba(211, 174, 110, 0.3) 60%,
+    rgba(211, 174, 110, 0.1) 80%,
+    rgba(211, 174, 110, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: enhancedShimmer 3s infinite linear;
+}
+
+/* Luxury text gradient styles */
+.text-gradient-gold {
+  background: linear-gradient(to bottom, #ffffff, #d3ae6e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Corporate gifts specific styles */
+.corporate-gift-card {
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.corporate-gift-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.corporate-section-bg {
+  background-color: #fff9fb;
+}
+
+.corporate-hero-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f8b9c1' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Professional shadow effects */
+.shadow-professional {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-professional-hover:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Corporate gift form styling */
+.corporate-form-input {
+  border: 1px solid rgba(211, 174, 110, 0.3);
+  transition: all 0.3s ease;
+}
+
+.corporate-form-input:focus {
+  border-color: rgba(211, 174, 110, 0.8);
+  box-shadow: 0 0 0 2px rgba(211, 174, 110, 0.2);
+}
+
+/* Add these styles to your CSS file for 3D card effect */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d3ae6e;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c19c5d;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d3ae6e #f5f5f5;
+}
+
+/* Search dropdown specific styles */
+.search-dropdown-scroll {
+  max-height: 60vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d3ae6e #f5f5f5;
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out forwards;
+}

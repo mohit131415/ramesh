@@ -1,0 +1,36 @@
+<?php
+// Simple script to test the category update API directly
+
+// Set your API endpoint and category ID
+$apiUrl = 'http://localhost/ramesh-be/be/api/api/categories/2'; // Change to your actual URL
+$accessToken = ''; // Add your access token here
+
+// Set the data to update
+$data = [
+    'name' => 'milk123',
+    'slug' => 'milk'
+];
+
+// Initialize cURL session
+$ch = curl_init($apiUrl);
+
+// Set cURL options
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'Authorization: Bearer ' . $accessToken
+]);
+
+// Execute cURL session and get the response
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+// Close cURL session
+curl_close($ch);
+
+// Output the response
+echo "HTTP Status Code: $httpCode\n";
+echo "Response:\n";
+echo $response;

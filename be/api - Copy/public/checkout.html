@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Checkout API Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+
+        .section-header:hover {
+            background: #e9ecef;
+        }
+
+        .section-header h2 {
+            color: #333;
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+
+        .toggle-icon {
+            font-size: 1.2em;
+            transition: transform 0.3s;
+        }
+
+        .section-content {
+            padding: 25px;
+            display: none;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-row-three {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .response-container {
+            margin-top: 25px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+
+        .response-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .response-content {
+            background: #1e1e1e;
+            color: #f8f8f2;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .status-success {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .test-scenario {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .test-scenario h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .test-scenario p {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 10px;
+        }
+
+        .quick-test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h4 {
+            color: #1976d2;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #1565c0;
+            font-size: 0.95em;
+            margin-bottom: 5px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .warning-box h4 {
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .warning-box p {
+            color: #856404;
+            font-size: 0.95em;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        @media (max-width: 768px) {
+            .form-row, .form-row-three {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-test-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 Comprehensive Checkout API Tester</h1>
+            <p>Test all checkout scenarios including tax calculation, payment methods, and validation</p>
+        </div>
+
+        <div class="content">
+            <!-- Authentication Section -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🔐 Authentication Setup</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content active">
+                    <div class="info-box">
+                        <h4>Required for all checkout operations</h4>
+                        <p>You must be logged in and have items in your cart to test checkout endpoints.</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="baseUrl">API Base URL:</label>
+                        <input type="text" id="baseUrl" value="http://localhost/api" placeholder="http://localhost/api">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="authToken">JWT Token:</label>
+                        <input type="text" id="authToken" placeholder="Enter your JWT token here">
+                    </div>
+                    
+                    <button class="btn" onclick="validateToken()">🔍 Validate Token</button>
+                    <button class="btn btn-secondary" onclick="clearToken()">🗑️ Clear Token</button>
+                </div>
+            </div>
+
+            <!-- Prepare Checkout Section -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>📋 Prepare Checkout Testing</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="info-box">
+                        <h4>Prepare Checkout Endpoint</h4>
+                        <p><strong>GET</strong> /checkout/prepare</p>
+                        <p>Validates cart, calculates taxes based on address state, determines shipping charges, and provides payment methods.</p>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="prepareAddressId">Address ID (Optional):</label>
+                            <input type="number" id="prepareAddressId" placeholder="Leave empty for default address">
+                        </div>
+                        <div class="form-group">
+                            <label for="preparePaymentMethod">Payment Method (Optional):</label>
+                            <select id="preparePaymentMethod">
+                                <option value="">Select payment method</option>
+                                <option value="cod">Cash on Delivery</option>
+                                <option value="online">Online Payment</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="quick-test-grid">
+                        <div class="test-scenario">
+                            <h4>🏠 Default Address Test</h4>
+                            <p>Test with user's default address</p>
+                            <button class="btn" onclick="testPrepareCheckout('default')">Test Default</button>
+                        </div>
+                        
+                        <div class="test-scenario">
+                            <h4>🏢 Specific Address Test</h4>
+                            <p>Test with a specific address ID</p>
+                            <button class="btn" onclick="testPrepareCheckout('specific')">Test Specific</button>
+                        </div>
+                        
+                        <div class="test-scenario">
+                            <h4>💰 COD Payment Test</h4>
+                            <p>Test with Cash on Delivery</p>
+                            <button class="btn" onclick="testPrepareCheckout('cod')">Test COD</button>
+                        </div>
+                        
+                        <div class="test-scenario">
+                            <h4>💳 Online Payment Test</h4>
+                            <p>Test with Online Payment</p>
+                            <button class="btn" onclick="testPrepareCheckout('online')">Test Online</button>
+                        </div>
+                        
+                        <div class="test-scenario">
+                            <h4>🏛️ Same State Tax Test</h4>
+                            <p>Test CGST+SGST calculation</p>
+                            <button class="btn" onclick="testPrepareCheckout('same_state')">Test Same State</button>
+                        </div>
+                        
+                        <div class="test-scenario">
+                            <h4>🌍 Different State Tax Test</h4>
+                            <p>Test IGST calculation</p>
+                            <button class="btn" onclick="testPrepareCheckout('diff_state')">Test Different State</button>
+                        </div>
+                    </div>
+
+                    <button class="btn" onclick="prepareCheckout()">🚀 Prepare Checkout</button>
+                    <button class="btn btn-secondary" onclick="testAllPrepareScenarios()">🧪 Test All Scenarios</button>
+
+                    <div class="loading" id="prepareLoading">
+                        <div class="spinner"></div>
+                        <p>Preparing checkout...</p>
+                    </div>
+
+                    <div class="response-container" id="prepareResponse" style="display: none;">
+                        <div class="response-header">Prepare Checkout Response</div>
+                        <div class="response-content" id="prepareResponseContent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Complete Checkout Section -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>✅ Complete Checkout Testing</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="info-box">
+                        <h4>Complete Checkout Endpoint</h4>
+                        <p><strong>POST</strong> /checkout/complete</p>
+                        <p>Creates an order with validated cart items, delivery address, and payment method.</p>
+                    </div>
+
+                    <div class="warning-box">
+                        <h4>⚠️ Important Note</h4>
+                        <p>This will create an actual order. Make sure you're testing with appropriate data.</p>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="completeAddressId">Address ID (Required):</label>
+                            <input type="number" id="completeAddressId" placeholder="Enter address ID" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="completePaymentMethod">Payment Method (Required):</label>
+                            <select id="completePaymentMethod" required>
+                                <option value="">Select payment method</option>
+                                <option value="cod">Cash on Delivery</option>
+                                <option value="online">Online Payment</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="paymentId">Payment ID (Required for Online Payment):</label>
+                        <input type="text" id="paymentId" placeholder="pay_abc123xyz789">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="deliveryNotes">Delivery Notes:</label>
+                        <textarea id="deliveryNotes" placeholder="Special delivery instructions..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="specialInstructions">Special Instructions:</label>
+                        <textarea id="specialInstructions" placeholder="Any special handling instructions..."></textarea>
+                    </div>
+
+                    <div class="quick-test-grid">
+                        <div class="test-scenario">
+                            <h4>💰 COD Order Test</h4>
+                            <p>Complete order with Cash on Delivery</p>
+                            <button class="btn" onclick="testCompleteCheckout('cod')">Test COD Order</button>
+                        </div>
+                        
+                        <div class="test-scenario">
+                            <h4>💳 Online Payment Order Test</h4>
+                            <p>Complete order with Online Payment</p>
+                            <button class="btn" onclick="testCompleteCheckout('online')">Test Online Order</button>
+                        </div>
+                        
+                        <div class="test-scenario">
+                            <h4>❌ Invalid Address Test</h4>
+                            <p>Test with non-existent address</p>
+                            <button class="btn btn-danger" onclick="testCompleteCheckout('invalid_address')">Test Invalid</button>
+                        </div>
+                        
+                        <div class="test-scenario">
+                            <h4>🚫 Missing Payment ID Test</h4>
+                            <p>Test online payment without payment ID</p>
+                            <button class="btn btn-danger" onclick="testCompleteCheckout('missing_payment')">Test Missing Payment</button>
+                        </div>
+                    </div>
+
+                    <button class="btn" onclick="completeCheckout()">🎯 Complete Checkout</button>
+                    <button class="btn btn-secondary" onclick="testAllCompleteScenarios()">🧪 Test All Scenarios</button>
+
+                    <div class="loading" id="completeLoading">
+                        <div class="spinner"></div>
+                        <p>Completing checkout...</p>
+                    </div>
+
+                    <div class="response-container" id="completeResponse" style="display: none;">
+                        <div class="response-header">Complete Checkout Response</div>
+                        <div class="response-content" id="completeResponseContent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Testing Section -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🐛 Error Scenario Testing</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="info-box">
+                        <h4>Test Various Error Conditions</h4>
+                        <p>These tests help ensure proper error handling in your frontend application.</p>
+                    </div>
+
+                    <div class="quick-test-grid">
+                        <div class="test-scenario">
+                            <h4>🔒 No Authentication Test</h4>
+                            <p>Test without JWT token</p>
+                            <button class="btn btn-danger" onclick="testNoAuth()">Test No Auth</button>
+                        </div>
+                        
+                        <div class="test-scenario">
+                            <h4>🛒 Empty Cart Test</h4>
+                            <p>Test with empty cart</p>
+                            <button class="btn btn-danger" onclick="testEmptyCart()">Test Empty Cart</button>
+                        </div>
+                        
+                        <div class="test-scenario">
+                            <h4>📍 No Address Test</h4>
+                            <p>Test without delivery address</p>
+                            <button class="btn btn-danger" onclick="testNoAddress()">Test No Address</button>
+                        </div>
+                        
+                        <div class="test-scenario">
+                            <h4>💳 Invalid Payment Method</h4>
+                            <p>Test with invalid payment method</p>
+                            <button class="btn btn-danger" onclick="testInvalidPayment()">Test Invalid Payment</button>
+                        </div>
+                        
+                        <div class="test-scenario">
+                            <h4>🚫 Disabled Payment Method</h4>
+                            <p>Test with disabled payment method</p>
+                            <button class="btn btn-danger" onclick="testDisabledPayment()">Test Disabled Payment</button>
+                        </div>
+                        
+                        <div class="test-scenario">
+                            <h4>📦 Inactive Products Test</h4>
+                            <p>Test with inactive products in cart</p>
+                            <button class="btn btn-danger" onclick="testInactiveProducts()">Test Inactive Products</button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-danger" onclick="testAllErrorScenarios()">🧪 Test All Error Scenarios</button>
+
+                    <div class="response-container" id="errorResponse" style="display: none;">
+                        <div class="response-header">Error Testing Response</div>
+                        <div class="response-content" id="errorResponseContent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Documentation Section -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>📚 API Documentation Reference</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="info-box">
+                        <h4>Quick Reference</h4>
+                        <p>Key information about the checkout endpoints for developers.</p>
+                    </div>
+
+                    <h3>Prepare Checkout</h3>
+                    <div class="code-block">
+GET /checkout/prepare?address_id=123&payment_method=cod
+Authorization: Bearer {token}
+                    </div>
+
+                    <h3>Complete Checkout</h3>
+                    <div class="code-block">
+POST /checkout/complete
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "address_id": 123,
+  "payment_method": "cod",
+  "payment_id": "pay_abc123xyz789",
+  "additional_data": {
+    "delivery_notes": "Call before delivery",
+    "special_instructions": "Handle with care"
+  }
+}
+                    </div>
+
+                    <h3>Tax Calculation Logic</h3>
+                    <div class="info-box">
+                        <h4>Same State (CGST + SGST)</h4>
+                        <p>When customer state = store state (Maharashtra)</p>
+                        <p>18% tax = 9% CGST + 9% SGST</p>
+                    </div>
+                    
+                    <div class="warning-box">
+                        <h4>Different State (IGST)</h4>
+                        <p>When customer state ≠ store state</p>
+                        <p>18% tax = 18% IGST</p>
+                    </div>
+
+                    <h3>Response Status Codes</h3>
+                    <div class="code-block">
+200 OK - Success
+400 Bad Request - Validation errors, cart issues
+401 Unauthorized - Invalid or missing token
+500 Internal Server Error - Server errors
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let baseUrl = '';
+        let authToken = '';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedData();
+        });
+
+        // Toggle section visibility
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.toggle-icon');
+            
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                icon.textContent = '▶';
+            } else {
+                content.classList.add('active');
+                icon.textContent = '▼';
+            }
+        }
+
+        // Load saved data from localStorage
+        function loadSavedData() {
+            const savedBaseUrl = localStorage.getItem('checkoutTester_baseUrl');
+            const savedToken = localStorage.getItem('checkoutTester_authToken');
+            
+            if (savedBaseUrl) {
+                document.getElementById('baseUrl').value = savedBaseUrl;
+                baseUrl = savedBaseUrl;
+            }
+            
+            if (savedToken) {
+                document.getElementById('authToken').value = savedToken;
+                authToken = savedToken;
+            }
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            baseUrl = document.getElementById('baseUrl').value;
+            authToken = document.getElementById('authToken').value;
+            
+            localStorage.setItem('checkoutTester_baseUrl', baseUrl);
+            localStorage.setItem('checkoutTester_authToken', authToken);
+        }
+
+        // Clear token
+        function clearToken() {
+            document.getElementById('authToken').value = '';
+            localStorage.removeItem('checkoutTester_authToken');
+            authToken = '';
+            alert('Token cleared successfully!');
+        }
+
+        // Validate token
+        async function validateToken() {
+            saveData();
+            
+            if (!authToken) {
+                alert('Please enter a JWT token first');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${baseUrl}/auth/validate-token`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('✅ Token is valid!');
+                } else {
+                    alert('❌ Token validation failed: ' + data.message);
+                }
+            } catch (error) {
+                alert('❌ Error validating token: ' + error.message);
+            }
+        }
+
+        // Generic API call function
+        async function makeApiCall(endpoint, method = 'GET', body = null, customHeaders = {}) {
+            saveData();
+            
+            const headers = {
+                'Content-Type': 'application/json',
+                ...customHeaders
+            };
+            
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
+
+            const config = {
+                method,
+                headers
+            };
+
+            if (body) {
+                config.body = JSON.stringify(body);
+            }
+
+            try {
+                const response = await fetch(`${baseUrl}${endpoint}`, config);
+                const data = await response.json();
+                
+                return {
+                    status: response.status,
+                    ok: response.ok,
+                    data: data
+                };
+            } catch (error) {
+                return {
+                    status: 0,
+                    ok: false,
+                    data: { error: error.message }
+                };
+            }
+        }
+
+        // Display response
+        function displayResponse(containerId, contentId, response, title = '') {
+            const container = document.getElementById(containerId);
+            const content = document.getElementById(contentId);
+            
+            let statusClass = response.ok ? 'status-success' : 'status-error';
+            let statusText = response.ok ? 'SUCCESS' : 'ERROR';
+            
+            const responseHtml = `
+                <div class="${statusClass}">Status: ${response.status} - ${statusText}</div>
+                <div style="margin-top: 15px;">
+                    <strong>${title}</strong>
+                    <pre>${JSON.stringify(response.data, null, 2)}</pre>
+                </div>
+            `;
+            
+            content.innerHTML = responseHtml;
+            container.style.display = 'block';
+            
+            // Scroll to response
+            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Show/hide loading
+        function toggleLoading(loadingId, show) {
+            const loading = document.getElementById(loadingId);
+            if (show) {
+                loading.classList.add('active');
+            } else {
+                loading.classList.remove('active');
+            }
+        }
+
+        // Prepare Checkout
+        async function prepareCheckout() {
+            toggleLoading('prepareLoading', true);
+            
+            const addressId = document.getElementById('prepareAddressId').value;
+            const paymentMethod = document.getElementById('preparePaymentMethod').value;
+            
+            let endpoint = '/checkout/prepare';
+            const params = new URLSearchParams();
+            
+            if (addressId) params.append('address_id', addressId);
+            if (paymentMethod) params.append('payment_method', paymentMethod);
+            
+            if (params.toString()) {
+                endpoint += '?' + params.toString();
+            }
+            
+            const response = await makeApiCall(endpoint);
+            
+            toggleLoading('prepareLoading', false);
+            displayResponse('prepareResponse', 'prepareResponseContent', response, 'Prepare Checkout Response');
+        }
+
+        // Test specific prepare checkout scenarios
+        async function testPrepareCheckout(scenario) {
+            toggleLoading('prepareLoading', true);
+            
+            let endpoint = '/checkout/prepare';
+            let params = new URLSearchParams();
+            
+            switch (scenario) {
+                case 'default':
+                    // No parameters - use default address
+                    break;
+                case 'specific':
+                    params.append('address_id', '1');
+                    break;
+                case 'cod':
+                    params.append('payment_method', 'cod');
+                    break;
+                case 'online':
+                    params.append('payment_method', 'online');
+                    break;
+                case 'same_state':
+                    params.append('address_id', '1'); // Assuming address 1 is in Maharashtra
+                    break;
+                case 'diff_state':
+                    params.append('address_id', '2'); // Assuming address 2 is in different state
+                    break;
+            }
+            
+            if (params.toString()) {
+                endpoint += '?' + params.toString();
+            }
+            
+            const response = await makeApiCall(endpoint);
+            
+            toggleLoading('prepareLoading', false);
+            displayResponse('prepareResponse', 'prepareResponseContent', response, `Prepare Checkout - ${scenario.toUpperCase()} Test`);
+        }
+
+        // Complete Checkout
+        async function completeCheckout() {
+            toggleLoading('completeLoading', true);
+            
+            const addressId = document.getElementById('completeAddressId').value;
+            const paymentMethod = document.getElementById('completePaymentMethod').value;
+            const paymentId = document.getElementById('paymentId').value;
+            const deliveryNotes = document.getElementById('deliveryNotes').value;
+            const specialInstructions = document.getElementById('specialInstructions').value;
+            
+            if (!addressId || !paymentMethod) {
+                alert('Address ID and Payment Method are required');
+                toggleLoading('completeLoading', false);
+                return;
+            }
+            
+            const body = {
+                address_id: parseInt(addressId),
+                payment_method: paymentMethod
+            };
+            
+            if (paymentId) {
+                body.payment_id = paymentId;
+            }
+            
+            if (deliveryNotes || specialInstructions) {
+                body.additional_data = {};
+                if (deliveryNotes) body.additional_data.delivery_notes = deliveryNotes;
+                if (specialInstructions) body.additional_data.special_instructions = specialInstructions;
+            }
+            
+            const response = await makeApiCall('/checkout/complete', 'POST', body);
+            
+            toggleLoading('completeLoading', false);
+            displayResponse('completeResponse', 'completeResponseContent', response, 'Complete Checkout Response');
+        }
+
+        // Test specific complete checkout scenarios
+        async function testCompleteCheckout(scenario) {
+            toggleLoading('completeLoading', true);
+            
+            let body = {};
+            
+            switch (scenario) {
+                case 'cod':
+                    body = {
+                        address_id: 1,
+                        payment_method: 'cod',
+                        additional_data: {
+                            delivery_notes: 'Test COD order',
+                            special_instructions: 'Handle with care'
+                        }
+                    };
+                    break;
+                case 'online':
+                    body = {
+                        address_id: 1,
+                        payment_method: 'online',
+                        payment_id: 'pay_test123456789',
+                        additional_data: {
+                            delivery_notes: 'Test online payment order'
+                        }
+                    };
+                    break;
+                case 'invalid_address':
+                    body = {
+                        address_id: 99999,
+                        payment_method: 'cod'
+                    };
+                    break;
+                case 'missing_payment':
+                    body = {
+                        address_id: 1,
+                        payment_method: 'online'
+                        // Missing payment_id
+                    };
+                    break;
+            }
+            
+            const response = await makeApiCall('/checkout/complete', 'POST', body);
+            
+            toggleLoading('completeLoading', false);
+            displayResponse('completeResponse', 'completeResponseContent', response, `Complete Checkout - ${scenario.toUpperCase()} Test`);
+        }
+
+        // Test all prepare scenarios
+        async function testAllPrepareScenarios() {
+            const scenarios = ['default', 'specific', 'cod', 'online', 'same_state', 'diff_state'];
+            
+            for (const scenario of scenarios) {
+                await testPrepareCheckout(scenario);
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between tests
+            }
+        }
+
+        // Test all complete scenarios
+        async function testAllCompleteScenarios() {
+            const scenarios = ['cod', 'online', 'invalid_address', 'missing_payment'];
+            
+            for (const scenario of scenarios) {
+                await testCompleteCheckout(scenario);
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between tests
+            }
+        }
+
+        // Error scenario tests
+        async function testNoAuth() {
+            const originalToken = authToken;
+            authToken = ''; // Temporarily remove token
+            
+            const response = await makeApiCall('/checkout/prepare');
+            
+            authToken = originalToken; // Restore token
+            displayResponse('errorResponse', 'errorResponseContent', response, 'No Authentication Test');
+        }
+
+        async function testEmptyCart() {
+            // This would require having an empty cart - implementation depends on your cart system
+            const response = await makeApiCall('/checkout/prepare');
+            displayResponse('errorResponse', 'errorResponseContent', response, 'Empty Cart Test');
+        }
+
+        async function testNoAddress() {
+            const body = {
+                address_id: null,
+                payment_method: 'cod'
+            };
+            
+            const response = await makeApiCall('/checkout/complete', 'POST', body);
+            displayResponse('errorResponse', 'errorResponseContent', response, 'No Address Test');
+        }
+
+        async function testInvalidPayment() {
+            const body = {
+                address_id: 1,
+                payment_method: 'invalid_method'
+            };
+            
+            const response = await makeApiCall('/checkout/complete', 'POST', body);
+            displayResponse('errorResponse', 'errorResponseContent', response, 'Invalid Payment Method Test');
+        }
+
+        async function testDisabledPayment() {
+            // This test assumes COD is disabled in settings
+            const body = {
+                address_id: 1,
+                payment_method: 'cod'
+            };
+            
+            const response = await makeApiCall('/checkout/complete', 'POST', body);
+            displayResponse('errorResponse', 'errorResponseContent', response, 'Disabled Payment Method Test');
+        }
+
+        async function testInactiveProducts() {
+            // This would require having inactive products in cart
+            const response = await makeApiCall('/checkout/prepare');
+            displayResponse('errorResponse', 'errorResponseContent', response, 'Inactive Products Test');
+        }
+
+        // Test all error scenarios
+        async function testAllErrorScenarios() {
+            const errorTests = [
+                { name: 'No Auth', func: testNoAuth },
+                { name: 'Empty Cart', func: testEmptyCart },
+                { name: 'No Address', func: testNoAddress },
+                { name: 'Invalid Payment', func: testInvalidPayment },
+                { name: 'Disabled Payment', func: testDisabledPayment },
+                { name: 'Inactive Products', func: testInactiveProducts }
+            ];
+            
+            for (const test of errorTests) {
+                console.log(`Running ${test.name} test...`);
+                await test.func();
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between tests
+            }
+        }
+
+        // Auto-save form data
+        document.getElementById('baseUrl').addEventListener('change', saveData);
+        document.getElementById('authToken').addEventListener('change', saveData);
+    </script>
+</body>
+</html>

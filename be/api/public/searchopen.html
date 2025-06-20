@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Search API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .search-container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .search-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            flex-grow: 1;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .results-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .result-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .result-item {
+            border-bottom: 1px solid #eee;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .result-item:hover {
+            background-color: #f9f9f9;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin-right: 10px;
+            vertical-align: middle;
+            border-radius: 4px;
+        }
+        .product-details {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .product-info {
+            flex-grow: 1;
+        }
+        .product-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e53935;
+        }
+        .product-images {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .product-images img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .product-images img:hover {
+            border-color: #4CAF50;
+        }
+        .product-description {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .product-variants {
+            margin-top: 20px;
+        }
+        .variant-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab.active {
+            background-color: #fff;
+            border-color: #ddd;
+            margin-bottom: -1px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .loading {
+            display: none;
+            margin-left: 10px;
+            font-style: italic;
+            color: #666;
+        }
+        .no-results {
+            color: #666;
+            font-style: italic;
+            padding: 10px;
+        }
+        .error-message {
+            color: #e53935;
+            padding: 10px;
+            background-color: #ffebee;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: none;
+        }
+        .api-url {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-bottom: 20px;
+        }
+        .debug-info {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Universal Search API Tester</h1>
+    
+    <div class="api-url">
+        API URL: <span id="apiUrlDisplay"></span>
+    </div>
+    
+    <div class="container">
+        <div class="search-container">
+            <h2>Search</h2>
+            <div class="search-form">
+                <input type="text" id="searchInput" placeholder="Search for products, categories, subcategories...">
+                <button id="searchButton">Search</button>
+                <span class="loading" id="loading">Searching...</span>
+            </div>
+            <div class="error-message" id="errorMessage"></div>
+            <div class="debug-info" id="debugInfo"></div>
+        </div>
+        
+        <div class="results-container">
+            <div class="result-section">
+                <h2>Categories</h2>
+                <div id="categoryResults"></div>
+            </div>
+            
+            <div class="result-section">
+                <h2>Subcategories</h2>
+                <div id="subcategoryResults"></div>
+            </div>
+            
+            <div class="result-section">
+                <h2>Products</h2>
+                <div id="productResults"></div>
+            </div>
+        </div>
+        
+        <div class="product-details" id="productDetails">
+            <div class="product-header">
+                <div class="product-info">
+                    <h2 id="productName"></h2>
+                    <div id="productCategory"></div>
+                </div>
+                <div class="product-price" id="productPrice"></div>
+            </div>
+            
+            <div class="product-description" id="productDescription"></div>
+            
+            <div class="product-images" id="productImages"></div>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="variants">Variants</div>
+                <div class="tab" data-tab="details">Details</div>
+                <div class="tab" data-tab="json">Raw JSON</div>
+            </div>
+            
+            <div class="tab-content active" id="variantsTab">
+                <h3>Product Variants</h3>
+                <div id="productVariants"></div>
+            </div>
+            
+            <div class="tab-content" id="detailsTab">
+                <h3>Product Details</h3>
+                <div id="productDetailsContent"></div>
+            </div>
+            
+            <div class="tab-content" id="jsonTab">
+                <h3>Raw JSON Response</h3>
+                <pre id="rawJson"></pre>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // API URL - Get the base URL dynamically
+            const baseUrl = window.location.protocol + '//' + window.location.host;
+            const API_URL = baseUrl + '/ramesh-be/be/api/api/public/search';
+            
+            // Update the displayed API URL
+            document.getElementById('apiUrlDisplay').textContent = API_URL;
+            
+            // DOM Elements
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('errorMessage');
+            const debugInfo = document.getElementById('debugInfo');
+            const categoryResults = document.getElementById('categoryResults');
+            const subcategoryResults = document.getElementById('subcategoryResults');
+            const productResults = document.getElementById('productResults');
+            const productDetails = document.getElementById('productDetails');
+            const productName = document.getElementById('productName');
+            const productCategory = document.getElementById('productCategory');
+            const productPrice = document.getElementById('productPrice');
+            const productDescription = document.getElementById('productDescription');
+            const productImages = document.getElementById('productImages');
+            const productVariants = document.getElementById('productVariants');
+            const productDetailsContent = document.getElementById('productDetailsContent');
+            const rawJson = document.getElementById('rawJson');
+            
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    const tabName = tab.getAttribute('data-tab');
+                    document.getElementById(`${tabName}Tab`).classList.add('active');
+                });
+            });
+            
+            // Enable debug mode with URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const debugMode = urlParams.get('debug') === 'true';
+            if (debugMode) {
+                debugInfo.style.display = 'block';
+            }
+            
+            // Search function
+            function performSearch() {
+                const query = searchInput.value.trim();
+                
+                if (query === '') {
+                    showError('Please enter a search term');
+                    return;
+                }
+                
+                loading.style.display = 'inline';
+                errorMessage.style.display = 'none';
+                
+                // Clear previous results
+                categoryResults.innerHTML = '';
+                subcategoryResults.innerHTML = '';
+                productResults.innerHTML = '';
+                productDetails.style.display = 'none';
+                
+                // Construct the URL with the query parameter
+                const searchUrl = `${API_URL}?query=${encodeURIComponent(query)}`;
+                
+                if (debugMode) {
+                    debugInfo.innerHTML = `Sending request to: ${searchUrl}`;
+                }
+                
+                // Make API request
+                fetch(searchUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        loading.style.display = 'none';
+                        
+                        if (debugMode) {
+                            debugInfo.innerHTML += `<br>Response received: ${JSON.stringify(data)}`;
+                        }
+                        
+                        if (data.status === 'success') {
+                            displaySearchResults(data.data);
+                        } else {
+                            showError(data.message || 'An error occurred while searching');
+                        }
+                    })
+                    .catch(error => {
+                        loading.style.display = 'none';
+                        console.error('Error:', error);
+                        showError('An error occurred while searching. Please try again.');
+                        
+                        if (debugMode) {
+                            debugInfo.innerHTML += `<br>Error: ${error.message}`;
+                        }
+                    });
+            }
+            
+            // Display search results
+            function displaySearchResults(data) {
+                // Display categories
+                if (data.categories && data.categories.length > 0) {
+                    data.categories.forEach(category => {
+                        const item = document.createElement('div');
+                        item.className = 'result-item';
+                        item.innerHTML = `
+                            ${category.image ? `<img src="${category.image}" alt="${category.name}">` : ''}
+                            <strong>${category.name}</strong>
+                            <div>${category.product_count || 0} products</div>
+                        `;
+                        item.addEventListener('click', () => {
+                            // You can implement category navigation here
+                            // For now, we'll just search for products in this category
+                            searchInput.value = category.name;
+                            performSearch();
+                        });
+                        categoryResults.appendChild(item);
+                    });
+                } else {
+                    categoryResults.innerHTML = '<div class="no-results">No categories found</div>';
+                }
+                
+                // Display subcategories
+                if (data.subcategories && data.subcategories.length > 0) {
+                    data.subcategories.forEach(subcategory => {
+                        const item = document.createElement('div');
+                        item.className = 'result-item';
+                        item.innerHTML = `
+                            ${subcategory.image ? `<img src="${subcategory.image}" alt="${subcategory.name}">` : ''}
+                            <strong>${subcategory.name}</strong>
+                            <div>Category: ${subcategory.category_name || 'Unknown'}</div>
+                            <div>${subcategory.product_count || 0} products</div>
+                        `;
+                        item.addEventListener('click', () => {
+                            // You can implement subcategory navigation here
+                            // For now, we'll just search for products in this subcategory
+                            searchInput.value = subcategory.name;
+                            performSearch();
+                        });
+                        subcategoryResults.appendChild(item);
+                    });
+                } else {
+                    subcategoryResults.innerHTML = '<div class="no-results">No subcategories found</div>';
+                }
+                
+                // Display products
+                if (data.products && data.products.length > 0) {
+                    data.products.forEach(product => {
+                        const item = document.createElement('div');
+                        item.className = 'result-item';
+                        
+                        // Format price display
+                        let priceDisplay = '';
+                        if (product.sale_price && parseFloat(product.sale_price) < parseFloat(product.price)) {
+                            priceDisplay = `<div>₹${product.sale_price} <span style="text-decoration: line-through; color: #999;">₹${product.price}</span></div>`;
+                        } else if (product.price) {
+                            priceDisplay = `<div>₹${product.price}</div>`;
+                        }
+                        
+                        item.innerHTML = `
+                            ${product.image ? `<img src="${product.image}" alt="${product.name}">` : ''}
+                            <strong>${product.name}</strong>
+                            <div>${product.short_description || ''}</div>
+                            ${priceDisplay}
+                        `;
+                        item.addEventListener('click', () => {
+                            getProductDetails(product.id);
+                        });
+                        productResults.appendChild(item);
+                    });
+                } else {
+                    productResults.innerHTML = '<div class="no-results">No products found</div>';
+                }
+            }
+            
+            // Get product details
+            function getProductDetails(productId) {
+                loading.style.display = 'inline';
+                errorMessage.style.display = 'none';
+                
+                fetch(`${API_URL}?product_id=${productId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        loading.style.display = 'none';
+                        
+                        if (data.status === 'success') {
+                            displayProductDetails(data.data);
+                        } else {
+                            showError(data.message || 'An error occurred while fetching product details');
+                        }
+                    })
+                    .catch(error => {
+                        loading.style.display = 'none';
+                        console.error('Error:', error);
+                        showError('An error occurred while fetching product details. Please try again.');
+                    });
+            }
+            
+            // Display product details
+            function displayProductDetails(product) {
+                // Set product name and category
+                productName.textContent = product.name;
+                productCategory.textContent = `${product.category_name || ''} ${product.subcategory_name ? '> ' + product.subcategory_name : ''}`;
+                
+                // Set product price
+                if (product.sale_price && parseFloat(product.sale_price) < parseFloat(product.price)) {
+                    productPrice.innerHTML = `₹${product.sale_price} <span style="text-decoration: line-through; font-size: 16px; color: #999;">₹${product.price}</span>`;
+                } else {
+                    productPrice.textContent = `₹${product.price || 'N/A'}`;
+                }
+                
+                // Set product description
+                productDescription.textContent = product.description || product.short_description || 'No description available';
+                
+                // Display product images
+                productImages.innerHTML = '';
+                if (product.images && product.images.length > 0) {
+                    product.images.forEach(image => {
+                        const img = document.createElement('img');
+                        img.src = image.image_path;
+                        img.alt = product.name;
+                        img.addEventListener('click', () => {
+                            // You can implement image zoom/lightbox here
+                        });
+                        productImages.appendChild(img);
+                    });
+                } else {
+                    productImages.innerHTML = '<p>No images available</p>';
+                }
+                
+                // Display product variants
+                productVariants.innerHTML = '';
+                if (product.variants && product.variants.length > 0) {
+                    product.variants.forEach(variant => {
+                        const variantItem = document.createElement('div');
+                        variantItem.className = 'variant-item';
+                        variantItem.innerHTML = `
+                            <strong>${variant.variant_name || 'Default Variant'}</strong>
+                            <div>Price: ₹${variant.price}</div>
+                            ${variant.sale_price ? `<div>Sale Price: ₹${variant.sale_price}</div>` : ''}
+                            <div>SKU: ${variant.sku || 'N/A'}</div>
+                            ${variant.stock_quantity ? `<div>Stock: ${variant.stock_quantity}</div>` : ''}
+                        `;
+                        productVariants.appendChild(variantItem);
+                    });
+                } else {
+                    productVariants.innerHTML = '<p>No variants available</p>';
+                }
+                
+                // Display product details
+                productDetailsContent.innerHTML = '';
+                const detailsList = document.createElement('dl');
+                detailsList.style.display = 'grid';
+                detailsList.style.gridTemplateColumns = 'auto 1fr';
+                detailsList.style.gap = '10px';
+                
+                // Add all available product details
+                const details = [
+                    { label: 'SKU', value: product.sku },
+                    { label: 'Brand', value: product.brand },
+                    { label: 'Weight', value: product.weight ? `${product.weight} ${product.weight_unit || ''}` : null },
+                    { label: 'Dimensions', value: product.dimensions },
+                    { label: 'Material', value: product.material },
+                    { label: 'Created', value: product.created_at },
+                    { label: 'Updated', value: product.updated_at }
+                ];
+                
+                details.forEach(detail => {
+                    if (detail.value) {
+                        const dt = document.createElement('dt');
+                        dt.style.fontWeight = 'bold';
+                        dt.textContent = detail.label + ':';
+                        
+                        const dd = document.createElement('dd');
+                        dd.textContent = detail.value;
+                        dd.style.margin = '0';
+                        
+                        detailsList.appendChild(dt);
+                        detailsList.appendChild(dd);
+                    }
+                });
+                
+                productDetailsContent.appendChild(detailsList);
+                
+                // Display raw JSON
+                rawJson.textContent = JSON.stringify(product, null, 2);
+                
+                // Show product details
+                productDetails.style.display = 'block';
+                
+                // Scroll to product details
+                productDetails.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Show error message
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+            }
+            
+            // Event listeners
+            searchButton.addEventListener('click', performSearch);
+            
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            // Check if there's a search term in the URL
+            const searchTerm = urlParams.get('q') || urlParams.get('query') || urlParams.get('search');
+            if (searchTerm) {
+                searchInput.value = searchTerm;
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>

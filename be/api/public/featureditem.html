@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Featured Items API Tester</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        .api-section {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .response-container {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .nav-tabs {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .btn-api {
+            margin-top: 10px;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .filter-section {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .filter-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .alert-info {
+            margin-bottom: 15px;
+        }
+        .btn-danger {
+            margin-right: 10px;
+        }
+        .featured-item-card {
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        .featured-item-card:hover {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .auth-status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .auth-status.logged-in {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .auth-status.logged-out {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .entity-selection {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .entity-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .entity-item:hover {
+            background-color: #f8f9fa;
+        }
+        .entity-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin-right: 10px;
+            border-radius: 4px;
+        }
+        .selected-entity {
+            background-color: #e9f5ff;
+            border: 1px solid #b8daff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Featured Items API Tester</h1>
+        
+        <!-- Authentication Section -->
+        <div class="api-section" id="authSection">
+            <h3>Authentication</h3>
+            <div class="alert alert-info">
+                Login to get an access token for testing the featured items API endpoints.
+            </div>
+            
+            <div id="authStatus" class="auth-status logged-out">
+                <strong>Status:</strong> Not authenticated
+            </div>
+            
+            <div id="loginForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="loginEmail">Email or Username</label>
+                            <input type="text" class="form-control" id="loginEmail" placeholder="Enter email or username">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" placeholder="Password">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="loginBtn" class="btn btn-success btn-api">Login</button>
+                <button type="button" id="logoutBtn" class="btn btn-outline-danger btn-api ms-2" style="display: none;">Logout</button>
+            </div>
+            
+            <div class="mt-3">
+                <div class="form-group">
+                    <label for="accessToken">Access Token</label>
+                    <input type="text" class="form-control" id="accessToken" placeholder="Enter your access token">
+                    <small class="form-text text-muted">Token will be used for API requests</small>
+                </div>
+            </div>
+        </div>
+        
+        <ul class="nav nav-tabs" id="apiTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list" type="button" role="tab" aria-controls="list" aria-selected="true">List Featured Items</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="view-tab" data-bs-toggle="tab" data-bs-target="#view" type="button" role="tab" aria-controls="view" aria-selected="false">View Featured Item</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab" aria-controls="create" aria-selected="false">Create Featured Item</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="update-tab" data-bs-toggle="tab" data-bs-target="#update" type="button" role="tab" aria-controls="update" aria-selected="false">Update Featured Item</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="delete-tab" data-bs-toggle="tab" data-bs-target="#delete" type="button" role="tab" aria-controls="delete" aria-selected="false">Delete Featured Item</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="search-tab" data-bs-toggle="tab" data-bs-target="#search" type="button" role="tab" aria-controls="search" aria-selected="false">Search Entities</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="limits-tab" data-bs-toggle="tab" data-bs-target="#limits" type="button" role="tab" aria-controls="limits" aria-selected="false">Manage Limits</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="apiTabsContent">
+            <!-- List Featured Items Tab -->
+            <div class="tab-pane fade show active" id="list" role="tabpanel" aria-labelledby="list-tab">
+                <div class="api-section">
+                    <h3>List All Featured Items</h3>
+                    <div class="alert alert-info">
+                        This endpoint returns all featured items with optional filtering by display type.
+                    </div>
+                    
+                    <div class="filter-section">
+                        <div class="filter-title">Filters</div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="listDisplayType">Display Type</label>
+                                    <select class="form-control" id="listDisplayType">
+                                        <option value="">All Types</option>
+                                        <option value="featured_product">Featured Products</option>
+                                        <option value="featured_category">Featured Categories</option>
+                                        <option value="quick_pick">Quick Picks</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="listItemsBtn" class="btn btn-primary btn-api">List Featured Items</button>
+                    
+                    <div class="mt-4" id="featuredItemsList">
+                        <!-- Featured item cards will be displayed here -->
+                    </div>
+                    
+                    <div class="response-container" id="listResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- View Featured Item Tab -->
+            <div class="tab-pane fade" id="view" role="tabpanel" aria-labelledby="view-tab">
+                <div class="api-section">
+                    <h3>View Featured Item Details</h3>
+                    <div class="alert alert-info">
+                        This endpoint returns detailed information about a specific featured item.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="viewItemId">Featured Item ID</label>
+                        <input type="number" class="form-control" id="viewItemId" placeholder="Enter featured item ID">
+                    </div>
+                    
+                    <button type="button" id="viewItemBtn" class="btn btn-primary btn-api">View Featured Item</button>
+                    
+                    <div class="mt-4" id="featuredItemDetails">
+                        <!-- Featured item details will be displayed here -->
+                    </div>
+                    
+                    <div class="response-container" id="viewResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Create Featured Item Tab -->
+            <div class="tab-pane fade" id="create" role="tabpanel" aria-labelledby="create-tab">
+                <div class="api-section">
+                    <h3>Create New Featured Item</h3>
+                    <div class="alert alert-info">
+                        This endpoint creates a new featured item. Admin or Super Admin role is required.
+                    </div>
+                    
+                    <form id="createItemForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createDisplayType">Display Type *</label>
+                                    <select class="form-control" id="createDisplayType" name="display_type" required>
+                                        <option value="">Select Display Type</option>
+                                        <option value="featured_product">Featured Product</option>
+                                        <option value="featured_category">Featured Category</option>
+                                        <option value="quick_pick">Quick Pick</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createEntityId">Entity ID *</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="createEntityId" name="entity_id" required>
+                                        <button type="button" class="btn btn-outline-secondary" id="createSearchEntityBtn">Search</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="createEntityPreview" class="mt-3" style="display: none;">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title" id="createEntityName">Entity Name</h5>
+                                    <p class="card-text">ID: <span id="createEntityIdDisplay"></span></p>
+                                    <p class="card-text">Type: <span id="createEntityTypeDisplay"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-api">Create Featured Item</button>
+                    </form>
+                    
+                    <div class="response-container" id="createResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Update Featured Item Tab -->
+            <div class="tab-pane fade" id="update" role="tabpanel" aria-labelledby="update-tab">
+                <div class="api-section">
+                    <h3>Update Featured Item</h3>
+                    <div class="alert alert-info">
+                        This endpoint updates an existing featured item. Admin or Super Admin role is required.
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label for="updateItemId">Featured Item ID *</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="updateItemId" required>
+                            <button type="button" id="loadItemBtn" class="btn btn-secondary">Load Item Data</button>
+                        </div>
+                    </div>
+                    
+                    <form id="updateItemForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateDisplayType">Display Type</label>
+                                    <select class="form-control" id="updateDisplayType" name="display_type">
+                                        <option value="">No Change</option>
+                                        <option value="featured_product">Featured Product</option>
+                                        <option value="featured_category">Featured Category</option>
+                                        <option value="quick_pick">Quick Pick</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateDisplayOrder">Display Order</label>
+                                    <input type="number" class="form-control" id="updateDisplayOrder" name="display_order" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-api">Update Featured Item</button>
+                    </form>
+                    
+                    <div class="response-container" id="updateResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Delete Featured Item Tab -->
+            <div class="tab-pane fade" id="delete" role="tabpanel" aria-labelledby="delete-tab">
+                <div class="api-section">
+                    <h3>Delete Featured Item</h3>
+                    <div class="alert alert-warning">
+                        <strong>Warning:</strong> This endpoint deletes a featured item. Admin or Super Admin role is required.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="deleteItemId">Featured Item ID *</label>
+                        <input type="number" class="form-control" id="deleteItemId" required>
+                    </div>
+                    
+                    <button type="button" id="deleteItemBtn" class="btn btn-danger btn-api">Delete Featured Item</button>
+                    
+                    <div class="response-container" id="deleteResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Search Entities Tab -->
+            <div class="tab-pane fade" id="search" role="tabpanel" aria-labelledby="search-tab">
+                <div class="api-section">
+                    <h3>Search Entities</h3>
+                    <div class="alert alert-info">
+                        This endpoint searches for products or categories to add as featured items.
+                    </div>
+                    
+                    <form id="searchEntitiesForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="searchEntityType">Entity Type *</label>
+                                    <select class="form-control" id="searchEntityType" name="entity_type" required>
+                                        <option value="">Select Entity Type</option>
+                                        <option value="product">Product</option>
+                                        <option value="category">Category</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="searchTerm">Search Term *</label>
+                                    <input type="text" class="form-control" id="searchTerm" name="search_term" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-api">Search Entities</button>
+                    </form>
+                    
+                    <div class="mt-4" id="searchResults">
+                        <!-- Search results will be displayed here -->
+                    </div>
+                    
+                    <div class="response-container" id="searchResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Manage Limits Tab -->
+            <div class="tab-pane fade" id="limits" role="tabpanel" aria-labelledby="limits-tab">
+                <div class="api-section">
+                    <h3>Featured Item Limits</h3>
+                    <div class="alert alert-info">
+                        These endpoints allow viewing and updating the limits for featured items. Super Admin role is required for updates.
+                    </div>
+                    
+                    <button type="button" id="getLimitsBtn" class="btn btn-primary btn-api">Get Current Limits</button>
+                    
+                    <div class="mt-4" id="currentLimits">
+                        <!-- Current limits will be displayed here -->
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <h4>Update Limits</h4>
+                    <div class="alert alert-warning">
+                        <strong>Note:</strong> Only Super Admin can update these limits.
+                    </div>
+                    
+                    <form id="updateLimitsForm">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="featuredProductLimit">Featured Products Limit</label>
+                                    <input type="number" class="form-control" id="featuredProductLimit" name="featured_product" min="1" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="featuredCategoryLimit">Featured Categories Limit</label>
+                                    <input type="number" class="form-control" id="featuredCategoryLimit" name="featured_category" min="1" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="quickPickLimit">Quick Picks Limit</label>
+                                    <input type="number" class="form-control" id="quickPickLimit" name="quick_pick" min="1" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-api">Update Limits</button>
+                    </form>
+                    
+                    <div class="response-container" id="limitsResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Base API URL - adjusted to match your setup
+        const baseUrl = window.location.origin + '/ramesh-be/be/api';
+        
+        // Store user data and tokens
+        let userData = null;
+        let accessToken = '';
+        
+        // Helper function to get access token
+        function getAccessToken() {
+            return document.getElementById('accessToken').value;
+        }
+        
+        // Helper function to make API requests
+        async function apiRequest(url, method, data = null, token = null) {
+            const headers = {
+                'Accept': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const options = {
+                method,
+                headers
+            };
+            
+            if (data && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+                headers['Content-Type'] = 'application/json';
+                options.body = JSON.stringify(data);
+            }
+            
+            try {
+                console.log(`Making ${method} request to ${url}`);
+                console.log('Headers:', headers);
+                if (data) console.log('Data:', data);
+                
+                const response = await fetch(url, options);
+                const responseData = await response.json();
+                
+                console.log('Response:', responseData);
+                return responseData;
+            } catch (error) {
+                console.error('API Request Error:', error);
+                return {
+                    status: 'error',
+                    message: error.message,
+                    data: null
+                };
+            }
+        }
+        
+        // Helper function to display response
+        function displayResponse(elementId, response) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<pre>${JSON.stringify(response, null, 2)}</pre>`;
+        }
+        
+        // Helper function to build query string from filters
+        function buildQueryString(filters) {
+            const params = new URLSearchParams();
+            
+            for (const key in filters) {
+                if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+                    params.append(key, filters[key]);
+                }
+            }
+            
+            return params.toString();
+        }
+        
+        // Helper function to create featured item cards
+        function createFeaturedItemCards(items) {
+            const container = document.getElementById('featuredItemsList');
+            container.innerHTML = '';
+            
+            if (!items || items.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No featured items found</div>';
+                return;
+            }
+            
+            const row = document.createElement('div');
+            row.className = 'row';
+            
+            items.forEach(item => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4';
+                
+                const card = document.createElement('div');
+                card.className = 'card featured-item-card';
+                card.onclick = () => {
+                    document.getElementById('viewItemId').value = item.id;
+                    document.getElementById('viewItemBtn').click();
+                    document.getElementById('view-tab').click();
+                };
+                
+                // Display type badge
+                let typeBadge = '';
+                switch (item.display_type) {
+                    case 'featured_product':
+                        typeBadge = '<span class="badge bg-primary">Featured Product</span>';
+                        break;
+                    case 'featured_category':
+                        typeBadge = '<span class="badge bg-success">Featured Category</span>';
+                        break;
+                    case 'quick_pick':
+                        typeBadge = '<span class="badge bg-info">Quick Pick</span>';
+                        break;
+                    default:
+                        typeBadge = '<span class="badge bg-secondary">Unknown</span>';
+                }
+                
+                // Entity name and image
+                const entityName = item.entity_name || 'Unknown Entity';
+                const entityImage = item.entity_image || 'https://via.placeholder.com/100';
+                
+                card.innerHTML = `
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="card-title mb-0">${entityName}</h5>
+                            <div>
+                                ${typeBadge}
+                            </div>
+                        </div>
+                        <div class="text-center mb-3">
+                            <img src="${entityImage}" alt="${entityName}" style="max-height: 100px; max-width: 100%;" onerror="this.src='https://via.placeholder.com/100'">
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">ID: ${item.id}</span>
+                            <span class="text-muted">Order: ${item.display_order || 0}</span>
+                        </div>
+                    </div>
+                `;
+                
+                col.appendChild(card);
+                row.appendChild(col);
+            });
+            
+            container.appendChild(row);
+        }
+        
+        // Helper function to display featured item details
+        function displayFeaturedItemDetails(item) {
+            const container = document.getElementById('featuredItemDetails');
+            
+            if (!item) {
+                container.innerHTML = '<div class="alert alert-warning">No featured item found</div>';
+                return;
+            }
+            
+            // Display type badge
+            let typeBadge = '';
+            switch (item.display_type) {
+                case 'featured_product':
+                    typeBadge = '<span class="badge bg-primary">Featured Product</span>';
+                    break;
+                case 'featured_category':
+                    typeBadge = '<span class="badge bg-success">Featured Category</span>';
+                    break;
+                case 'quick_pick':
+                    typeBadge = '<span class="badge bg-info">Quick Pick</span>';
+                    break;
+                default:
+                    typeBadge = '<span class="badge bg-secondary">Unknown</span>';
+            }
+            
+            // Entity name and image
+            const entityName = item.entity_name || 'Unknown Entity';
+            const entityImage = item.entity_image || 'https://via.placeholder.com/200';
+            
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <img src="${entityImage}" alt="${entityName}" style="max-height: 200px; max-width: 100%;" onerror="this.src='https://via.placeholder.com/200'">
+                            </div>
+                            <div class="col-md-8">
+                                <h3>${entityName}</h3>
+                                <div class="mb-3">
+                                    ${typeBadge}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5>Featured Item Information</h5>
+                                    <p><strong>ID:</strong> ${item.id}</p>
+                                    <p><strong>Entity ID:</strong> ${item.entity_id}</p>
+                                    <p><strong>Display Order:</strong> ${item.display_order || 0}</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5>Timestamps</h5>
+                                    <p><strong>Created At:</strong> ${item.created_at || 'Unknown'}</p>
+                                    <p><strong>Updated At:</strong> ${item.updated_at || 'Never'}</p>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-sm btn-primary" onclick="loadItemForUpdate(${item.id})">Edit</button>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="prepareDeleteItem(${item.id})">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Helper function to display search results
+        function displaySearchResults(results) {
+            const container = document.getElementById('searchResults');
+            
+            if (!results || results.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No entities found matching your search criteria</div>';
+                return;
+            }
+            
+            let html = '<div class="entity-selection">';
+            
+            results.forEach(entity => {
+                const entityName = entity.name || 'Unknown Entity';
+                const entityImage = entity.image || 'https://via.placeholder.com/50';
+                
+                html += `
+                    <div class="entity-item d-flex align-items-center" data-id="${entity.id}" data-name="${entityName}" data-type="${entity.type || 'unknown'}">
+                        <img src="${entityImage}" alt="${entityName}" onerror="this.src='https://via.placeholder.com/50'">
+                        <div class="ms-3">
+                            <div><strong>${entityName}</strong></div>
+                            <div class="text-muted">ID: ${entity.id}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            container.innerHTML = html;
+            
+            // Add click event to entity items
+            document.querySelectorAll('.entity-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const name = this.getAttribute('data-name');
+                    const type = this.getAttribute('data-type');
+                    
+                    // Remove selected class from all items
+                    document.querySelectorAll('.entity-item').forEach(el => {
+                        el.classList.remove('selected-entity');
+                    });
+                    
+                    // Add selected class to clicked item
+                    this.classList.add('selected-entity');
+                    
+                    // If we're in the create tab, update the entity ID
+                    if (document.getElementById('create-tab').classList.contains('active')) {
+                        document.getElementById('createEntityId').value = id;
+                        document.getElementById('createEntityName').textContent = name;
+                        document.getElementById('createEntityIdDisplay').textContent = id;
+                        document.getElementById('createEntityTypeDisplay').textContent = type;
+                        document.getElementById('createEntityPreview').style.display = 'block';
+                    }
+                });
+            });
+        }
+        
+        // Helper function to display current limits
+        function displayCurrentLimits(limits) {
+            const container = document.getElementById('currentLimits');
+            
+            if (!limits) {
+                container.innerHTML = '<div class="alert alert-warning">Failed to load current limits</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Current Featured Item Limits</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Featured Products
+                                <span class="badge bg-primary rounded-pill">${limits.featured_product || 0}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Featured Categories
+                                <span class="badge bg-primary rounded-pill">${limits.featured_category || 0}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Quick Picks
+                                <span class="badge bg-primary rounded-pill">${limits.quick_pick || 0}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            // Update form values
+            document.getElementById('featuredProductLimit').value = limits.featured_product || 5;
+            document.getElementById('featuredCategoryLimit').value = limits.featured_category || 5;
+            document.getElementById('quickPickLimit').value = limits.quick_pick || 10;
+        }
+        
+        // Function to load item data for update
+        function loadItemForUpdate(itemId) {
+            document.getElementById('updateItemId').value = itemId;
+            document.getElementById('loadItemBtn').click();
+            document.getElementById('update-tab').click();
+        }
+        
+        // Function to prepare delete item
+        function prepareDeleteItem(itemId) {
+            document.getElementById('deleteItemId').value = itemId;
+            document.getElementById('delete-tab').click();
+        }
+        
+        // Function to update authentication status UI
+        function updateAuthStatusUI() {
+            const authStatus = document.getElementById('authStatus');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            if (accessToken) {
+                authStatus.className = 'auth-status logged-in';
+                authStatus.innerHTML = `<strong>Status:</strong> Authenticated${userData ? ' as ' + userData.name : ''}`;
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+            } else {
+                authStatus.className = 'auth-status logged-out';
+                authStatus.innerHTML = '<strong>Status:</strong> Not authenticated';
+                loginBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'none';
+            }
+        }
+        
+        // Login functionality
+        document.getElementById('loginBtn').addEventListener('click', async function() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                alert('Email/username and password are required');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/login`, 'POST', { email, password });
+            
+            if (response.status === 'success' && response.data && response.data.token) {
+                // Store tokens and user data
+                accessToken = response.data.token;
+                userData = response.data.user;
+                
+                // Update access token input
+                document.getElementById('accessToken').value = accessToken;
+                
+                // Store in localStorage
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('userData', JSON.stringify(userData));
+                
+                // Update UI
+                updateAuthStatusUI();
+                
+                alert('Login successful!');
+            } else {
+                alert('Login failed: ' + (response.message || 'Unknown error'));
+            }
+        });
+        
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            if (!accessToken) {
+                alert('Not logged in');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/logout`, 'POST', {}, accessToken);
+            
+            // Clear tokens and user data regardless of response
+            accessToken = '';
+            userData = null;
+            
+            // Clear access token input
+            document.getElementById('accessToken').value = '';
+            
+            // Remove from localStorage
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('userData');
+            
+            // Update UI
+            updateAuthStatusUI();
+            
+            alert('Logged out successfully.');
+        });
+        
+        // List Featured Items
+        document.getElementById('listItemsBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const displayType = document.getElementById('listDisplayType').value;
+            
+            let url = `${baseUrl}/api/featured-items`;
+            if (displayType) {
+                url += `?display_type=${displayType}`;
+            }
+            
+            const response = await apiRequest(url, 'GET', null, token);
+            displayResponse('listResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                createFeaturedItemCards(response.data);
+            }
+        });
+        
+        // View Featured Item
+        document.getElementById('viewItemBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const itemId = document.getElementById('viewItemId').value;
+            
+            if (!itemId) {
+                alert('Featured Item ID is required');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/featured-items/${itemId}`, 'GET', null, token);
+            displayResponse('viewResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                displayFeaturedItemDetails(response.data);
+            }
+        });
+        
+        // Create Featured Item
+        document.getElementById('createItemForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const displayType = document.getElementById('createDisplayType').value;
+            const entityId = document.getElementById('createEntityId').value;
+            
+            if (!displayType || !entityId) {
+                alert('Display Type and Entity ID are required');
+                return;
+            }
+            
+            const data = {
+                display_type: displayType,
+                entity_id: parseInt(entityId)
+            };
+            
+            const response = await apiRequest(`${baseUrl}/api/featured-items`, 'POST', data, token);
+            displayResponse('createResponse', response);
+            
+            if (response.status === 'success') {
+                alert('Featured item created successfully!');
+                document.getElementById('createItemForm').reset();
+                document.getElementById('createEntityPreview').style.display = 'none';
+            }
+        });
+        
+        // Search Entity Button
+        document.getElementById('createSearchEntityBtn').addEventListener('click', function() {
+            document.getElementById('search-tab').click();
+        });
+        
+        // Load Featured Item for Update
+        document.getElementById('loadItemBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const itemId = document.getElementById('updateItemId').value;
+            
+            if (!itemId) {
+                alert('Featured Item ID is required');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/featured-items/${itemId}`, 'GET', null, token);
+            
+            if (response.status === 'success' && response.data) {
+                const item = response.data;
+                
+                // Populate form fields
+                document.getElementById('updateDisplayType').value = '';
+                document.getElementById('updateDisplayOrder').value = item.display_order || 0;
+                
+                alert('Featured item data loaded successfully!');
+            } else {
+                displayResponse('updateResponse', response);
+            }
+        });
+        
+        // Update Featured Item
+        document.getElementById('updateItemForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const itemId = document.getElementById('updateItemId').value;
+            
+            if (!itemId) {
+                alert('Featured Item ID is required');
+                return;
+            }
+            
+            const displayType = document.getElementById('updateDisplayType').value;
+            const displayOrder = document.getElementById('updateDisplayOrder').value;
+            
+            const data = {};
+            
+            if (displayType) {
+                data.display_type = displayType;
+            }
+            
+            if (displayOrder !== '') {
+                data.display_order = parseInt(displayOrder);
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/featured-items/${itemId}`, 'PUT', data, token);
+            displayResponse('updateResponse', response);
+            
+            if (response.status === 'success') {
+                alert('Featured item updated successfully!');
+            }
+        });
+        
+        // Delete Featured Item
+        document.getElementById('deleteItemBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const itemId = document.getElementById('deleteItemId').value;
+            
+            if (!itemId) {
+                alert('Featured Item ID is required');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to delete this featured item?')) {
+                const response = await apiRequest(`${baseUrl}/api/featured-items/${itemId}`, 'DELETE', null, token);
+                displayResponse('deleteResponse', response);
+                
+                if (response.status === 'success') {
+                    alert('Featured item deleted successfully!');
+                }
+            }
+        });
+        
+        // Search Entities
+        document.getElementById('searchEntitiesForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const entityType = document.getElementById('searchEntityType').value;
+            const searchTerm = document.getElementById('searchTerm').value;
+            
+            if (!entityType || !searchTerm) {
+                alert('Entity Type and Search Term are required');
+                return;
+            }
+            
+            const data = {
+                entity_type: entityType,
+                search_term: searchTerm
+            };
+            
+            const response = await apiRequest(`${baseUrl}/api/featured-items/search`, 'POST', data, token);
+            displayResponse('searchResponse', response);
+            
+            if (response.status === 'success' && response.data && response.data.items) {
+                displaySearchResults(response.data.items);
+            }
+        });
+        
+        // Get Featured Item Limits
+        document.getElementById('getLimitsBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/featured-items/limits`, 'GET', null, token);
+            displayResponse('limitsResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                displayCurrentLimits(response.data);
+            }
+        });
+        
+        // Update Featured Item Limits
+        document.getElementById('updateLimitsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const featuredProductLimit = document.getElementById('featuredProductLimit').value;
+            const featuredCategoryLimit = document.getElementById('featuredCategoryLimit').value;
+            const quickPickLimit = document.getElementById('quickPickLimit').value;
+            
+            const data = {
+                featured_product: parseInt(featuredProductLimit),
+                featured_category: parseInt(featuredCategoryLimit),
+                quick_pick: parseInt(quickPickLimit)
+            };
+            
+            const response = await apiRequest(`${baseUrl}/api/featured-items/limits`, 'PUT', data, token);
+            displayResponse('limitsResponse', response);
+            
+            if (response.status === 'success') {
+                alert('Featured item limits updated successfully!');
+                document.getElementById('getLimitsBtn').click();
+            }
+        });
+        
+        // Initialize from localStorage on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load tokens and user data from localStorage
+            accessToken = localStorage.getItem('accessToken') || '';
+            
+            try {
+                const userDataStr = localStorage.getItem('userData');
+                if (userDataStr) {
+                    userData = JSON.parse(userDataStr);
+                }
+            } catch (e) {
+                console.error('Error parsing user data from localStorage:', e);
+                userData = null;
+            }
+            
+            // Set access token input
+            if (accessToken) {
+                document.getElementById('accessToken').value = accessToken;
+            }
+            
+            // Update UI
+            updateAuthStatusUI();
+            
+            // Save token to localStorage when changed manually
+            document.getElementById('accessToken').addEventListener('change', function() {
+                accessToken = this.value;
+                localStorage.setItem('accessToken', accessToken);
+                updateAuthStatusUI();
+            });
+        });
+    </script>
+</body>
+</html>

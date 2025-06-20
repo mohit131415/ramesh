@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ramesh Sweets API Tester</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        .api-section {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .response-container {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .nav-tabs {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .btn-api {
+            margin-top: 10px;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .filter-section {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .filter-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .alert-info {
+            margin-bottom: 15px;
+        }
+        .btn-danger {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Ramesh Sweets API Tester</h1>
+        
+        <ul class="nav nav-tabs" id="apiTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="auth-tab" data-bs-toggle="tab" data-bs-target="#auth" type="button" role="tab" aria-controls="auth" aria-selected="true">Authentication</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button" role="tab" aria-controls="activity" aria-selected="false">Activity Logs</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="apiTabsContent">
+            <!-- Authentication Tab -->
+            <div class="tab-pane fade show active" id="auth" role="tabpanel" aria-labelledby="auth-tab">
+                <!-- Login Form -->
+                <div class="api-section">
+                    <h3>Login</h3>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginEmail">Email or Username</label>
+                            <input type="text" class="form-control" id="loginEmail" placeholder="Enter email or username">
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" placeholder="Password">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-api">Login</button>
+                    </form>
+                    <div class="response-container" id="loginResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+                
+                <!-- Refresh Token Form -->
+                <div class="api-section">
+                    <h3>Refresh Token</h3>
+                    <form id="refreshTokenForm">
+                        <div class="form-group">
+                            <label for="refreshToken">Refresh Token</label>
+                            <input type="text" class="form-control" id="refreshToken" placeholder="Enter refresh token">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-api">Refresh Token</button>
+                    </form>
+                    <div class="response-container" id="refreshTokenResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+                
+                <!-- Change Password Form -->
+                <div class="api-section">
+                    <h3>Change Password</h3>
+                    <form id="changePasswordForm">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" class="form-control" id="currentPassword" placeholder="Current password">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" class="form-control" id="newPassword" placeholder="New password">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPasswordConfirmation">Confirm New Password</label>
+                            <input type="password" class="form-control" id="newPasswordConfirmation" placeholder="Confirm new password">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-api">Change Password</button>
+                    </form>
+                    <div class="response-container" id="changePasswordResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+                
+                <!-- Logout Form -->
+                <div class="api-section">
+                    <h3>Logout</h3>
+                    <form id="logoutForm">
+                        <button type="submit" class="btn btn-primary btn-api">Logout</button>
+                    </form>
+                    <div class="response-container" id="logoutResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Activity Logs Tab -->
+            <div class="tab-pane fade" id="activity" role="tabpanel" aria-labelledby="activity-tab">
+                <!-- Activity Filters -->
+                <div class="api-section">
+                    <h3>Activity Filters</h3>
+                    <div class="alert alert-info">
+                        This endpoint returns all available filters for client-side filtering: modules, actions, users, and roles.
+                    </div>
+                    <form id="getFiltersForm">
+                        <button type="submit" class="btn btn-primary btn-api">Get Available Filters</button>
+                    </form>
+                    <div class="response-container" id="filtersResponse">
+                        <pre>Filters will appear here</pre>
+                    </div>
+                </div>
+                
+                <!-- View All Activities -->
+                <div class="api-section">
+                    <h3>View All Activities</h3>
+                    <div class="alert alert-info">
+                        This endpoint returns all activities with pagination. You can filter the results on the client side.
+                    </div>
+                    <form id="viewAllActivitiesForm">
+                        <div class="form-group">
+                            <label for="activitiesPage">Page</label>
+                            <input type="number" class="form-control" id="activitiesPage" value="1" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="activitiesLimit">Limit</label>
+                            <input type="number" class="form-control" id="activitiesLimit" value="50" min="1" max="100">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-api">Get Activities</button>
+                    </form>
+                    <div class="response-container" id="viewAllActivitiesResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+                
+                <!-- Delete Activity Logs -->
+                <div class="api-section">
+                    <h3>Delete Activity Logs</h3>
+                    <div class="alert alert-info">
+                        These endpoints allow you to delete specific logs by ID or all logs at once. Only admin users can delete logs.
+                    </div>
+                    
+                    <!-- Delete Single Log -->
+                    <form id="deleteActivityLogForm" class="mb-4">
+                        <div class="form-group">
+                            <label for="deleteLogId">Log ID</label>
+                            <input type="number" class="form-control" id="deleteLogId" placeholder="Enter log ID to delete">
+                        </div>
+                        <button type="submit" class="btn btn-danger btn-api">Delete Single Log</button>
+                    </form>
+                    
+                    <!-- Delete All Logs -->
+                    <form id="deleteAllLogsForm">
+                        <div class="alert alert-warning">
+                            <strong>Warning:</strong> This will delete ALL activity logs. This action cannot be undone.
+                        </div>
+                        <button type="submit" class="btn btn-danger btn-api">Delete All Logs</button>
+                    </form>
+                    
+                    <div class="response-container" id="deleteLogsResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Store access token and refresh token
+        let accessToken = localStorage.getItem('accessToken') || '';
+        let refreshToken = localStorage.getItem('refreshToken') || '';
+        
+        // Store activity filters
+        let activityFilters = {
+            modules: [],
+            actions: [],
+            users: [],
+            roles: ['admin', 'super_admin']
+        };
+        
+        // Base API URL - adjust this to match your setup
+        const baseUrl = window.location.origin + '/ramesh-be/be/api';
+        
+        // Helper function to make API requests
+        async function apiRequest(url, method, data = null, token = null) {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const options = {
+                method,
+                headers
+            };
+            
+            if (data && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+                options.body = JSON.stringify(data);
+            }
+            
+            try {
+                console.log(`Making ${method} request to ${url}`);
+                console.log('Headers:', headers);
+                if (data) console.log('Data:', data);
+                
+                const response = await fetch(url, options);
+                const responseData = await response.json();
+                
+                console.log('Response:', responseData);
+                return responseData;
+            } catch (error) {
+                console.error('API Request Error:', error);
+                return {
+                    status: 'error',
+                    message: error.message,
+                    data: null
+                };
+            }
+        }
+        
+        // Helper function to display response
+        function displayResponse(elementId, response) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<pre>${JSON.stringify(response, null, 2)}</pre>`;
+        }
+        
+        // Helper function to build query string from filters
+        function buildQueryString(filters) {
+            const params = new URLSearchParams();
+            
+            for (const key in filters) {
+                if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+                    params.append(key, filters[key]);
+                }
+            }
+            
+            return params.toString();
+        }
+        
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                displayResponse('loginResponse', { 
+                    status: 'error', 
+                    message: 'Email and password are required',
+                    data: null
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/login`, 'POST', { email, password });
+            displayResponse('loginResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                accessToken = response.data.access_token;
+                refreshToken = response.data.refresh_token;
+                
+                // Store tokens in localStorage
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                
+                // Update refresh token input
+                document.getElementById('refreshToken').value = refreshToken;
+                
+                // Show success message
+                alert('Login successful! You can now use other API features.');
+                
+                // Update auth status
+                updateAuthStatus();
+            }
+        });
+        
+        // Refresh token form submission
+        document.getElementById('refreshTokenForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const refreshTokenValue = document.getElementById('refreshToken').value;
+            
+            if (!refreshTokenValue) {
+                displayResponse('refreshTokenResponse', { 
+                    status: 'error', 
+                    message: 'Refresh token is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/refresh`, 'POST', { refresh_token: refreshTokenValue });
+            displayResponse('refreshTokenResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                accessToken = response.data.access_token;
+                refreshToken = response.data.refresh_token;
+                
+                // Store tokens in localStorage
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                
+                // Update refresh token input
+                document.getElementById('refreshToken').value = refreshToken;
+                
+                // Show success message
+                alert('Token refreshed successfully!');
+                
+                // Update auth status
+                updateAuthStatus();
+            }
+        });
+        
+        // Change password form submission
+        document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const newPasswordConfirmation = document.getElementById('newPasswordConfirmation').value;
+            
+            if (!currentPassword || !newPassword || !newPasswordConfirmation) {
+                displayResponse('changePasswordResponse', { 
+                    status: 'error', 
+                    message: 'All fields are required',
+                    data: null
+                });
+                return;
+            }
+            
+            if (newPassword !== newPasswordConfirmation) {
+                displayResponse('changePasswordResponse', { 
+                    status: 'error', 
+                    message: 'New password and confirmation do not match',
+                    data: null
+                });
+                return;
+            }
+            
+            if (!accessToken) {
+                displayResponse('changePasswordResponse', { 
+                    status: 'error', 
+                    message: 'You must be logged in to change password',
+                    data: null
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/change-password`, 'POST', {
+                current_password: currentPassword,
+                new_password: newPassword,
+                new_password_confirmation: newPasswordConfirmation
+            }, accessToken);
+            
+            displayResponse('changePasswordResponse', response);
+            
+            if (response.status === 'success') {
+                alert('Password changed successfully!');
+            }
+        });
+        
+        // Logout form submission
+        document.getElementById('logoutForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!accessToken) {
+                displayResponse('logoutResponse', { 
+                    status: 'error', 
+                    message: 'You are not logged in',
+                    data: null
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/logout`, 'POST', {}, accessToken);
+            displayResponse('logoutResponse', response);
+            
+            if (response.status === 'success') {
+                // Clear tokens
+                accessToken = '';
+                refreshToken = '';
+                
+                // Remove tokens from localStorage
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                
+                // Clear refresh token input
+                document.getElementById('refreshToken').value = '';
+                
+                // Show success message
+                alert('Logged out successfully!');
+                
+                // Update auth status
+                updateAuthStatus();
+            }
+        });
+        
+        // Get activity filters
+        document.getElementById('getFiltersForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!accessToken) {
+                displayResponse('filtersResponse', { 
+                    status: 'error', 
+                    message: 'You must be logged in to get filters', 
+                    status: 'error', 
+                    message: 'You must be logged in to get filters',
+                    data: null
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/activities/filters`, 'GET', null, accessToken);
+            displayResponse('filtersResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                activityFilters = response.data;
+            }
+        });
+        
+        // View all activities form submission
+        document.getElementById('viewAllActivitiesForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const page = document.getElementById('activitiesPage').value;
+            const limit = document.getElementById('activitiesLimit').value;
+            
+            if (!accessToken) {
+                displayResponse('viewAllActivitiesResponse', { 
+                    status: 'error', 
+                    message: 'You must be logged in to view activities',
+                    data: null
+                });
+                return;
+            }
+            
+            // Build query string
+            const queryString = buildQueryString({ page, limit });
+            
+            const response = await apiRequest(`${baseUrl}/api/activities?${queryString}`, 'GET', null, accessToken);
+            displayResponse('viewAllActivitiesResponse', response);
+        });
+        
+        // Delete activity log form submission
+        document.getElementById('deleteActivityLogForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const logId = document.getElementById('deleteLogId').value;
+            
+            if (!logId) {
+                displayResponse('deleteLogsResponse', { 
+                    status: 'error', 
+                    message: 'Log ID is required',
+                    data: null
+                });
+                return;
+            }
+            
+            if (!accessToken) {
+                displayResponse('deleteLogsResponse', { 
+                    status: 'error', 
+                    message: 'You must be logged in to delete activity logs',
+                    data: null
+                });
+                return;
+            }
+            
+            if (confirm('Are you sure you want to delete this activity log? This action cannot be undone.')) {
+                const response = await apiRequest(`${baseUrl}/api/activities/${logId}`, 'DELETE', null, accessToken);
+                displayResponse('deleteLogsResponse', response);
+                
+                if (response.status === 'success') {
+                    alert('Activity log deleted successfully!');
+                    // Refresh the activities list if it's currently displayed
+                    const activitiesResponse = document.getElementById('viewAllActivitiesResponse');
+                    if (activitiesResponse.textContent.trim() !== 'Response will appear here') {
+                        document.getElementById('viewAllActivitiesForm').dispatchEvent(new Event('submit'));
+                    }
+                }
+            }
+        });
+        
+        // Delete all logs form submission
+        document.getElementById('deleteAllLogsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!accessToken) {
+                displayResponse('deleteLogsResponse', { 
+                    status: 'error', 
+                    message: 'You must be logged in to delete activity logs',
+                    data: null
+                });
+                return;
+            }
+            
+            if (confirm('WARNING: Are you absolutely sure you want to delete ALL activity logs? This action cannot be undone.')) {
+                const response = await apiRequest(`${baseUrl}/api/activities`, 'DELETE', null, accessToken);
+                displayResponse('deleteLogsResponse', response);
+                
+                if (response.status === 'success') {
+                    alert(`All activity logs deleted successfully! (${response.data.count} logs deleted)`);
+                    // Refresh the activities list if it's currently displayed
+                    const activitiesResponse = document.getElementById('viewAllActivitiesResponse');
+                    if (activitiesResponse.textContent.trim() !== 'Response will appear here') {
+                        document.getElementById('viewAllActivitiesForm').dispatchEvent(new Event('submit'));
+                    }
+                }
+            }
+        });
+        
+        // Initialize refresh token input if available
+        if (refreshToken) {
+            document.getElementById('refreshToken').value = refreshToken;
+        }
+        
+        // Display current authentication status
+        function updateAuthStatus() {
+            // Remove existing status if any
+            const existingStatus = document.querySelector('#auth .alert');
+            if (existingStatus) {
+                existingStatus.remove();
+            }
+            
+            const authStatus = document.createElement('div');
+            authStatus.className = 'alert ' + (accessToken ? 'alert-success' : 'alert-warning');
+            authStatus.innerHTML = accessToken 
+                ? '<strong>Status:</strong> Authenticated' 
+                : '<strong>Status:</strong> Not authenticated';
+            
+            // Insert at the top of the auth tab
+            const authTab = document.getElementById('auth');
+            authTab.insertBefore(authStatus, authTab.firstChild);
+        }
+        
+        // Call on page load
+        updateAuthStatus();
+    </script>
+</body>
+</html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token API Tester</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: none;
+        }
+        .card-header {
+            background-color: #f1f1f1;
+            font-weight: bold;
+        }
+        .response-container {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .token-display {
+            font-size: 12px;
+            word-break: break-all;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .status-valid {
+            background-color: #28a745;
+        }
+        .status-invalid {
+            background-color: #dc3545;
+        }
+        .status-unknown {
+            background-color: #6c757d;
+        }
+        .btn-copy {
+            padding: 2px 8px;
+            font-size: 12px;
+        }
+        .timer {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Token API Tester</h1>
+        
+        <!-- Login Section -->
+        <div class="card">
+            <div class="card-header">Login</div>
+            <div class="card-body">
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email/Username</label>
+                        <input type="text" class="form-control" id="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+                <div class="response-container mt-3" id="loginResponse">Response will appear here</div>
+            </div>
+        </div>
+        
+        <!-- Token Information Section -->
+        <div class="card">
+            <div class="card-header">Token Information</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Access Token</label>
+                    <div class="d-flex align-items-center">
+                        <span class="status-indicator" id="accessTokenStatus"></span>
+                        <span id="accessTokenExpiry"></span>
+                    </div>
+                    <div class="token-display" id="accessTokenDisplay">No access token</div>
+                    <button class="btn btn-sm btn-outline-secondary btn-copy" onclick="copyToClipboard('accessTokenDisplay')">Copy</button>
+                    <div class="timer" id="accessTokenTimer"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Refresh Token</label>
+                    <div class="token-display" id="refreshTokenDisplay">No refresh token</div>
+                    <button class="btn btn-sm btn-outline-secondary btn-copy" onclick="copyToClipboard('refreshTokenDisplay')">Copy</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Token Validation Section -->
+        <div class="card">
+            <div class="card-header">Token Validation API</div>
+            <div class="card-body">
+                <button id="validateTokenBtn" class="btn btn-primary" disabled>Validate Token</button>
+                <div class="response-container mt-3" id="validateResponse">Response will appear here</div>
+            </div>
+        </div>
+        
+        <!-- Token Refresh Section -->
+        <div class="card">
+            <div class="card-header">Token Refresh API</div>
+            <div class="card-body">
+                <button id="refreshTokenBtn" class="btn btn-primary" disabled>Refresh Token</button>
+                <div class="response-container mt-3" id="refreshResponse">Response will appear here</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Base API URL - adjust this to match your setup
+        const baseUrl = window.location.origin + '/ramesh-be/be/api';
+        
+        // Store tokens and expiry
+        let accessToken = '';
+        let refreshToken = '';
+        let tokenExpiry = null;
+        let tokenTimer = null;
+        
+        // Helper function to make API requests
+        async function apiRequest(url, method, data = null, token = null) {
+            const headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const options = {
+                method,
+                headers
+            };
+            
+            if (data && (method === 'POST' || method === 'PUT')) {
+                options.body = JSON.stringify(data);
+            }
+            
+            try {
+                console.log(`Making ${method} request to ${url}`);
+                const response = await fetch(url, options);
+                const responseData = await response.json();
+                console.log('Response:', responseData);
+                return responseData;
+            } catch (error) {
+                console.error('API Request Error:', error);
+                return {
+                    status: 'error',
+                    message: error.message,
+                    data: null
+                };
+            }
+        }
+        
+        // Helper function to display response
+        function displayResponse(elementId, response) {
+            const element = document.getElementById(elementId);
+            element.textContent = JSON.stringify(response, null, 2);
+        }
+        
+        // Helper function to copy text to clipboard
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+        
+        // Update token displays
+        function updateTokenDisplays() {
+            const accessTokenDisplay = document.getElementById('accessTokenDisplay');
+            const refreshTokenDisplay = document.getElementById('refreshTokenDisplay');
+            const accessTokenStatus = document.getElementById('accessTokenStatus');
+            const accessTokenExpiry = document.getElementById('accessTokenExpiry');
+            
+            if (accessToken) {
+                accessTokenDisplay.textContent = accessToken;
+                document.getElementById('validateTokenBtn').disabled = false;
+                
+                // Update token status indicator
+                if (tokenExpiry && new Date(tokenExpiry) > new Date()) {
+                    accessTokenStatus.className = 'status-indicator status-valid';
+                    accessTokenExpiry.textContent = 'Valid until: ' + new Date(tokenExpiry).toLocaleString();
+                } else if (tokenExpiry) {
+                    accessTokenStatus.className = 'status-indicator status-invalid';
+                    accessTokenExpiry.textContent = 'Expired at: ' + new Date(tokenExpiry).toLocaleString();
+                } else {
+                    accessTokenStatus.className = 'status-indicator status-unknown';
+                    accessTokenExpiry.textContent = 'Unknown status';
+                }
+            } else {
+                accessTokenDisplay.textContent = 'No access token';
+                accessTokenStatus.className = 'status-indicator status-unknown';
+                accessTokenExpiry.textContent = '';
+                document.getElementById('validateTokenBtn').disabled = true;
+            }
+            
+            if (refreshToken) {
+                refreshTokenDisplay.textContent = refreshToken;
+                document.getElementById('refreshTokenBtn').disabled = false;
+            } else {
+                refreshTokenDisplay.textContent = 'No refresh token';
+                document.getElementById('refreshTokenBtn').disabled = true;
+            }
+        }
+        
+        // Start token expiry timer
+        function startTokenTimer() {
+            // Clear existing timer
+            if (tokenTimer) {
+                clearInterval(tokenTimer);
+            }
+            
+            // If no expiry, don't start timer
+            if (!tokenExpiry) {
+                document.getElementById('accessTokenTimer').textContent = '';
+                return;
+            }
+            
+            // Update timer every second
+            tokenTimer = setInterval(() => {
+                const now = new Date();
+                const expiry = new Date(tokenExpiry);
+                const diff = expiry - now;
+                
+                if (diff <= 0) {
+                    document.getElementById('accessTokenTimer').textContent = 'Token has expired';
+                    updateTokenDisplays();
+                    clearInterval(tokenTimer);
+                } else {
+                    const minutes = Math.floor(diff / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    document.getElementById('accessTokenTimer').textContent = 
+                        `Token expires in: ${minutes}m ${seconds}s`;
+                }
+            }, 1000);
+        }
+        
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/login`, 'POST', { email, password });
+            displayResponse('loginResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                accessToken = response.data.access_token;
+                refreshToken = response.data.refresh_token;
+                
+                // Calculate token expiry
+                const expiresIn = response.data.expires_in || 3600; // Default to 1 hour
+                tokenExpiry = new Date(new Date().getTime() + expiresIn * 1000);
+                
+                updateTokenDisplays();
+                startTokenTimer();
+                
+                // Store tokens in localStorage for persistence
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                localStorage.setItem('tokenExpiry', tokenExpiry.toISOString());
+            }
+        });
+        
+        // Validate token button
+        document.getElementById('validateTokenBtn').addEventListener('click', async function() {
+            if (!accessToken) {
+                displayResponse('validateResponse', { 
+                    status: 'error', 
+                    message: 'No access token available' 
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/validate`, 'POST', null, accessToken);
+            displayResponse('validateResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                // Update token expiry if provided
+                if (response.data.expires_at) {
+                    tokenExpiry = new Date(response.data.expires_at);
+                    updateTokenDisplays();
+                    startTokenTimer();
+                }
+            }
+        });
+        
+        // Refresh token button
+        document.getElementById('refreshTokenBtn').addEventListener('click', async function() {
+            if (!refreshToken) {
+                displayResponse('refreshResponse', { 
+                    status: 'error', 
+                    message: 'No refresh token available' 
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/refresh`, 'POST', { refresh_token: refreshToken });
+            displayResponse('refreshResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                accessToken = response.data.access_token;
+                refreshToken = response.data.refresh_token;
+                
+                // Calculate token expiry
+                const expiresIn = response.data.expires_in || 3600; // Default to 1 hour
+                tokenExpiry = new Date(new Date().getTime() + expiresIn * 1000);
+                
+                updateTokenDisplays();
+                startTokenTimer();
+                
+                // Update localStorage
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                localStorage.setItem('tokenExpiry', tokenExpiry.toISOString());
+            }
+        });
+        
+        // Load tokens from localStorage on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            accessToken = localStorage.getItem('accessToken') || '';
+            refreshToken = localStorage.getItem('refreshToken') || '';
+            const storedExpiry = localStorage.getItem('tokenExpiry');
+            
+            if (storedExpiry) {
+                tokenExpiry = new Date(storedExpiry);
+                
+                // If token is already expired, clear it
+                if (tokenExpiry < new Date()) {
+                    accessToken = '';
+                    tokenExpiry = null;
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('tokenExpiry');
+                }
+            }
+            
+            updateTokenDisplays();
+            
+            if (tokenExpiry) {
+                startTokenTimer();
+            }
+        });
+    </script>
+</body>
+</html>

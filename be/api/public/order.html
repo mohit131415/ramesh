@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: #fff;
+            border-bottom: 1px solid #fff;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 0 4px 4px 4px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Order API Tester</h1>
+    
+    <div class="tabs">
+        <div class="tab active" onclick="openTab(event, 'cod')">Cash on Delivery</div>
+        <div class="tab" onclick="openTab(event, 'online')">Online Payment</div>
+    </div>
+    
+    <div id="cod" class="tab-content active">
+        <h2>Create COD Order</h2>
+        <div class="form-group">
+            <label for="cod-token">Bearer Token:</label>
+            <input type="text" id="cod-token" placeholder="Enter your authentication token">
+        </div>
+        <div class="form-group">
+            <label for="cod-address-id">Address ID:</label>
+            <input type="number" id="cod-address-id" placeholder="Enter address ID">
+        </div>
+        <div class="form-group">
+            <label for="cod-additional">Additional Data (optional JSON):</label>
+            <textarea id="cod-additional" rows="3" placeholder='{"note": "Please deliver in the evening"}'></textarea>
+        </div>
+        <button onclick="createCodOrder()">Create COD Order</button>
+        <h3>Response:</h3>
+        <pre id="cod-response">Response will appear here</pre>
+    </div>
+    
+    <div id="online" class="tab-content">
+        <h2>Create Online Payment Order</h2>
+        <div class="form-group">
+            <label for="online-token">Bearer Token:</label>
+            <input type="text" id="online-token" placeholder="Enter your authentication token">
+        </div>
+        <div class="form-group">
+            <label for="online-address-id">Address ID:</label>
+            <input type="number" id="online-address-id" placeholder="Enter address ID">
+        </div>
+        <div class="form-group">
+            <label for="online-payment-id">Payment ID:</label>
+            <input type="text" id="online-payment-id" placeholder="Enter payment ID from gateway">
+        </div>
+        <div class="form-group">
+            <label for="online-additional">Additional Data (optional JSON):</label>
+            <textarea id="online-additional" rows="3" placeholder='{"card": "xxxx-xxxx-xxxx-1234"}'></textarea>
+        </div>
+        <button onclick="createOnlineOrder()">Create Online Order</button>
+        <h3>Response:</h3>
+        <pre id="online-response">Response will appear here</pre>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].className = tabcontent[i].className.replace(" active", "");
+            }
+            tablinks = document.getElementsByClassName("tab");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).className += " active";
+            evt.currentTarget.className += " active";
+        }
+
+        async function createCodOrder() {
+            const token = document.getElementById('cod-token').value;
+            const addressId = document.getElementById('cod-address-id').value;
+            let additionalData = document.getElementById('cod-additional').value;
+            
+            try {
+                additionalData = additionalData ? JSON.parse(additionalData) : {};
+            } catch (e) {
+                document.getElementById('cod-response').textContent = "Error parsing additional data JSON: " + e.message;
+                return;
+            }
+            
+            const requestBody = {
+                address_id: parseInt(addressId),
+                payment_method: 'cod',
+                additional_data: additionalData
+            };
+            
+            try {
+                const response = await fetch('/api/api/public/orders/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                const data = await response.json();
+                document.getElementById('cod-response').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('cod-response').textContent = "Error: " + error.message;
+            }
+        }
+
+        async function createOnlineOrder() {
+            const token = document.getElementById('online-token').value;
+            const addressId = document.getElementById('online-address-id').value;
+            const paymentId = document.getElementById('online-payment-id').value;
+            let additionalData = document.getElementById('online-additional').value;
+            
+            try {
+                additionalData = additionalData ? JSON.parse(additionalData) : {};
+            } catch (e) {
+                document.getElementById('online-response').textContent = "Error parsing additional data JSON: " + e.message;
+                return;
+            }
+            
+            const requestBody = {
+                address_id: parseInt(addressId),
+                payment_method: 'online',
+                payment_id: paymentId,
+                additional_data: additionalData
+            };
+            
+            try {
+                const response = await fetch('/api/api/public/orders/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                const data = await response.json();
+                document.getElementById('online-response').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('online-response').textContent = "Error: " + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

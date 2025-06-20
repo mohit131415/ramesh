@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products by Subcategory API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .panel {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #444;
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .result {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: #D8000C;
+            background-color: #FFD2D2;
+        }
+        .success {
+            color: #4F8A10;
+            background-color: #DFF2BF;
+        }
+        .debug-info {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Products by Subcategory API Tester</h1>
+        
+        <div class="panel">
+            <h2>Get Products by Subcategory</h2>
+            
+            <div class="form-group">
+                <label for="subcategoryId">Subcategory ID:</label>
+                <input type="number" id="subcategoryId" placeholder="Enter subcategory ID" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Pagination:</label>
+                <div class="filters">
+                    <div>
+                        <label for="page">Page:</label>
+                        <input type="number" id="page" value="1" min="1">
+                    </div>
+                    <div>
+                        <label for="limit">Items per page:</label>
+                        <input type="number" id="limit" value="12" min="1" max="50">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Sorting:</label>
+                <div class="filters">
+                    <div>
+                        <label for="sortBy">Sort By:</label>
+                        <select id="sortBy">
+                            <option value="created_at">Date Created</option>
+                            <option value="name">Name</option>
+                            <option value="price">Price</option>
+                            <option value="display_order">Display Order</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="sortOrder">Sort Order:</label>
+                        <select id="sortOrder">
+                            <option value="desc">Descending</option>
+                            <option value="asc">Ascending</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Price Range:</label>
+                <div class="filters">
+                    <div>
+                        <label for="minPrice">Min Price:</label>
+                        <input type="number" id="minPrice" placeholder="Minimum price">
+                    </div>
+                    <div>
+                        <label for="maxPrice">Max Price:</label>
+                        <input type="number" id="maxPrice" placeholder="Maximum price">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="isVegetarian">Vegetarian Filter:</label>
+                <select id="isVegetarian">
+                    <option value="">All</option>
+                    <option value="1">Vegetarian Only</option>
+                    <option value="0">Non-Vegetarian Only</option>
+                </select>
+            </div>
+            
+            <button onclick="getProductsBySubcategory()">Get Products</button>
+            
+            <div id="requestUrl" class="debug-info"></div>
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Base URL for API
+        const baseUrl = 'http://localhost/ramesh-be/be/api';
+        
+        // Helper function to display results
+        function displayResult(data, isError = false) {
+            const resultElement = document.getElementById('result');
+            resultElement.textContent = JSON.stringify(data, null, 2);
+            resultElement.className = isError ? 'result error' : 'result success';
+        }
+        
+        // Helper function to display debug info
+        function displayDebugInfo(message) {
+            const debugElement = document.getElementById('requestUrl');
+            debugElement.textContent = message;
+        }
+        
+        // Get products by subcategory
+        async function getProductsBySubcategory() {
+            const subcategoryId = document.getElementById('subcategoryId').value;
+            
+            if (!subcategoryId) {
+                displayResult({ error: 'Please enter a subcategory ID' }, true);
+                return;
+            }
+            
+            // Get pagination parameters
+            const page = document.getElementById('page').value;
+            const limit = document.getElementById('limit').value;
+            
+            // Get sorting parameters
+            const sortBy = document.getElementById('sortBy').value;
+            const sortOrder = document.getElementById('sortOrder').value;
+            
+            // Get filter parameters
+            const minPrice = document.getElementById('minPrice').value;
+            const maxPrice = document.getElementById('maxPrice').value;
+            const isVegetarian = document.getElementById('isVegetarian').value;
+            
+            // Build query parameters
+            const params = new URLSearchParams();
+            if (page) params.append('page', page);
+            if (limit) params.append('limit', limit);
+            if (sortBy) params.append('sort_by', sortBy);
+            if (sortOrder) params.append('sort_order', sortOrder);
+            if (minPrice) params.append('min_price', minPrice);
+            if (maxPrice) params.append('max_price', maxPrice);
+            if (isVegetarian !== '') params.append('is_vegetarian', isVegetarian);
+            
+            // Build the URL
+            const url = `${baseUrl}/api/public/products/subcategory/${subcategoryId}${params.toString() ? '?' + params.toString() : ''}`;
+            
+            // Display the request URL for debugging
+            displayDebugInfo(`Request URL: ${url}`);
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                displayResult(data);
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                displayResult({ error: error.message }, true);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile API Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .section {
+            background: white;
+            margin-bottom: 30px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
+        
+        .method.get { background-color: #28a745; }
+        .method.post { background-color: #007bff; }
+        .method.put { background-color: #ffc107; color: #333; }
+        .method.delete { background-color: #dc3545; }
+        
+        .url {
+            font-family: 'Courier New', monospace;
+            background-color: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .table th,
+        .table td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .table th {
+            background-color: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .code-block {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .required {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .optional {
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .response-example {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .auth-note {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .error-codes {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .nav {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .nav a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav a:hover {
+            background-color: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>User Profile API Documentation</h1>
+            <p>Complete guide for frontend developers to integrate user profile functionality</p>
+        </div>
+
+        <div class="nav">
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#authentication">Authentication</a></li>
+                <li><a href="#endpoints">Endpoints</a></li>
+                <li><a href="#examples">Examples</a></li>
+                <li><a href="#errors">Error Handling</a></li>
+            </ul>
+        </div>
+
+        <div class="section" id="overview">
+            <h2>📋 Overview</h2>
+            <p>The User Profile API allows users to manage their personal profile information including personal details, profile pictures, and track profile completion status.</p>
+            
+            <h3>Base URL</h3>
+            <div class="code-block">https://your-domain.com/api/public/user/profile</div>
+            
+            <h3>Key Features</h3>
+            <ul>
+                <li>Create and update user profiles</li>
+                <li>Upload and manage profile pictures</li>
+                <li>Track profile completion percentage</li>
+                <li>Email uniqueness validation</li>
+                <li>Phone number integration from user account</li>
+            </ul>
+        </div>
+
+        <div class="section" id="authentication">
+            <h2>🔐 Authentication</h2>
+            <div class="auth-note">
+                <strong>Important:</strong> All endpoints require authentication via JWT token in the Authorization header.
+            </div>
+            
+            <h3>Header Format</h3>
+            <div class="code-block">Authorization: Bearer YOUR_JWT_TOKEN</div>
+            
+            <h3>User Identification</h3>
+            <p>The user is automatically identified from the JWT token. No need to pass user_id in requests.</p>
+        </div>
+
+        <div class="section" id="endpoints">
+            <h2>🚀 API Endpoints</h2>
+
+            <!-- Create Profile -->
+            <div class="endpoint">
+                <h3>
+                    <span class="method post">POST</span>
+                    <span class="url">/api/public/user/profile</span>
+                </h3>
+                <p><strong>Description:</strong> Create a new user profile</p>
+                
+                <h4>Request Parameters</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>first_name</td>
+                            <td>string</td>
+                            <td class="optional">Optional</td>
+                            <td>User's first name (max 100 characters)</td>
+                        </tr>
+                        <tr>
+                            <td>last_name</td>
+                            <td>string</td>
+                            <td class="optional">Optional</td>
+                            <td>User's last name (max 100 characters)</td>
+                        </tr>
+                        <tr>
+                            <td>gender</td>
+                            <td>enum</td>
+                            <td class="optional">Optional</td>
+                            <td>male, female, other, prefer_not_to_say</td>
+                        </tr>
+                        <tr>
+                            <td>email</td>
+                            <td>string</td>
+                            <td class="optional">Optional</td>
+                            <td>Valid email address (must be unique)</td>
+                        </tr>
+                        <tr>
+                            <td>date_of_birth</td>
+                            <td>date</td>
+                            <td class="optional">Optional</td>
+                            <td>Format: YYYY-MM-DD</td>
+                        </tr>
+                        <tr>
+                            <td>profile_picture</td>
+                            <td>file</td>
+                            <td class="optional">Optional</td>
+                            <td>Image file (JPEG, PNG, GIF, WebP, max 5MB)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>Success Response (201)</h4>
+                <div class="response-example">
+                    <div class="code-block">{
+  "status": "success",
+  "message": "Profile created successfully",
+  "data": {
+    "id": 1,
+    "user_id": 123,
+    "first_name": "John",
+    "last_name": "Doe",
+    "gender": "male",
+    "email": "john.doe@example.com",
+    "date_of_birth": "1990-01-15",
+    "profile_picture": "uploads/profile_pictures/profile_123456.jpg",
+    "profile_picture_url": "https://your-domain.com/uploads/profile_pictures/profile_123456.jpg",
+    "phone_number": "+1234567890",
+    "user_status": "active",
+    "last_login_at": "2024-01-15 10:30:00",
+    "created_at": "2024-01-15 10:30:00",
+    "updated_at": "2024-01-15 10:30:00"
+  }
+}</div>
+                </div>
+            </div>
+
+            <!-- Get Profile -->
+            <div class="endpoint">
+                <h3>
+                    <span class="method get">GET</span>
+                    <span class="url">/api/public/user/profile</span>
+                </h3>
+                <p><strong>Description:</strong> Retrieve the authenticated user's profile</p>
+                
+                <h4>Success Response (200)</h4>
+                <div class="response-example">
+                    <div class="code-block">{
+  "status": "success",
+  "message": "Profile retrieved successfully",
+  "data": {
+    "id": 1,
+    "user_id": 123,
+    "first_name": "John",
+    "last_name": "Doe",
+    "gender": "male",
+    "email": "john.doe@example.com",
+    "date_of_birth": "1990-01-15",
+    "profile_picture": "uploads/profile_pictures/profile_123456.jpg",
+    "profile_picture_url": "https://your-domain.com/uploads/profile_pictures/profile_123456.jpg",
+    "phone_number": "+1234567890",
+    "user_status": "active",
+    "last_login_at": "2024-01-15 10:30:00",
+    "created_at": "2024-01-15 10:30:00",
+    "updated_at": "2024-01-15 10:30:00"
+  }
+}</div>
+                </div>
+            </div>
+
+            <!-- Update Profile -->
+            <div class="endpoint">
+                <h3>
+                    <span class="method put">PUT</span>
+                    <span class="url">/api/public/user/profile</span>
+                </h3>
+                <p><strong>Description:</strong> Update the authenticated user's profile</p>
+                
+                <h4>Request Parameters</h4>
+                <p>Same as create profile. Only send fields you want to update.</p>
+                
+                <h4>Success Response (200)</h4>
+                <div class="response-example">
+                    <div class="code-block">{
+  "status": "success",
+  "message": "Profile updated successfully",
+  "data": {
+    // Updated profile data (same structure as get profile)
+  }
+}</div>
+                </div>
+            </div>
+
+            <!-- Profile Completion -->
+            <div class="endpoint">
+                <h3>
+                    <span class="method get">GET</span>
+                    <span class="url">/api/public/user/profile/completion</span>
+                </h3>
+                <p><strong>Description:</strong> Get profile completion status and percentage</p>
+                
+                <h4>Success Response (200)</h4>
+                <div class="response-example">
+                    <div class="code-block">{
+  "status": "success",
+  "message": "Profile completion status retrieved successfully",
+  "data": {
+    "completion_percentage": 83,
+    "missing_fields": ["profile_picture"],
+    "completed_fields": ["first_name", "last_name", "gender", "email", "date_of_birth"]
+  }
+}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="examples">
+            <h2>💡 Frontend Integration Examples</h2>
+            
+            <h3>JavaScript/Fetch Example</h3>
+            <div class="code-block">// Create Profile
+const createProfile = async (profileData) => {
+  const formData = new FormData();
+  
+  // Add text fields
+  Object.keys(profileData).forEach(key => {
+    if (key !== 'profile_picture' && profileData[key]) {
+      formData.append(key, profileData[key]);
+    }
+  });
+  
+  // Add file if exists
+  if (profileData.profile_picture) {
+    formData.append('profile_picture', profileData.profile_picture);
+  }
+  
+  const response = await fetch('/api/public/user/profile', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
+    body: formData
+  });
+  
+  return await response.json();
+};
+
+// Get Profile
+const getProfile = async () => {
+  const response = await fetch('/api/public/user/profile', {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  });
+  
+  return await response.json();
+};
+
+// Update Profile
+const updateProfile = async (updates) => {
+  const formData = new FormData();
+  
+  Object.keys(updates).forEach(key => {
+    if (updates[key] !== null && updates[key] !== undefined) {
+      formData.append(key, updates[key]);
+    }
+  });
+  
+  const response = await fetch('/api/public/user/profile', {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
+    body: formData
+  });
+  
+  return await response.json();
+};
+
+// Get Completion Status
+const getCompletionStatus = async () => {
+  const response = await fetch('/api/public/user/profile/completion', {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  });
+  
+  return await response.json();
+};</div>
+
+            <h3>React Hook Example</h3>
+            <div class="code-block">import { useState, useEffect } from 'react';
+
+const useUserProfile = () => {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchProfile = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/public/user/profile', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.status === 'success') {
+        setProfile(data.data);
+      } else {
+        setError(data.message);
+      }
+    } catch (err) {
+      setError('Failed to fetch profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProfile = async (updates) => {
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      Object.keys(updates).forEach(key => {
+        if (updates[key] !== null && updates[key] !== undefined) {
+          formData.append(key, updates[key]);
+        }
+      });
+
+      const response = await fetch('/api/public/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+      
+      if (data.status === 'success') {
+        setProfile(data.data);
+        return data;
+      } else {
+        setError(data.message);
+        throw new Error(data.message);
+      }
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  return { profile, loading, error, updateProfile, refetch: fetchProfile };
+};</div>
+        </div>
+
+        <div class="section" id="errors">
+            <h2>⚠️ Error Handling</h2>
+            
+            <div class="error-codes">
+                <h3>HTTP Status Codes</h3>
+                <ul>
+                    <li><strong>200:</strong> Success</li>
+                    <li><strong>201:</strong> Created successfully</li>
+                    <li><strong>400:</strong> Bad request / Validation error</li>
+                    <li><strong>401:</strong> Unauthorized (invalid/missing token)</li>
+                    <li><strong>404:</strong> Profile not found</li>
+                    <li><strong>422:</strong> Validation failed</li>
+                    <li><strong>500:</strong> Internal server error</li>
+                </ul>
+            </div>
+
+            <h3>Error Response Format</h3>
+            <div class="code-block">{
+  "status": "error",
+  "message": "Validation failed",
+  "errors": {
+    "email": "Email is already in use",
+    "date_of_birth": "Date of birth must be in format YYYY-MM-DD"
+  },
+  "data": null
+}</div>
+
+            <h3>Common Validation Errors</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Error</th>
+                        <th>Solution</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>email</td>
+                        <td>Email is already in use</td>
+                        <td>Use a different email address</td>
+                    </tr>
+                    <tr>
+                        <td>email</td>
+                        <td>Invalid email format</td>
+                        <td>Provide a valid email address</td>
+                    </tr>
+                    <tr>
+                        <td>date_of_birth</td>
+                        <td>Date of birth must be in format YYYY-MM-DD</td>
+                        <td>Use correct date format</td>
+                    </tr>
+                    <tr>
+                        <td>date_of_birth</td>
+                        <td>Date of birth cannot be in the future</td>
+                        <td>Use a past date</td>
+                    </tr>
+                    <tr>
+                        <td>gender</td>
+                        <td>Gender must be one of: male, female, other, prefer_not_to_say</td>
+                        <td>Use valid gender value</td>
+                    </tr>
+                    <tr>
+                        <td>profile_picture</td>
+                        <td>Invalid file type</td>
+                        <td>Use JPEG, PNG, GIF, or WebP</td>
+                    </tr>
+                    <tr>
+                        <td>profile_picture</td>
+                        <td>File size too large</td>
+                        <td>Use file smaller than 5MB</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Frontend Error Handling Example</h3>
+            <div class="code-block">const handleProfileUpdate = async (formData) => {
+  try {
+    const result = await updateProfile(formData);
+    // Success - show success message
+    showSuccessMessage('Profile updated successfully!');
+  } catch (error) {
+    // Handle different error types
+    if (error.status === 422) {
+      // Validation errors
+      const errors = error.errors;
+      Object.keys(errors).forEach(field => {
+        showFieldError(field, errors[field]);
+      });
+    } else if (error.status === 401) {
+      // Authentication error
+      redirectToLogin();
+    } else {
+      // General error
+      showErrorMessage('Something went wrong. Please try again.');
+    }
+  }
+};</div>
+        </div>
+
+        <div class="section">
+            <h2>📝 Notes for Frontend Developers</h2>
+            <ul>
+                <li><strong>File Uploads:</strong> Use FormData for requests with file uploads</li>
+                <li><strong>Profile Pictures:</strong> Always check for both 'profile_picture' and 'profile_picture_url' fields</li>
+                <li><strong>Phone Number:</strong> Phone number comes from the user account, not the profile</li>
+                <li><strong>Email Uniqueness:</strong> Handle email uniqueness errors gracefully</li>
+                <li><strong>Profile Completion:</strong> Use the completion endpoint to show progress to users</li>
+                <li><strong>Optional Fields:</strong> All profile fields are optional - handle null/empty values</li>
+                <li><strong>Date Format:</strong> Always use YYYY-MM-DD format for dates</li>
+                <li><strong>Error Handling:</strong> Always check the 'status' field in responses</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

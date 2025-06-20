@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Filter Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .filter-group select, .filter-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .price-range {
+            display: flex;
+            gap: 10px;
+        }
+        .price-range input {
+            flex: 1;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .results {
+            margin-top: 30px;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .product-image {
+            height: 200px;
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .product-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+        .product-info {
+            padding: 15px;
+        }
+        .product-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .product-price {
+            color: #e63946;
+            font-weight: bold;
+        }
+        .product-original-price {
+            text-decoration: line-through;
+            color: #999;
+            margin-right: 10px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        .pagination button {
+            background-color: #f1f1f1;
+            color: black;
+            padding: 8px 16px;
+        }
+        .pagination button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .subcategories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .subcategory-tag {
+            background-color: #f1f1f1;
+            padding: 5px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .subcategory-tag:hover {
+            background-color: #e0e0e0;
+        }
+        .subcategory-tag.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .sort-options {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        .sort-options select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .debug-section {
+            margin-top: 30px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .debug-section h3 {
+            margin-bottom: 10px;
+        }
+        .debug-section pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Comprehensive Filter Tester</h1>
+    
+    <div class="filter-container">
+        <div class="filter-group">
+            <label for="category">Category:</label>
+            <select id="category">
+                <option value="">All Categories</option>
+                <!-- Categories will be loaded here -->
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label for="subcategory">Subcategory:</label>
+            <select id="subcategory">
+                <option value="">All Subcategories</option>
+                <!-- Subcategories will be loaded here -->
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label>Price Range:</label>
+            <div class="price-range">
+                <input type="number" id="min-price" placeholder="Min Price">
+                <input type="number" id="max-price" placeholder="Max Price">
+            </div>
+        </div>
+        
+        <div class="filter-group">
+            <label for="vegetarian">Vegetarian:</label>
+            <select id="vegetarian">
+                <option value="">All Products</option>
+                <option value="1">Vegetarian Only</option>
+                <option value="0">Non-Vegetarian Only</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label for="sort">Sort By:</label>
+            <select id="sort">
+                <option value="popular">Popular</option>
+                <option value="price_low">Price: Low to High</option>
+                <option value="price_high">Price: High to Low</option>
+                <option value="name_asc">Name: A to Z</option>
+                <option value="name_desc">Name: Z to A</option>
+                <option value="newest">Newest First</option>
+                <option value="discount_high">Discount: High to Low</option>
+                <option value="discount_low">Discount: Low to High</option>
+            </select>
+        </div>
+    </div>
+    
+    <button id="apply-filters">Apply Filters</button>
+    <button id="reset-filters">Reset Filters</button>
+    
+    <div class="results">
+        <div id="subcategories-container" class="subcategories"></div>
+        
+        <div class="sort-options">
+            <select id="sort-mobile">
+                <option value="popular">Sort: Popular</option>
+                <option value="price_low">Sort: Price Low to High</option>
+                <option value="price_high">Sort: Price High to Low</option>
+                <option value="name_asc">Sort: Name A to Z</option>
+                <option value="name_desc">Sort: Name Z to A</option>
+                <option value="newest">Sort: Newest First</option>
+                <option value="discount_high">Sort: Discount High to Low</option>
+                <option value="discount_low">Sort: Discount Low to High</option>
+            </select>
+        </div>
+        
+        <h2>Products <span id="product-count"></span></h2>
+        <div id="products" class="product-grid"></div>
+        
+        <div id="pagination" class="pagination"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Debug Information</h3>
+        <div>
+            <label for="debug-toggle">
+                <input type="checkbox" id="debug-toggle"> Show Debug Info
+            </label>
+        </div>
+        <div id="debug-info" style="display: none;">
+            <h4>Request URL:</h4>
+            <pre id="request-url"></pre>
+            <h4>Response:</h4>
+            <pre id="response-data"></pre>
+        </div>
+    </div>
+    
+    <script>
+        // Base API URL - adjust as needed
+        const baseApiUrl = window.location.origin + '/api/public';
+        
+        // Current page
+        let currentPage = 1;
+        
+        // Load categories on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCategories();
+            
+            // Set up event listeners
+            document.getElementById('category').addEventListener('change', loadSubcategories);
+            document.getElementById('apply-filters').addEventListener('click', applyFilters);
+            document.getElementById('reset-filters').addEventListener('click', resetFilters);
+            document.getElementById('sort-mobile').addEventListener('change', function() {
+                document.getElementById('sort').value = this.value;
+                applyFilters();
+            });
+            document.getElementById('debug-toggle').addEventListener('change', function() {
+                document.getElementById('debug-info').style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // Apply filters on page load
+            applyFilters();
+        });
+        
+        // Load categories
+        function loadCategories() {
+            fetch(`${baseApiUrl}/filters/categories`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const categorySelect = document.getElementById('category');
+                        data.data.forEach(category => {
+                            const option = document.createElement('option');
+                            option.value = category.id;
+                            option.textContent = category.name;
+                            categorySelect.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error loading categories:', error));
+        }
+        
+        // Load subcategories based on selected category
+        function loadSubcategories() {
+            const categoryId = document.getElementById('category').value;
+            const subcategorySelect = document.getElementById('subcategory');
+            
+            // Clear existing options
+            subcategorySelect.innerHTML = '<option value="">All Subcategories</option>';
+            
+            if (categoryId) {
+                fetch(`${baseApiUrl}/filters/subcategories/category/${categoryId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            data.data.subcategories.forEach(subcategory => {
+                                const option = document.createElement('option');
+                                option.value = subcategory.id;
+                                option.textContent = subcategory.name;
+                                subcategorySelect.appendChild(option);
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error loading subcategories:', error));
+            }
+        }
+        
+        // Apply filters
+        function applyFilters() {
+            const categoryId = document.getElementById('category').value;
+            const subcategoryId = document.getElementById('subcategory').value;
+            const minPrice = document.getElementById('min-price').value;
+            const maxPrice = document.getElementById('max-price').value;
+            const isVegetarian = document.getElementById('vegetarian').value;
+            const sortBy = document.getElementById('sort').value;
+            
+            // Build query parameters
+            const params = new URLSearchParams();
+            if (categoryId) params.append('category_id', categoryId);
+            if (subcategoryId) params.append('subcategory_id', subcategoryId);
+            if (minPrice) params.append('min_price', minPrice);
+            if (maxPrice) params.append('max_price', maxPrice);
+            if (isVegetarian !== '') params.append('is_vegetarian', isVegetarian);
+            if (sortBy) params.append('sort', sortBy);
+            params.append('page', currentPage);
+            params.append('limit', 12);
+            
+            // Update sort mobile dropdown
+            document.getElementById('sort-mobile').value = sortBy;
+            
+            // Build the request URL
+            const requestUrl = `${baseApiUrl}/filters/comprehensive?${params.toString()}`;
+            
+            // Show request URL in debug section
+            document.getElementById('request-url').textContent = requestUrl;
+            
+            // Fetch filtered products
+            fetch(requestUrl)
+                .then(response => response.json())
+                .then(data => {
+                    // Show response in debug section
+                    document.getElementById('response-data').textContent = JSON.stringify(data, null, 2);
+                    
+                    if (data.status === 'success') {
+                        displayProducts(data.data);
+                        displaySubcategories(data.data.filters.subcategories);
+                        updatePagination(data.data.products);
+                    } else {
+                        document.getElementById('products').innerHTML = `<p>Error: ${data.message}</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error applying filters:', error);
+                    document.getElementById('products').innerHTML = `<p>Error: ${error.message}</p>`;
+                });
+        }
+        
+        // Display products
+        function displayProducts(data) {
+            const productsContainer = document.getElementById('products');
+            const productCount = document.getElementById('product-count');
+            
+            // Clear existing products
+            productsContainer.innerHTML = '';
+            
+            // Update product count
+            productCount.textContent = `(${data.products.total} items)`;
+            
+            // Check if there are products
+            if (data.products.items.length === 0) {
+                productsContainer.innerHTML = '<p>No products found matching your criteria.</p>';
+                return;
+            }
+            
+            // Display each product
+            data.products.items.forEach(product => {
+                // Get the first variant for price display
+                const variant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
+                const price = variant ? (variant.sale_price > 0 ? variant.sale_price : variant.price) : 0;
+                const originalPrice = variant && variant.sale_price > 0 ? variant.price : null;
+                
+                // Get the first image
+                const image = product.images && product.images.length > 0 ? product.images[0].image_path : null;
+                
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <div class="product-image">
+                        ${image ? `<img src="${image}" alt="${product.name}">` : '<div>No image</div>'}
+                    </div>
+                    <div class="product-info">
+                        <div class="product-name">${product.name}</div>
+                        <div>
+                            ${originalPrice ? `<span class="product-original-price">₹${originalPrice.toFixed(2)}</span>` : ''}
+                            <span class="product-price">₹${price.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+                productsContainer.appendChild(productCard);
+            });
+        }
+        
+        // Display subcategories
+        function displaySubcategories(subcategories) {
+            const subcategoriesContainer = document.getElementById('subcategories-container');
+            
+            // Clear existing subcategories
+            subcategoriesContainer.innerHTML = '';
+            
+            // Check if there are subcategories
+            if (!subcategories || subcategories.length === 0) {
+                return;
+            }
+            
+            // Display each subcategory
+            subcategories.forEach(subcategory => {
+                const subcategoryTag = document.createElement('div');
+                subcategoryTag.className = 'subcategory-tag';
+                subcategoryTag.textContent = `${subcategory.name} (${subcategory.product_count})`;
+                subcategoryTag.dataset.id = subcategory.id;
+                
+                // Add click event to filter by subcategory
+                subcategoryTag.addEventListener('click', function() {
+                    document.getElementById('subcategory').value = this.dataset.id;
+                    currentPage = 1;
+                    applyFilters();
+                });
+                
+                // Highlight active subcategory
+                if (document.getElementById('subcategory').value === subcategory.id.toString()) {
+                    subcategoryTag.classList.add('active');
+                }
+                
+                subcategoriesContainer.appendChild(subcategoryTag);
+            });
+        }
+        
+        // Update pagination
+        function updatePagination(products) {
+            const paginationContainer = document.getElementById('pagination');
+            
+            // Clear existing pagination
+            paginationContainer.innerHTML = '';
+            
+            // Check if pagination is needed
+            if (products.total_pages <= 1) {
+                return;
+            }
+            
+            // Previous button
+            if (currentPage > 1) {
+                const prevButton = document.createElement('button');
+                prevButton.textContent = 'Previous';
+                prevButton.addEventListener('click', function() {
+                    currentPage--;
+                    applyFilters();
+                    window.scrollTo(0, 0);
+                });
+                paginationContainer.appendChild(prevButton);
+            }
+            
+            // Page buttons
+            const maxButtons = 5;
+            const startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+            const endPage = Math.min(products.total_pages, startPage + maxButtons - 1);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.className = i === currentPage ? 'active' : '';
+                pageButton.addEventListener('click', function() {
+                    currentPage = i;
+                    applyFilters();
+                    window.scrollTo(0, 0);
+                });
+                paginationContainer.appendChild(pageButton);
+            }
+            
+            // Next button
+            if (currentPage < products.total_pages) {
+                const nextButton = document.createElement('button');
+                nextButton.textContent = 'Next';
+                nextButton.addEventListener('click', function() {
+                    currentPage++;
+                    applyFilters();
+                    window.scrollTo(0, 0);
+                });
+                paginationContainer.appendChild(nextButton);
+            }
+        }
+        
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('category').value = '';
+            document.getElementById('subcategory').innerHTML = '<option value="">All Subcategories</option>';
+            document.getElementById('min-price').value = '';
+            document.getElementById('max-price').value = '';
+            document.getElementById('vegetarian').value = '';
+            document.getElementById('sort').value = 'popular';
+            document.getElementById('sort-mobile').value = 'popular';
+            currentPage = 1;
+            applyFilters();
+        }
+    </script>
+</body>
+</html>

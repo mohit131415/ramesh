@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Management API Tester</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        .api-section {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .response-container {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .nav-tabs {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .btn-api {
+            margin-top: 10px;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .filter-section {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .filter-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .alert-info {
+            margin-bottom: 15px;
+        }
+        .btn-danger {
+            margin-right: 10px;
+        }
+        .category-card {
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        .category-card:hover {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .image-preview {
+            max-width: 150px;
+            max-height: 150px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: none;
+        }
+        .auth-status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .auth-status.logged-in {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .auth-status.logged-out {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Category Management API Tester</h1>
+        
+        <!-- Authentication Section -->
+        <div class="api-section" id="authSection">
+            <h3>Authentication</h3>
+            <div class="alert alert-info">
+                Login to get an access token for testing the category management API endpoints.
+            </div>
+            
+            <div id="authStatus" class="auth-status logged-out">
+                <strong>Status:</strong> Not authenticated
+            </div>
+            
+            <div id="loginForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="loginEmail">Email or Username</label>
+                            <input type="text" class="form-control" id="loginEmail" placeholder="Enter email or username">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" placeholder="Password">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="loginBtn" class="btn btn-success btn-api">Login</button>
+                <button type="button" id="logoutBtn" class="btn btn-outline-danger btn-api ms-2" style="display: none;">Logout</button>
+            </div>
+            
+            <div class="response-container" id="loginResponse">
+                <pre>Response will appear here</pre>
+            </div>
+            
+            <div class="mt-4">
+                <div class="form-group">
+                    <label for="accessToken">Access Token</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="accessToken" placeholder="Enter your access token">
+                        <button class="btn btn-outline-secondary" type="button" id="copyTokenBtn">Copy</button>
+                    </div>
+                    <small class="form-text text-muted">This token will be used for all API requests below.</small>
+                </div>
+            </div>
+        </div>
+        
+        <ul class="nav nav-tabs" id="apiTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list" type="button" role="tab" aria-controls="list" aria-selected="true">List Categories</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="view-tab" data-bs-toggle="tab" data-bs-target="#view" type="button" role="tab" aria-controls="view" aria-selected="false">View Category</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab" aria-controls="create" aria-selected="false">Create Category</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="update-tab" data-bs-toggle="tab" data-bs-target="#update" type="button" role="tab" aria-controls="update" aria-selected="false">Update Category</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="delete-tab" data-bs-toggle="tab" data-bs-target="#delete" type="button" role="tab" aria-controls="delete" aria-selected="false">Delete Category</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="restore-tab" data-bs-toggle="tab" data-bs-target="#restore" type="button" role="tab" aria-controls="restore" aria-selected="false">Restore Category</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="apiTabsContent">
+            <!-- List Categories Tab -->
+            <div class="tab-pane fade show active" id="list" role="tabpanel" aria-labelledby="list-tab">
+                <div class="api-section">
+                    <h3>List All Categories</h3>
+                    <div class="alert alert-info">
+                        This endpoint returns all categories with pagination and optional filtering.
+                    </div>
+                    
+                    <div class="filter-section">
+                        <div class="filter-title">Filters</div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="listSearch">Search</label>
+                                    <input type="text" class="form-control" id="listSearch" placeholder="Search by name, description, slug">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="listStatus">Status</label>
+                                    <select class="form-control" id="listStatus">
+                                        <option value="">All Statuses</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="listPage">Page</label>
+                                <input type="number" class="form-control" id="listPage" value="1" min="1">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="listLimit">Items Per Page</label>
+                                <input type="number" class="form-control" id="listLimit" value="10" min="1" max="100">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="listCategoriesBtn" class="btn btn-primary btn-api">List Categories</button>
+                    
+                    <div class="mt-4" id="categoriesList">
+                        <!-- Category cards will be displayed here -->
+                    </div>
+                    
+                    <div class="response-container" id="listResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- View Category Tab -->
+            <div class="tab-pane fade" id="view" role="tabpanel" aria-labelledby="view-tab">
+                <div class="api-section">
+                    <h3>View Category Details</h3>
+                    <div class="alert alert-info">
+                        This endpoint returns detailed information about a specific category.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="viewCategoryId">Category ID</label>
+                        <input type="number" class="form-control" id="viewCategoryId" placeholder="Enter category ID">
+                    </div>
+                    
+                    <button type="button" id="viewCategoryBtn" class="btn btn-primary btn-api">View Category</button>
+                    
+                    <div class="mt-4" id="categoryDetails">
+                        <!-- Category details will be displayed here -->
+                    </div>
+                    
+                    <div class="response-container" id="viewResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Create Category Tab -->
+            <div class="tab-pane fade" id="create" role="tabpanel" aria-labelledby="create-tab">
+                <div class="api-section">
+                    <h3>Create New Category</h3>
+                    <div class="alert alert-info">
+                        This endpoint creates a new category. Admin or Super Admin role is required.
+                    </div>
+                    
+                    <form id="createCategoryForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createName">Name *</label>
+                                    <input type="text" class="form-control" id="createName" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createSlug">Slug</label>
+                                    <input type="text" class="form-control" id="createSlug" name="slug">
+                                    <small class="form-text text-muted">Leave empty to auto-generate from name</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="createDescription">Description</label>
+                            <textarea class="form-control" id="createDescription" name="description" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createStatus">Status</label>
+                                    <select class="form-control" id="createStatus" name="status">
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createDisplayOrder">Display Order</label>
+                                    <input type="number" class="form-control" id="createDisplayOrder" name="display_order" value="0" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="createImage">Category Image</label>
+                            <input type="file" class="form-control" id="createImage" name="image" accept="image/*">
+                            <img id="createImagePreview" class="image-preview" src="#" alt="Category Image Preview">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createMetaTitle">Meta Title</label>
+                                    <input type="text" class="form-control" id="createMetaTitle" name="meta_title">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createMetaDescription">Meta Description</label>
+                                    <textarea class="form-control" id="createMetaDescription" name="meta_description" rows="2"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createMetaKeywords">Meta Keywords</label>
+                                    <textarea class="form-control" id="createMetaKeywords" name="meta_keywords" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-api">Create Category</button>
+                    </form>
+                    
+                    <div class="response-container" id="createResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Update Category Tab -->
+            <div class="tab-pane fade" id="update" role="tabpanel" aria-labelledby="update-tab">
+                <div class="api-section">
+                    <h3>Update Category</h3>
+                    <div class="alert alert-info">
+                        This endpoint updates an existing category. Admin or Super Admin role is required.
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label for="updateCategoryId">Category ID *</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="updateCategoryId" required>
+                            <button type="button" id="loadCategoryBtn" class="btn btn-secondary">Load Category Data</button>
+                        </div>
+                    </div>
+                    
+                    <form id="updateCategoryForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateName">Name</label>
+                                    <input type="text" class="form-control" id="updateName" name="name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateSlug">Slug</label>
+                                    <input type="text" class="form-control" id="updateSlug" name="slug">
+                                    <small class="form-text text-muted">Leave empty to auto-generate from name</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="updateDescription">Description</label>
+                            <textarea class="form-control" id="updateDescription" name="description" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateStatus">Status</label>
+                                    <select class="form-control" id="updateStatus" name="status">
+                                        <option value="">No Change</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateDisplayOrder">Display Order</label>
+                                    <input type="number" class="form-control" id="updateDisplayOrder" name="display_order" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="updateImage">Category Image</label>
+                            <input type="file" class="form-control" id="updateImage" name="image" accept="image/*">
+                            <small class="form-text text-muted">Leave empty to keep current image</small>
+                            <div id="currentImageContainer" class="mt-2" style="display: none;">
+                                <label>Current Image:</label>
+                                <img id="currentImage" class="image-preview" style="display: block;" src="#" alt="Current Category Image">
+                            </div>
+                            <img id="updateImagePreview" class="image-preview" src="#" alt="Category Image Preview">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="updateMetaTitle">Meta Title</label>
+                                    <input type="text" class="form-control" id="updateMetaTitle" name="meta_title">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="updateMetaDescription">Meta Description</label>
+                                    <textarea class="form-control" id="updateMetaDescription" name="meta_description" rows="2"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="updateMetaKeywords">Meta Keywords</label>
+                                    <textarea class="form-control" id="updateMetaKeywords" name="meta_keywords" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-api">Update Category</button>
+                    </form>
+                    
+                    <div class="response-container" id="updateResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Delete Category Tab -->
+            <div class="tab-pane fade" id="delete" role="tabpanel" aria-labelledby="delete-tab">
+                <div class="api-section">
+                    <h3>Delete Category</h3>
+                    <div class="alert alert-warning">
+                        <strong>Warning:</strong> This endpoint deletes a category (soft delete). Admin or Super Admin role is required.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="deleteCategoryId">Category ID *</label>
+                        <input type="number" class="form-control" id="deleteCategoryId" required>
+                    </div>
+                    
+                    <button type="button" id="deleteCategoryBtn" class="btn btn-danger btn-api">Delete Category</button>
+                    
+                    <div class="response-container" id="deleteResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Restore Category Tab -->
+            <div class="tab-pane fade" id="restore" role="tabpanel" aria-labelledby="restore-tab">
+                <div class="api-section">
+                    <h3>Restore Category</h3>
+                    <div class="alert alert-info">
+                        This endpoint restores a previously deleted category. Super Admin role is required.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="restoreCategoryId">Category ID *</label>
+                        <input type="number" class="form-control" id="restoreCategoryId" required>
+                    </div>
+                    
+                    <button type="button" id="restoreCategoryBtn" class="btn btn-success btn-api">Restore Category</button>
+                    
+                    <div class="response-container" id="restoreResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Base API URL - adjust this to match your setup
+        const baseUrl = window.location.origin + '/ramesh-be/be/api';
+        
+        // Store user data and tokens
+        let userData = null;
+        let accessToken = '';
+        let refreshToken = '';
+        
+        // Helper function to get access token
+        function getAccessToken() {
+            return document.getElementById('accessToken').value;
+        }
+        
+        // Helper function to make API requests
+        async function apiRequest(url, method, data = null, token = null) {
+            const headers = {
+                'Accept': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const options = {
+                method,
+                headers
+            };
+            
+            // Handle FormData separately for file uploads
+            if (data instanceof FormData) {
+                // Don't set Content-Type for FormData, browser will set it with boundary
+                options.body = data;
+                
+                // If we're using method override (_method=PUT), change the actual method to POST
+                if (data.has('_method') && data.get('_method') === 'PUT') {
+                    options.method = 'POST';
+                }
+            } else if (data && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+                headers['Content-Type'] = 'application/json';
+                options.body = JSON.stringify(data);
+            }
+            
+            try {
+                console.log(`Making ${method} request to ${url}`);
+                console.log('Headers:', headers);
+                if (data) console.log('Data:', data instanceof FormData ? 'FormData object' : data);
+                
+                const response = await fetch(url, options);
+                const responseData = await response.json();
+                
+                console.log('Response:', responseData);
+                return responseData;
+            } catch (error) {
+                console.error('API Request Error:', error);
+                return {
+                    status: 'error',
+                    message: error.message,
+                    data: null
+                };
+            }
+        }
+        
+        // Helper function to display response
+        function displayResponse(elementId, response) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<pre>${JSON.stringify(response, null, 2)}</pre>`;
+        }
+        
+        // Helper function to build query string from filters
+        function buildQueryString(filters) {
+            const params = new URLSearchParams();
+            
+            for (const key in filters) {
+                if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+                    params.append(key, filters[key]);
+                }
+            }
+            
+            return params.toString();
+        }
+        
+        // Helper function to create category cards
+        function createCategoryCards(categories) {
+            const container = document.getElementById('categoriesList');
+            container.innerHTML = '';
+            
+            if (!categories || categories.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No categories found</div>';
+                return;
+            }
+            
+            const row = document.createElement('div');
+            row.className = 'row';
+            
+            categories.forEach(category => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4';
+                
+                const card = document.createElement('div');
+                card.className = 'card category-card';
+                card.onclick = () => {
+                    document.getElementById('viewCategoryId').value = category.id;
+                    document.getElementById('viewCategoryBtn').click();
+                    document.getElementById('view-tab').click();
+                };
+                
+                const cardBody = document.createElement('div');
+                cardBody.className = 'card-body';
+                
+                // Category image
+                let categoryImage = '';
+                if (category.image_url) {
+                    categoryImage = `<img src="${category.image_url}" class="img-thumbnail mb-2" style="width: 50px; height: 50px; object-fit: cover;" alt="Category Image">`;
+                } else {
+                    categoryImage = `<div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
+                        <span>${category.name.charAt(0).toUpperCase()}</span>
+                    </div>`;
+                }
+                
+                // Status badge
+                let statusBadge = '';
+                switch (category.status) {
+                    case 'active':
+                        statusBadge = '<span class="badge bg-success">Active</span>';
+                        break;
+                    case 'inactive':
+                        statusBadge = '<span class="badge bg-warning text-dark">Inactive</span>';
+                        break;
+                    default:
+                        statusBadge = '<span class="badge bg-secondary">Unknown</span>';
+                }
+                
+                // Deleted badge
+                let deletedBadge = '';
+                if (category.deleted_at) {
+                    deletedBadge = '<span class="badge bg-danger ms-1">Deleted</span>';
+                }
+                
+                cardBody.innerHTML = `
+                    <div class="d-flex align-items-center mb-2">
+                        ${categoryImage}
+                        <h5 class="card-title mb-0 ms-2">${category.name}</h5>
+                    </div>
+                    <h6 class="card-subtitle mb-2 text-muted">${category.slug}</h6>
+                    <p class="card-text">${category.description ? category.description.substring(0, 50) + (category.description.length > 50 ? '...' : '') : 'No description'}</p>
+                    <div class="d-flex">
+                        ${statusBadge}
+                        ${deletedBadge}
+                    </div>
+                    <div class="mt-2 small text-muted">ID: ${category.id}</div>
+                `;
+                
+                card.appendChild(cardBody);
+                col.appendChild(card);
+                row.appendChild(col);
+            });
+            
+            container.appendChild(row);
+        }
+        
+        // Helper function to display category details
+        function displayCategoryDetails(category) {
+            const container = document.getElementById('categoryDetails');
+            
+            if (!category) {
+                container.innerHTML = '<div class="alert alert-warning">No category found</div>';
+                return;
+            }
+            
+            // Category image
+            let categoryImage = '';
+            if (category.image_url) {
+                categoryImage = `<img src="${category.image_url}" class="img-thumbnail mb-3" style="max-width: 200px; max-height: 200px;" alt="Category Image">`;
+            } else {
+                categoryImage = `<div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center mb-3" style="width: 200px; height: 200px; font-size: 3rem;">
+                    <span>${category.name.charAt(0).toUpperCase()}</span>
+                </div>`;
+            }
+            
+            // Status badge
+            let statusBadge = '';
+            switch (category.status) {
+                case 'active':
+                    statusBadge = '<span class="badge bg-success">Active</span>';
+                    break;
+                case 'inactive':
+                    statusBadge = '<span class="badge bg-warning text-dark">Inactive</span>';
+                    break;
+                default:
+                    statusBadge = '<span class="badge bg-secondary">Unknown</span>';
+            }
+            
+            // Deleted badge
+            let deletedBadge = '';
+            if (category.deleted_at) {
+                deletedBadge = '<span class="badge bg-danger ms-1">Deleted</span>';
+            }
+            
+            // Format dates
+            const createdAt = category.created_at_formatted || new Date(category.created_at).toLocaleString();
+            const updatedAt = category.updated_at ? (category.updated_at_formatted || new Date(category.updated_at).toLocaleString()) : 'Never';
+            const deletedAt = category.deleted_at ? (category.deleted_at_formatted || new Date(category.deleted_at).toLocaleString()) : 'Not deleted';
+            
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                ${categoryImage}
+                                <div class="mt-2">
+                                    ${statusBadge} ${deletedBadge}
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <h3>${category.name}</h3>
+                                <p class="text-muted">Slug: ${category.slug}</p>
+                                
+                                <div class="mb-3">
+                                    <h5>Description</h5>
+                                    <p>${category.description || 'No description'}</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5>SEO Information</h5>
+                                    <p><strong>Meta Title:</strong> ${category.meta_title || 'Not set'}</p>
+                                    <p><strong>Meta Description:</strong> ${category.meta_description || 'Not set'}</p>
+                                    <p><strong>Meta Keywords:</strong> ${category.meta_keywords || 'Not set'}</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5>Category Information</h5>
+                                    <p><strong>ID:</strong> ${category.id}</p>
+                                    <p><strong>Display Order:</strong> ${category.display_order}</p>
+                                    <p><strong>Created By:</strong> ${category.created_by_name || 'System'}</p>
+                                    <p><strong>Created At:</strong> ${createdAt}</p>
+                                    <p><strong>Updated By:</strong> ${category.updated_by_name || 'Never updated'}</p>
+                                    <p><strong>Updated At:</strong> ${updatedAt}</p>
+                                    <p><strong>Deleted By:</strong> ${category.deleted_by_name || 'Not deleted'}</p>
+                                    <p><strong>Deleted At:</strong> ${deletedAt}</p>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-sm btn-primary" onclick="loadCategoryForUpdate(${category.id})">Edit</button>
+                                    ${!category.deleted_at ? 
+                                        `<button type="button" class="btn btn-sm btn-danger" onclick="prepareDeleteCategory(${category.id})">Delete</button>` : 
+                                        `<button type="button" class="btn btn-sm btn-success" onclick="prepareRestoreCategory(${category.id})">Restore</button>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Function to load category data for update
+        function loadCategoryForUpdate(categoryId) {
+            document.getElementById('updateCategoryId').value = categoryId;
+            document.getElementById('loadCategoryBtn').click();
+            document.getElementById('update-tab').click();
+        }
+        
+        // Function to prepare delete category
+        function prepareDeleteCategory(categoryId) {
+            document.getElementById('deleteCategoryId').value = categoryId;
+            document.getElementById('delete-tab').click();
+        }
+        
+        // Function to prepare restore category
+        function prepareRestoreCategory(categoryId) {
+            document.getElementById('restoreCategoryId').value = categoryId;
+            document.getElementById('restore-tab').click();
+        }
+        
+        // Function to update authentication status UI
+        function updateAuthStatusUI() {
+            const authStatus = document.getElementById('authStatus');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            if (accessToken) {
+                authStatus.className = 'auth-status logged-in';
+                authStatus.innerHTML = `<strong>Status:</strong> Authenticated${userData ? ' as ' + userData.username : ''}`;
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+            } else {
+                authStatus.className = 'auth-status logged-out';
+                authStatus.innerHTML = '<strong>Status:</strong> Not authenticated';
+                loginBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'none';
+            }
+        }
+        
+        // Login functionality
+        document.getElementById('loginBtn').addEventListener('click', async function() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                displayResponse('loginResponse', { 
+                    status: 'error', 
+                    message: 'Email/username and password are required',
+                    data: null
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/login`, 'POST', { email, password });
+            displayResponse('loginResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                // Store tokens and user data
+                accessToken = response.data.access_token;
+                refreshToken = response.data.refresh_token;
+                userData = response.data.user;
+                
+                // Update access token input
+                document.getElementById('accessToken').value = accessToken;
+                
+                // Store in localStorage
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                localStorage.setItem('userData', JSON.stringify(userData));
+                
+                // Update UI
+                updateAuthStatusUI();
+                
+                alert('Login successful! You can now use the category management API endpoints.');
+            }
+        });
+        
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            if (!accessToken) {
+                displayResponse('loginResponse', { 
+                    status: 'error', 
+                    message: 'Not logged in',
+                    data: null
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/logout`, 'POST', {}, accessToken);
+            displayResponse('loginResponse', response);
+            
+            // Clear tokens and user data regardless of response
+            accessToken = '';
+            refreshToken = '';
+            userData = null;
+            
+            // Clear access token input
+            document.getElementById('accessToken').value = '';
+            
+            // Remove from localStorage
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('userData');
+            
+            // Update UI
+            updateAuthStatusUI();
+            
+            alert('Logged out successfully.');
+        });
+        
+        // Copy token button
+        document.getElementById('copyTokenBtn').addEventListener('click', function() {
+            const tokenInput = document.getElementById('accessToken');
+            tokenInput.select();
+            document.execCommand('copy');
+            alert('Token copied to clipboard!');
+        });
+        
+        // List Categories
+        document.getElementById('listCategoriesBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                displayResponse('listResponse', { 
+                    status: 'error', 
+                    message: 'Access token is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const page = document.getElementById('listPage').value;
+            const limit = document.getElementById('listLimit').value;
+            const search = document.getElementById('listSearch').value;
+            const status = document.getElementById('listStatus').value;
+            
+            const filters = { page, limit, search, status };
+            const queryString = buildQueryString(filters);
+            
+            const response = await apiRequest(`${baseUrl}/api/categories?${queryString}`, 'GET', null, token);
+            displayResponse('listResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                createCategoryCards(response.data);
+            }
+        });
+        
+        // View Category
+        document.getElementById('viewCategoryBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                displayResponse('viewResponse', { 
+                    status: 'error', 
+                    message: 'Access token is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const categoryId = document.getElementById('viewCategoryId').value;
+            
+            if (!categoryId) {
+                displayResponse('viewResponse', { 
+                    status: 'error', 
+                    message: 'Category ID is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/categories/${categoryId}`, 'GET', null, token);
+            displayResponse('viewResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                displayCategoryDetails(response.data);
+            }
+        });
+        
+        // Create Category
+        document.getElementById('createCategoryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = getAccessToken();
+            
+            if (!token) {
+                displayResponse('createResponse', { 
+                    status: 'error', 
+                    message: 'Access token is required',
+                    data: null
+                });
+                return;
+            }
+            
+            // Create FormData object for file upload
+            const formData = new FormData(this);
+            
+            const response = await apiRequest(`${baseUrl}/api/categories`, 'POST', formData, token);
+            displayResponse('createResponse', response);
+            
+            if (response.status === 'success') {
+                alert('Category created successfully!');
+                this.reset();
+                document.getElementById('createImagePreview').style.display = 'none';
+                
+                // Refresh the categories list
+                document.getElementById('listCategoriesBtn').click();
+            }
+        });
+        
+        // Load Category for Update
+        document.getElementById('loadCategoryBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                displayResponse('updateResponse', { 
+                    status: 'error', 
+                    message: 'Access token is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const categoryId = document.getElementById('updateCategoryId').value;
+            
+            if (!categoryId) {
+                displayResponse('updateResponse', { 
+                    status: 'error', 
+                    message: 'Category ID is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/categories/${categoryId}`, 'GET', null, token);
+            
+            if (response.status === 'success' && response.data) {
+                const category = response.data;
+                
+                // Populate form fields
+                document.getElementById('updateName').value = category.name;
+                document.getElementById('updateSlug').value = category.slug;
+                document.getElementById('updateDescription').value = category.description || '';
+                document.getElementById('updateDisplayOrder').value = category.display_order;
+                document.getElementById('updateMetaTitle').value = category.meta_title || '';
+                document.getElementById('updateMetaDescription').value = category.meta_description || '';
+                document.getElementById('updateMetaKeywords').value = category.meta_keywords || '';
+                
+                // Set select fields
+                document.getElementById('updateStatus').value = '';
+                
+                // Show current image if exists
+                if (category.image_url) {
+                    document.getElementById('currentImageContainer').style.display = 'block';
+                    document.getElementById('currentImage').src = category.image_url;
+                } else {
+                    document.getElementById('currentImageContainer').style.display = 'none';
+                }
+                
+                // Clear file input
+                document.getElementById('updateImage').value = '';
+                document.getElementById('updateImagePreview').style.display = 'none';
+                
+                alert('Category data loaded successfully!');
+            } else {
+                displayResponse('updateResponse', response);
+            }
+        });
+        
+        // Update Category
+        document.getElementById('updateCategoryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+        
+            const token = getAccessToken();
+        
+            if (!token) {
+                displayResponse('updateResponse', { 
+                    status: 'error', 
+                    message: 'Access token is required',
+                    data: null
+                });
+                return;
+            }
+        
+            const categoryId = document.getElementById('updateCategoryId').value;
+        
+            if (!categoryId) {
+                displayResponse('updateResponse', { 
+                    status: 'error', 
+                    message: 'Category ID is required',
+                    data: null
+                });
+                return;
+            }
+        
+            // Create FormData object for file upload
+            const formData = new FormData(this);
+        
+            // Add method override for PUT
+            formData.append('_method', 'PUT');
+        
+            // Remove empty fields to avoid overwriting with empty values
+            for (const pair of formData.entries()) {
+                if (pair[1] === '') {
+                    formData.delete(pair[0]);
+                }
+            }
+        
+            // Log what we're sending
+            console.log("Sending update with FormData:");
+            for (const pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+        
+            const response = await apiRequest(`${baseUrl}/api/categories/${categoryId}`, 'POST', formData, token);
+            displayResponse('updateResponse', response);
+        
+            if (response.status === 'success') {
+                alert('Category updated successfully!');
+            
+                // Refresh the categories list
+                document.getElementById('listCategoriesBtn').click();
+            }
+        });
+        
+        // Delete Category
+        document.getElementById('deleteCategoryBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                displayResponse('deleteResponse', { 
+                    status: 'error', 
+                    message: 'Access token is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const categoryId = document.getElementById('deleteCategoryId').value;
+            
+            if (!categoryId) {
+                displayResponse('deleteResponse', { 
+                    status: 'error', 
+                    message: 'Category ID is required',
+                    data: null
+                });
+                return;
+            }
+            
+            if (confirm('Are you sure you want to delete this category? This action can be undone by a Super Admin.')) {
+                const response = await apiRequest(`${baseUrl}/api/categories/${categoryId}`, 'DELETE', null, token);
+                displayResponse('deleteResponse', response);
+                
+                if (response.status === 'success') {
+                    alert('Category deleted successfully!');
+                    
+                    // Refresh the categories list
+                    document.getElementById('listCategoriesBtn').click();
+                }
+            }
+        });
+        
+        // Restore Category
+        document.getElementById('restoreCategoryBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                displayResponse('restoreResponse', { 
+                    status: 'error', 
+                    message: 'Access token is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const categoryId = document.getElementById('restoreCategoryId').value;
+            
+            if (!categoryId) {
+                displayResponse('restoreResponse', { 
+                    status: 'error', 
+                    message: 'Category ID is required',
+                    data: null
+                });
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/categories/${categoryId}/restore`, 'POST', null, token);
+            displayResponse('restoreResponse', response);
+            
+            if (response.status === 'success') {
+                alert('Category restored successfully!');
+                
+                // Refresh the categories list
+                document.getElementById('listCategoriesBtn').click();
+            }
+        });
+        
+        // Image preview for create form
+        document.getElementById('createImage').addEventListener('change', function() {
+            const file = this.files[0];
+            const preview = document.getElementById('createImagePreview');
+            
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+        
+        // Image preview for update form
+        document.getElementById('updateImage').addEventListener('change', function() {
+            const file = this.files[0];
+            const preview = document.getElementById('updateImagePreview');
+            
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+        
+        // Initialize from localStorage on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load tokens and user data from localStorage
+            accessToken = localStorage.getItem('accessToken') || '';
+            refreshToken = localStorage.getItem('refreshToken') || '';
+            
+            try {
+                const userDataStr = localStorage.getItem('userData');
+                if (userDataStr) {
+                    userData = JSON.parse(userDataStr);
+                }
+            } catch (e) {
+                console.error('Error parsing user data from localStorage:', e);
+                userData = null;
+            }
+            
+            // Set access token input
+            if (accessToken) {
+                document.getElementById('accessToken').value = accessToken;
+            }
+            
+            // Update UI
+            updateAuthStatusUI();
+            
+            // Save token to localStorage when changed manually
+            document.getElementById('accessToken').addEventListener('change', function() {
+                accessToken = this.value;
+                localStorage.setItem('accessToken', accessToken);
+                updateAuthStatusUI();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Search Tester</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .response-container {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .category-card {
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        .category-card:hover {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .auth-status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .auth-status.logged-in {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .auth-status.logged-out {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Category Search Tester</h1>
+        
+        <!-- Authentication Section -->
+        <div class="card mb-4">
+            <div class="card-header">Authentication</div>
+            <div class="card-body">
+                <div id="authStatus" class="auth-status logged-out">
+                    <strong>Status:</strong> Not authenticated
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="loginEmail">Email or Username</label>
+                            <input type="text" class="form-control" id="loginEmail" placeholder="Enter email or username">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" placeholder="Password">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="loginBtn" class="btn btn-success">Login</button>
+                <button type="button" id="logoutBtn" class="btn btn-outline-danger ms-2" style="display: none;">Logout</button>
+                
+                <div class="mt-3">
+                    <div class="form-group">
+                        <label for="accessToken">Access Token</label>
+                        <input type="text" class="form-control" id="accessToken" placeholder="Enter your access token">
+                        <small class="form-text text-muted">Token will be used for API requests</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Category Search Section -->
+        <div class="card">
+            <div class="card-header">Category Search</div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="searchTerm">Search Term</label>
+                            <input type="text" class="form-control" id="searchTerm" placeholder="Search by name, description, slug">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="statusFilter">Status</label>
+                            <select class="form-control" id="statusFilter">
+                                <option value="">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="limit">Items Per Page</label>
+                            <input type="number" class="form-control" id="limit" value="10" min="1" max="100">
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="button" id="searchBtn" class="btn btn-primary">Search Categories</button>
+                
+                <div class="mt-4" id="categoriesList">
+                    <!-- Category cards will be displayed here -->
+                </div>
+                
+                <div class="response-container mt-3" id="searchResponse">
+                    <pre>Response will appear here</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Base API URL - adjust this to match your setup
+        const baseUrl = window.location.origin + '/ramesh-be/be/api';
+        
+        // Store user data and tokens
+        let userData = null;
+        let accessToken = '';
+        
+        // Helper function to make API requests
+        async function apiRequest(url, method, data = null, token = null) {
+            const headers = {
+                'Accept': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const options = {
+                method,
+                headers
+            };
+            
+            if (data && (method === 'POST' || method === 'PUT')) {
+                headers['Content-Type'] = 'application/json';
+                options.body = JSON.stringify(data);
+            }
+            
+            try {
+                console.log(`Making ${method} request to ${url}`);
+                console.log('Headers:', headers);
+                if (data) console.log('Data:', data);
+                
+                const response = await fetch(url, options);
+                const responseData = await response.json();
+                
+                console.log('Response:', responseData);
+                return responseData;
+            } catch (error) {
+                console.error('API Request Error:', error);
+                return {
+                    status: 'error',
+                    message: error.message,
+                    data: null
+                };
+            }
+        }
+        
+        // Helper function to display response
+        function displayResponse(elementId, response) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<pre>${JSON.stringify(response, null, 2)}</pre>`;
+        }
+        
+        // Helper function to build query string from filters
+        function buildQueryString(filters) {
+            const params = new URLSearchParams();
+            
+            for (const key in filters) {
+                if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+                    params.append(key, filters[key]);
+                }
+            }
+            
+            return params.toString();
+        }
+        
+        // Helper function to create category cards
+        function createCategoryCards(categories) {
+            const container = document.getElementById('categoriesList');
+            container.innerHTML = '';
+            
+            if (!categories || categories.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No categories found</div>';
+                return;
+            }
+            
+            const row = document.createElement('div');
+            row.className = 'row';
+            
+            categories.forEach(category => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4';
+                
+                const card = document.createElement('div');
+                card.className = 'card category-card';
+                
+                const cardBody = document.createElement('div');
+                cardBody.className = 'card-body';
+                
+                // Category image
+                let categoryImage = '';
+                if (category.image_url) {
+                    categoryImage = `<img src="${category.image_url}" class="img-thumbnail mb-2" style="width: 50px; height: 50px; object-fit: cover;" alt="Category Image">`;
+                } else {
+                    categoryImage = `<div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
+                        <span>${category.name.charAt(0).toUpperCase()}</span>
+                    </div>`;
+                }
+                
+                // Status badge
+                let statusBadge = '';
+                switch (category.status) {
+                    case 'active':
+                        statusBadge = '<span class="badge bg-success">Active</span>';
+                        break;
+                    case 'inactive':
+                        statusBadge = '<span class="badge bg-warning text-dark">Inactive</span>';
+                        break;
+                    default:
+                        statusBadge = '<span class="badge bg-secondary">Unknown</span>';
+                }
+                
+                // Deleted badge
+                let deletedBadge = '';
+                if (category.deleted_at) {
+                    deletedBadge = '<span class="badge bg-danger ms-1">Deleted</span>';
+                }
+                
+                cardBody.innerHTML = `
+                    <div class="d-flex align-items-center mb-2">
+                        ${categoryImage}
+                        <h5 class="card-title mb-0 ms-2">${category.name}</h5>
+                    </div>
+                    <h6 class="card-subtitle mb-2 text-muted">${category.slug}</h6>
+                    <p class="card-text">${category.description ? category.description.substring(0, 50) + (category.description.length > 50 ? '...' : '') : 'No description'}</p>
+                    <div class="d-flex">
+                        ${statusBadge}
+                        ${deletedBadge}
+                    </div>
+                    <div class="mt-2 small text-muted">ID: ${category.id}</div>
+                `;
+                
+                card.appendChild(cardBody);
+                col.appendChild(card);
+                row.appendChild(col);
+            });
+            
+            container.appendChild(row);
+        }
+        
+        // Function to update authentication status UI
+        function updateAuthStatusUI() {
+            const authStatus = document.getElementById('authStatus');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            if (accessToken) {
+                authStatus.className = 'auth-status logged-in';
+                authStatus.innerHTML = `<strong>Status:</strong> Authenticated${userData ? ' as ' + userData.username : ''}`;
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+            } else {
+                authStatus.className = 'auth-status logged-out';
+                authStatus.innerHTML = '<strong>Status:</strong> Not authenticated';
+                loginBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'none';
+            }
+        }
+        
+        // Login functionality
+        document.getElementById('loginBtn').addEventListener('click', async function() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                alert('Email/username and password are required');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/login`, 'POST', { email, password });
+            
+            if (response.status === 'success' && response.data) {
+                // Store tokens and user data
+                accessToken = response.data.access_token;
+                userData = response.data.user;
+                
+                // Update access token input
+                document.getElementById('accessToken').value = accessToken;
+                
+                // Store in localStorage
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('userData', JSON.stringify(userData));
+                
+                // Update UI
+                updateAuthStatusUI();
+                
+                alert('Login successful!');
+            } else {
+                alert('Login failed: ' + (response.message || 'Unknown error'));
+            }
+        });
+        
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            if (!accessToken) {
+                alert('Not logged in');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/logout`, 'POST', {}, accessToken);
+            
+            // Clear tokens and user data regardless of response
+            accessToken = '';
+            userData = null;
+            
+            // Clear access token input
+            document.getElementById('accessToken').value = '';
+            
+            // Remove from localStorage
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('userData');
+            
+            // Update UI
+            updateAuthStatusUI();
+            
+            alert('Logged out successfully.');
+        });
+        
+        // Search Categories
+        document.getElementById('searchBtn').addEventListener('click', async function() {
+            const token = document.getElementById('accessToken').value;
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const searchTerm = document.getElementById('searchTerm').value;
+            const status = document.getElementById('statusFilter').value;
+            const limit = document.getElementById('limit').value;
+            
+            const filters = { 
+                page: 1, 
+                limit, 
+                search: searchTerm, 
+                status 
+            };
+            
+            const queryString = buildQueryString(filters);
+            
+            // Clear previous results
+            document.getElementById('searchResponse').innerHTML = '<pre>Searching...</pre>';
+            document.getElementById('categoriesList').innerHTML = '';
+            
+            const response = await apiRequest(`${baseUrl}/api/categories?${queryString}`, 'GET', null, token);
+            displayResponse('searchResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                createCategoryCards(response.data);
+            }
+        });
+        
+        // Initialize from localStorage on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            accessToken = localStorage.getItem('accessToken') || '';
+            
+            try {
+                const userDataStr = localStorage.getItem('userData');
+                if (userDataStr) {
+                    userData = JSON.parse(userDataStr);
+                }
+            } catch (e) {
+                console.error('Error parsing user data from localStorage:', e);
+                userData = null;
+            }
+            
+            // Set access token input
+            if (accessToken) {
+                document.getElementById('accessToken').value = accessToken;
+            }
+            
+            // Update UI
+            updateAuthStatusUI();
+            
+            // Save token to localStorage when changed manually
+            document.getElementById('accessToken').addEventListener('change', function() {
+                accessToken = this.value;
+                localStorage.setItem('accessToken', accessToken);
+                updateAuthStatusUI();
+            });
+        });
+    </script>
+</body>
+</html>

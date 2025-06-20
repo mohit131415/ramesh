@@ -1,0 +1,170 @@
+/* Animation styles with hardware acceleration and smoother transitions */
+.featured-item {
+  transition: all 2.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+  will-change: transform, background-color, border-color;
+}
+
+/* Animation for moving up - smoother with hardware acceleration */
+.featured-item.moving-up {
+  animation: moveUp 2.5s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: rgba(0, 128, 0, 0.08);
+  border-color: rgba(0, 128, 0, 0.3);
+}
+
+/* Animation for moving down - smoother with hardware acceleration */
+.featured-item.moving-down {
+  animation: moveDown 2.5s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: rgba(0, 128, 0, 0.08);
+  border-color: rgba(0, 128, 0, 0.3);
+}
+
+/* Animation for the item being swapped with - smoother */
+.featured-item.swap-target {
+  animation: flash 3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Keyframes for moving up animation - more gradual */
+@keyframes moveUp {
+  0% {
+    transform: translate3d(0, 0, 0);
+    background-color: transparent;
+  }
+  10% {
+    transform: translate3d(0, -5px, 0);
+    background-color: rgba(0, 128, 0, 0.02);
+  }
+  20% {
+    transform: translate3d(0, -10px, 0);
+    background-color: rgba(0, 128, 0, 0.04);
+  }
+  30% {
+    transform: translate3d(0, -15px, 0);
+    background-color: rgba(0, 128, 0, 0.06);
+  }
+  40% {
+    transform: translate3d(0, -15px, 0);
+    background-color: rgba(0, 128, 0, 0.08);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+    background-color: rgba(0, 128, 0, 0.08);
+  }
+  60% {
+    transform: translate3d(0, -5px, 0);
+    background-color: rgba(0, 128, 0, 0.06);
+  }
+  70% {
+    transform: translate3d(0, 5px, 0);
+    background-color: rgba(0, 128, 0, 0.04);
+  }
+  80% {
+    transform: translate3d(0, 10px, 0);
+    background-color: rgba(0, 128, 0, 0.02);
+  }
+  90% {
+    transform: translate3d(0, 5px, 0);
+    background-color: rgba(0, 128, 0, 0.01);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+    background-color: transparent;
+  }
+}
+
+/* Keyframes for moving down animation - more gradual */
+@keyframes moveDown {
+  0% {
+    transform: translate3d(0, 0, 0);
+    background-color: transparent;
+  }
+  10% {
+    transform: translate3d(0, 5px, 0);
+    background-color: rgba(0, 128, 0, 0.02);
+  }
+  20% {
+    transform: translate3d(0, 10px, 0);
+    background-color: rgba(0, 128, 0, 0.04);
+  }
+  30% {
+    transform: translate3d(0, 15px, 0);
+    background-color: rgba(0, 128, 0, 0.06);
+  }
+  40% {
+    transform: translate3d(0, 15px, 0);
+    background-color: rgba(0, 128, 0, 0.08);
+  }
+  50% {
+    transform: translate3d(0, 10px, 0);
+    background-color: rgba(0, 128, 0, 0.08);
+  }
+  60% {
+    transform: translate3d(0, 5px, 0);
+    background-color: rgba(0, 128, 0, 0.06);
+  }
+  70% {
+    transform: translate3d(0, -5px, 0);
+    background-color: rgba(0, 128, 0, 0.04);
+  }
+  80% {
+    transform: translate3d(0, -10px, 0);
+    background-color: rgba(0, 128, 0, 0.02);
+  }
+  90% {
+    transform: translate3d(0, -5px, 0);
+    background-color: rgba(0, 128, 0, 0.01);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+    background-color: transparent;
+  }
+}
+
+/* Keyframes for flash animation - more gradual */
+@keyframes flash {
+  0% {
+    background-color: transparent;
+    border-color: transparent;
+  }
+  10% {
+    background-color: rgba(0, 0, 255, 0.01);
+    border-color: rgba(0, 0, 255, 0.05);
+  }
+  20% {
+    background-color: rgba(0, 0, 255, 0.03);
+    border-color: rgba(0, 0, 255, 0.1);
+  }
+  30% {
+    background-color: rgba(0, 0, 255, 0.05);
+    border-color: rgba(0, 0, 255, 0.2);
+  }
+  40% {
+    background-color: rgba(0, 0, 255, 0.08);
+    border-color: rgba(0, 0, 255, 0.3);
+  }
+  50% {
+    background-color: rgba(0, 0, 255, 0.1);
+    border-color: rgba(0, 0, 255, 0.35);
+  }
+  60% {
+    background-color: rgba(0, 0, 255, 0.08);
+    border-color: rgba(0, 0, 255, 0.3);
+  }
+  70% {
+    background-color: rgba(0, 0, 255, 0.05);
+    border-color: rgba(0, 0, 255, 0.2);
+  }
+  80% {
+    background-color: rgba(0, 0, 255, 0.03);
+    border-color: rgba(0, 0, 255, 0.1);
+  }
+  90% {
+    background-color: rgba(0, 0, 255, 0.01);
+    border-color: rgba(0, 0, 255, 0.05);
+  }
+  100% {
+    background-color: transparent;
+    border-color: transparent;
+  }
+}

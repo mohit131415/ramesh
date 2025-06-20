@@ -1,0 +1,1917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coupon Management API Tester</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        .api-section {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .response-container {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .nav-tabs {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .btn-api {
+            margin-top: 10px;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .filter-section {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .filter-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .alert-info {
+            margin-bottom: 15px;
+        }
+        .btn-danger {
+            margin-right: 10px;
+        }
+        .coupon-card {
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        .coupon-card:hover {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .auth-status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .auth-status.logged-in {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .auth-status.logged-out {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .date-time-local {
+            position: relative;
+        }
+        .date-time-local input[type="datetime-local"] {
+            padding-right: 30px;
+        }
+        .date-time-local .clear-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #999;
+        }
+        .date-time-local .clear-btn:hover {
+            color: #333;
+        }
+        .product-selection {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .category-selection {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Coupon Management API Tester</h1>
+        
+        <!-- Authentication Section -->
+        <div class="api-section" id="authSection">
+            <h3>Authentication</h3>
+            <div class="alert alert-info">
+                Login to get an access token for testing the coupon management API endpoints.
+            </div>
+            
+            <div id="authStatus" class="auth-status logged-out">
+                <strong>Status:</strong> Not authenticated
+            </div>
+            
+            <div id="loginForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="loginEmail">Email or Username</label>
+                            <input type="text" class="form-control" id="loginEmail" placeholder="Enter email or username">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" placeholder="Password">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="loginBtn" class="btn btn-success btn-api">Login</button>
+                <button type="button" id="logoutBtn" class="btn btn-outline-danger btn-api ms-2" style="display: none;">Logout</button>
+            </div>
+            
+            <div class="mt-3">
+                <div class="form-group">
+                    <label for="accessToken">Access Token</label>
+                    <input type="text" class="form-control" id="accessToken" placeholder="Enter your access token">
+                    <small class="form-text text-muted">Token will be used for API requests</small>
+                </div>
+            </div>
+        </div>
+        
+        <ul class="nav nav-tabs" id="apiTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list" type="button" role="tab" aria-controls="list" aria-selected="true">List Coupons</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="view-tab" data-bs-toggle="tab" data-bs-target="#view" type="button" role="tab" aria-controls="view" aria-selected="false">View Coupon</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab" aria-controls="create" aria-selected="false">Create Coupon</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="update-tab" data-bs-toggle="tab" data-bs-target="#update" type="button" role="tab" aria-controls="update" aria-selected="false">Update Coupon</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="delete-tab" data-bs-toggle="tab" data-bs-target="#delete" type="button" role="tab" aria-controls="delete" aria-selected="false">Delete Coupon</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="restore-tab" data-bs-toggle="tab" data-bs-target="#restore" type="button" role="tab" aria-controls="restore" aria-selected="false">Restore Coupon</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="validate-tab" data-bs-toggle="tab" data-bs-target="#validate" type="button" role="tab" aria-controls="validate" aria-selected="false">Validate Coupon</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="apply-tab" data-bs-toggle="tab" data-bs-target="#apply" type="button" role="tab" aria-controls="apply" aria-selected="false">Apply Coupon</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="usage-tab" data-bs-toggle="tab" data-bs-target="#usage" type="button" role="tab" aria-controls="usage" aria-selected="false">Usage History</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="apiTabsContent">
+            <!-- List Coupons Tab -->
+            <div class="tab-pane fade show active" id="list" role="tabpanel" aria-labelledby="list-tab">
+                <div class="api-section">
+                    <h3>List All Coupons</h3>
+                    <div class="alert alert-info">
+                        This endpoint returns all coupons with pagination and optional filtering.
+                    </div>
+                    
+                    <div class="filter-section">
+                        <div class="filter-title">Filters</div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="listSearch">Search</label>
+                                    <input type="text" class="form-control" id="listSearch" placeholder="Search by code, description">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="listStatus">Status</label>
+                                    <select class="form-control" id="listStatus">
+                                        <option value="">All Statuses</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                        <option value="expired">Expired</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="listType">Discount Type</label>
+                                    <select class="form-control" id="listType">
+                                        <option value="">All Types</option>
+                                        <option value="percentage">Percentage</option>
+                                        <option value="fixed_amount">Fixed Amount</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="listPage">Page</label>
+                                <input type="number" class="form-control" id="listPage" value="1" min="1">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="listLimit">Items Per Page</label>
+                                <input type="number" class="form-control" id="listLimit" value="10" min="1" max="100">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="listCouponsBtn" class="btn btn-primary btn-api">List Coupons</button>
+                    
+                    <div class="mt-4" id="couponsList">
+                        <!-- Coupon cards will be displayed here -->
+                    </div>
+                    
+                    <div class="response-container" id="listResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- View Coupon Tab -->
+            <div class="tab-pane fade" id="view" role="tabpanel" aria-labelledby="view-tab">
+                <div class="api-section">
+                    <h3>View Coupon Details</h3>
+                    <div class="alert alert-info">
+                        This endpoint returns detailed information about a specific coupon.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="viewCouponId">Coupon ID</label>
+                        <input type="number" class="form-control" id="viewCouponId" placeholder="Enter coupon ID">
+                    </div>
+                    
+                    <button type="button" id="viewCouponBtn" class="btn btn-primary btn-api">View Coupon</button>
+                    
+                    <div class="mt-4" id="couponDetails">
+                        <!-- Coupon details will be displayed here -->
+                    </div>
+                    
+                    <div class="response-container" id="viewResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Create Coupon Tab -->
+            <div class="tab-pane fade" id="create" role="tabpanel" aria-labelledby="create-tab">
+                <div class="api-section">
+                    <h3>Create New Coupon</h3>
+                    <div class="alert alert-info">
+                        This endpoint creates a new coupon. Admin or Super Admin role is required.
+                    </div>
+                    
+                    <form id="createCouponForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createCode">Coupon Code *</label>
+                                    <input type="text" class="form-control" id="createCode" name="code" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createDescription">Description</label>
+                                    <input type="text" class="form-control" id="createDescription" name="description">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createDiscountType">Discount Type *</label>
+                                    <select class="form-control" id="createDiscountType" name="discount_type" required>
+                                        <option value="percentage">Percentage</option>
+                                        <option value="fixed_amount">Fixed Amount</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createDiscountValue">Discount Value *</label>
+                                    <input type="number" class="form-control" id="createDiscountValue" name="discount_value" step="0.01" min="0" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="createMaxDiscountAmount">Max Discount Amount</label>
+                                    <input type="number" class="form-control" id="createMaxDiscountAmount" name="max_discount_amount" step="0.01" min="0">
+                                    <small class="form-text text-muted">For percentage discounts</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createMinPurchaseAmount">Minimum Purchase Amount</label>
+                                    <input type="number" class="form-control" id="createMinPurchaseAmount" name="min_purchase_amount" step="0.01" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createUsageLimit">Usage Limit</label>
+                                    <input type="number" class="form-control" id="createUsageLimit" name="usage_limit" min="0">
+                                    <small class="form-text text-muted">Leave empty for unlimited uses</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group date-time-local">
+                                    <label for="createStartDate">Start Date</label>
+                                    <input type="datetime-local" class="form-control" id="createStartDate" name="start_date">
+                                    <span class="clear-btn" onclick="clearDateInput('createStartDate')">×</span>
+                                    <small class="form-text text-muted">Leave empty to start immediately</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group date-time-local">
+                                    <label for="createEndDate">End Date</label>
+                                    <input type="datetime-local" class="form-control" id="createEndDate" name="end_date">
+                                    <span class="clear-btn" onclick="clearDateInput('createEndDate')">×</span>
+                                    <small class="form-text text-muted">Leave empty for no expiration</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createStatus">Status</label>
+                                    <select class="form-control" id="createStatus" name="status">
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="createIsFirstOrderOnly">First Order Only</label>
+                                    <select class="form-control" id="createIsFirstOrderOnly" name="is_first_order_only">
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Applicable Products</label>
+                                    <div class="mb-2">
+                                        <select class="form-control" id="createProductRestrictionType" name="product_restriction_type">
+                                            <option value="all">All Products</option>
+                                            <option value="specific">Specific Products</option>
+                                            <option value="exclude">Exclude Specific Products</option>
+                                        </select>
+                                    </div>
+                                    <div id="createProductSelectionContainer" style="display: none;">
+                                        <div class="input-group mb-2">
+                                            <input type="text" class="form-control" id="createProductSearch" placeholder="Search products...">
+                                            <button class="btn btn-outline-secondary" type="button" id="createProductSearchBtn">Search</button>
+                                        </div>
+                                        <div class="product-selection" id="createProductSelection">
+                                            <!-- Product checkboxes will be loaded here -->
+                                            <div class="text-center py-3">
+                                                <small class="text-muted">Search for products to select</small>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="createSelectedProducts" name="product_ids" value="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Applicable Categories</label>
+                                    <div class="mb-2">
+                                        <select class="form-control" id="createCategoryRestrictionType" name="category_restriction_type">
+                                            <option value="all">All Categories</option>
+                                            <option value="specific">Specific Categories</option>
+                                            <option value="exclude">Exclude Specific Categories</option>
+                                        </select>
+                                    </div>
+                                    <div id="createCategorySelectionContainer" style="display: none;">
+                                        <div class="category-selection" id="createCategorySelection">
+                                            <!-- Category checkboxes will be loaded here -->
+                                            <div class="text-center py-3">
+                                                <small class="text-muted">Loading categories...</small>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="createSelectedCategories" name="category_ids" value="">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-api">Create Coupon</button>
+                    </form>
+                    
+                    <div class="response-container" id="createResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Update Coupon Tab -->
+            <div class="tab-pane fade" id="update" role="tabpanel" aria-labelledby="update-tab">
+                <div class="api-section">
+                    <h3>Update Coupon</h3>
+                    <div class="alert alert-info">
+                        This endpoint updates an existing coupon. Admin or Super Admin role is required.
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label for="updateCouponId">Coupon ID *</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="updateCouponId" required>
+                            <button type="button" id="loadCouponBtn" class="btn btn-secondary">Load Coupon Data</button>
+                        </div>
+                    </div>
+                    
+                    <form id="updateCouponForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateCode">Coupon Code</label>
+                                    <input type="text" class="form-control" id="updateCode" name="code">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateDescription">Description</label>
+                                    <input type="text" class="form-control" id="updateDescription" name="description">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="updateDiscountType">Discount Type</label>
+                                    <select class="form-control" id="updateDiscountType" name="discount_type">
+                                        <option value="">No Change</option>
+                                        <option value="percentage">Percentage</option>
+                                        <option value="fixed_amount">Fixed Amount</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="updateDiscountValue">Discount Value</label>
+                                    <input type="number" class="form-control" id="updateDiscountValue" name="discount_value" step="0.01" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="updateMaxDiscountAmount">Max Discount Amount</label>
+                                    <input type="number" class="form-control" id="updateMaxDiscountAmount" name="max_discount_amount" step="0.01" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateMinPurchaseAmount">Minimum Purchase Amount</label>
+                                    <input type="number" class="form-control" id="updateMinPurchaseAmount" name="min_purchase_amount" step="0.01" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateUsageLimit">Usage Limit</label>
+                                    <input type="number" class="form-control" id="updateUsageLimit" name="usage_limit" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group date-time-local">
+                                    <label for="updateStartDate">Start Date</label>
+                                    <input type="datetime-local" class="form-control" id="updateStartDate" name="start_date">
+                                    <span class="clear-btn" onclick="clearDateInput('updateStartDate')">×</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group date-time-local">
+                                    <label for="updateEndDate">End Date</label>
+                                    <input type="datetime-local" class="form-control" id="updateEndDate" name="end_date">
+                                    <span class="clear-btn" onclick="clearDateInput('updateEndDate')">×</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateStatus">Status</label>
+                                    <select class="form-control" id="updateStatus" name="status">
+                                        <option value="">No Change</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="updateIsFirstOrderOnly">First Order Only</label>
+                                    <select class="form-control" id="updateIsFirstOrderOnly" name="is_first_order_only">
+                                        <option value="">No Change</option>
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Applicable Products</label>
+                                    <div class="mb-2">
+                                        <select class="form-control" id="updateProductRestrictionType" name="product_restriction_type">
+                                            <option value="">No Change</option>
+                                            <option value="all">All Products</option>
+                                            <option value="specific">Specific Products</option>
+                                            <option value="exclude">Exclude Specific Products</option>
+                                        </select>
+                                    </div>
+                                    <div id="updateProductSelectionContainer" style="display: none;">
+                                        <div class="input-group mb-2">
+                                            <input type="text" class="form-control" id="updateProductSearch" placeholder="Search products...">
+                                            <button class="btn btn-outline-secondary" type="button" id="updateProductSearchBtn">Search</button>
+                                        </div>
+                                        <div class="product-selection" id="updateProductSelection">
+                                            <!-- Product checkboxes will be loaded here -->
+                                            <div class="text-center py-3">
+                                                <small class="text-muted">Search for products to select</small>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="updateSelectedProducts" name="product_ids" value="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Applicable Categories</label>
+                                    <div class="mb-2">
+                                        <select class="form-control" id="updateCategoryRestrictionType" name="category_restriction_type">
+                                            <option value="">No Change</option>
+                                            <option value="all">All Categories</option>
+                                            <option value="specific">Specific Categories</option>
+                                            <option value="exclude">Exclude Specific Categories</option>
+                                        </select>
+                                    </div>
+                                    <div id="updateCategorySelectionContainer" style="display: none;">
+                                        <div class="category-selection" id="updateCategorySelection">
+                                            <!-- Category checkboxes will be loaded here -->
+                                            <div class="text-center py-3">
+                                                <small class="text-muted">Loading categories...</small>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="updateSelectedCategories" name="category_ids" value="">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-api">Update Coupon</button>
+                    </form>
+                    
+                    <div class="response-container" id="updateResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Delete Coupon Tab -->
+            <div class="tab-pane fade" id="delete" role="tabpanel" aria-labelledby="delete-tab">
+                <div class="api-section">
+                    <h3>Delete Coupon</h3>
+                    <div class="alert alert-warning">
+                        <strong>Warning:</strong> This endpoint deletes a coupon (soft delete). Admin or Super Admin role is required.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="deleteCouponId">Coupon ID *</label>
+                        <input type="number" class="form-control" id="deleteCouponId" required>
+                    </div>
+                    
+                    <button type="button" id="deleteCouponBtn" class="btn btn-danger btn-api">Delete Coupon</button>
+                    
+                    <div class="response-container" id="deleteResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Restore Coupon Tab -->
+            <div class="tab-pane fade" id="restore" role="tabpanel" aria-labelledby="restore-tab">
+                <div class="api-section">
+                    <h3>Restore Coupon</h3>
+                    <div class="alert alert-info">
+                        This endpoint restores a previously deleted coupon. Super Admin role is required.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="restoreCouponId">Coupon ID *</label>
+                        <input type="number" class="form-control" id="restoreCouponId" required>
+                    </div>
+                    
+                    <button type="button" id="restoreCouponBtn" class="btn btn-success btn-api">Restore Coupon</button>
+                    
+                    <div class="response-container" id="restoreResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Validate Coupon Tab -->
+            <div class="tab-pane fade" id="validate" role="tabpanel" aria-labelledby="validate-tab">
+                <div class="api-section">
+                    <h3>Validate Coupon</h3>
+                    <div class="alert alert-info">
+                        This endpoint validates a coupon code for a given cart value and user.
+                    </div>
+                    
+                    <form id="validateCouponForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="validateCode">Coupon Code *</label>
+                                    <input type="text" class="form-control" id="validateCode" name="code" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="validateCartTotal">Cart Total *</label>
+                                    <input type="number" class="form-control" id="validateCartTotal" name="cart_total" step="0.01" min="0" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="validateUserId">User ID</label>
+                                    <input type="number" class="form-control" id="validateUserId" name="user_id" min="1">
+                                    <small class="form-text text-muted">Optional. For first-order validation.</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="validateProductIds">Product IDs</label>
+                                    <input type="text" class="form-control" id="validateProductIds" name="product_ids">
+                                    <small class="form-text text-muted">Comma-separated list of product IDs in cart</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-api">Validate Coupon</button>
+                    </form>
+                    
+                    <div class="mt-4" id="validationResult">
+                        <!-- Validation result will be displayed here -->
+                    </div>
+                    
+                    <div class="response-container" id="validateResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Apply Coupon Tab -->
+            <div class="tab-pane fade" id="apply" role="tabpanel" aria-labelledby="apply-tab">
+                <div class="api-section">
+                    <h3>Apply Coupon</h3>
+                    <div class="alert alert-info">
+                        This endpoint applies a coupon to a cart and returns the discount amount.
+                    </div>
+                    
+                    <form id="applyCouponForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="applyCode">Coupon Code *</label>
+                                    <input type="text" class="form-control" id="applyCode" name="code" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="applyCartTotal">Cart Total *</label>
+                                    <input type="number" class="form-control" id="applyCartTotal" name="cart_total" step="0.01" min="0" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="applyUserId">User ID</label>
+                                    <input type="number" class="form-control" id="applyUserId" name="user_id" min="1">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="applyOrderId">Order ID</label>
+                                    <input type="number" class="form-control" id="applyOrderId" name="order_id" min="1">
+                                    <small class="form-text text-muted">Optional. For tracking coupon usage.</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="applyProductIds">Product IDs</label>
+                            <input type="text" class="form-control" id="applyProductIds" name="product_ids">
+                            <small class="form-text text-muted">Comma-separated list of product IDs in cart</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-api">Apply Coupon</button>
+                    </form>
+                    
+                    <div class="mt-4" id="applyResult">
+                        <!-- Apply result will be displayed here -->
+                    </div>
+                    
+                    <div class="response-container" id="applyResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Usage History Tab -->
+            <div class="tab-pane fade" id="usage" role="tabpanel" aria-labelledby="usage-tab">
+                <div class="api-section">
+                    <h3>Coupon Usage History</h3>
+                    <div class="alert alert-info">
+                        This endpoint returns the usage history for a specific coupon.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="usageCouponId">Coupon ID *</label>
+                        <input type="number" class="form-control" id="usageCouponId" required>
+                    </div>
+                    
+                    <button type="button" id="getCouponUsageBtn" class="btn btn-primary btn-api">Get Usage History</button>
+                    
+                    <div class="mt-4" id="usageHistoryList">
+                        <!-- Usage history will be displayed here -->
+                    </div>
+                    
+                    <div class="response-container" id="usageResponse">
+                        <pre>Response will appear here</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Base API URL - adjust this to match your setup
+        const baseUrl = window.location.origin + '/ramesh-be/be/api';
+        
+        // Store user data and tokens
+        let userData = null;
+        let accessToken = '';
+        let categories = [];
+        let products = [];
+        
+        // Helper function to get access token
+        function getAccessToken() {
+            return document.getElementById('accessToken').value;
+        }
+        
+        // Helper function to make API requests
+        async function apiRequest(url, method, data = null, token = null) {
+            const headers = {
+                'Accept': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const options = {
+                method,
+                headers
+            };
+            
+            // Handle FormData separately for file uploads
+            if (data instanceof FormData) {
+                // Don't set Content-Type for FormData, browser will set it with boundary
+                options.body = data;
+                
+                // If we're using method override (_method=PUT), change the actual method to POST
+                if (data.has('_method') && data.get('_method') === 'PUT') {
+                    options.method = 'POST';
+                }
+            } else if (data && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+                headers['Content-Type'] = 'application/json';
+                options.body = JSON.stringify(data);
+            }
+            
+            try {
+                console.log(`Making ${method} request to ${url}`);
+                console.log('Headers:', headers);
+                if (data) console.log('Data:', data instanceof FormData ? 'FormData object' : data);
+                
+                const response = await fetch(url, options);
+                const responseData = await response.json();
+                
+                console.log('Response:', responseData);
+                return responseData;
+            } catch (error) {
+                console.error('API Request Error:', error);
+                return {
+                    status: 'error',
+                    message: error.message,
+                    data: null
+                };
+            }
+        }
+        
+        // Helper function to display response
+        function displayResponse(elementId, response) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<pre>${JSON.stringify(response, null, 2)}</pre>`;
+        }
+        
+        // Helper function to build query string from filters
+        function buildQueryString(filters) {
+            const params = new URLSearchParams();
+            
+            for (const key in filters) {
+                if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+                    params.append(key, filters[key]);
+                }
+            }
+            
+            return params.toString();
+        }
+        
+        // Helper function to format date for display
+        function formatDate(dateString) {
+            if (!dateString) return 'Not set';
+            
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        }
+        
+        // Helper function to format date for input
+        function formatDateForInput(dateString) {
+            if (!dateString) return '';
+            
+            const date = new Date(dateString);
+            return date.toISOString().slice(0, 16);
+        }
+        
+        // Helper function to clear date input
+        function clearDateInput(inputId) {
+            document.getElementById(inputId).value = '';
+        }
+        
+        // Helper function to create coupon cards
+        function createCouponCards(coupons) {
+            const container = document.getElementById('couponsList');
+            container.innerHTML = '';
+            
+            if (!coupons || coupons.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No coupons found</div>';
+                return;
+            }
+            
+            const row = document.createElement('div');
+            row.className = 'row';
+            
+            coupons.forEach(coupon => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4';
+                
+                const card = document.createElement('div');
+                card.className = 'card coupon-card';
+                card.onclick = () => {
+                    document.getElementById('viewCouponId').value = coupon.id;
+                    document.getElementById('viewCouponBtn').click();
+                    document.getElementById('view-tab').click();
+                };
+                
+                // Status badge
+                let statusBadge = '';
+                switch (coupon.status) {
+                    case 'active':
+                        statusBadge = '<span class="badge bg-success">Active</span>';
+                        break;
+                    case 'inactive':
+                        statusBadge = '<span class="badge bg-warning text-dark">Inactive</span>';
+                        break;
+                    case 'expired':
+                        statusBadge = '<span class="badge bg-danger">Expired</span>';
+                        break;
+                    default:
+                        statusBadge = '<span class="badge bg-secondary">Unknown</span>';
+                }
+                
+                // Deleted badge
+                let deletedBadge = '';
+                if (coupon.deleted_at) {
+                    deletedBadge = '<span class="badge bg-danger ms-1">Deleted</span>';
+                }
+                
+                // Discount type badge
+                let discountBadge = '';
+                if (coupon.discount_type === 'percentage') {
+                    discountBadge = `<span class="badge bg-info ms-1">${coupon.discount_value}% Off</span>`;
+                } else {
+                    discountBadge = `<span class="badge bg-info ms-1">₹${coupon.discount_value} Off</span>`;
+                }
+                
+                // Usage count
+                let usageInfo = '';
+                if (coupon.usage_limit) {
+                    usageInfo = `<small class="text-muted">Used ${coupon.usage_count || 0} of ${coupon.usage_limit}</small>`;
+                } else {
+                    usageInfo = `<small class="text-muted">Used ${coupon.usage_count || 0} times (unlimited)</small>`;
+                }
+                
+                // Date info
+                let dateInfo = '';
+                if (coupon.start_date && coupon.end_date) {
+                    dateInfo = `<small class="text-muted">Valid from ${formatDate(coupon.start_date)} to ${formatDate(coupon.end_date)}</small>`;
+                } else if (coupon.start_date) {
+                    dateInfo = `<small class="text-muted">Valid from ${formatDate(coupon.start_date)}</small>`;
+                } else if (coupon.end_date) {
+                    dateInfo = `<small class="text-muted">Valid until ${formatDate(coupon.end_date)}</small>`;
+                } else {
+                    dateInfo = `<small class="text-muted">No date restrictions</small>`;
+                }
+                
+                card.innerHTML = `
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="card-title mb-0">${coupon.code}</h5>
+                            <div>
+                                ${statusBadge}
+                                ${deletedBadge}
+                            </div>
+                        </div>
+                        <h6 class="card-subtitle mb-2 text-muted">${coupon.description || 'No description'}</h6>
+                        <div class="mb-2">
+                            ${discountBadge}
+                            ${coupon.min_purchase_amount ? `<span class="badge bg-secondary ms-1">Min: ₹${coupon.min_purchase_amount}</span>` : ''}
+                            ${coupon.max_discount_amount ? `<span class="badge bg-secondary ms-1">Max: ₹${coupon.max_discount_amount}</span>` : ''}
+                        </div>
+                        <div class="mb-2">
+                            ${usageInfo}
+                        </div>
+                        <div class="mb-2">
+                            ${dateInfo}
+                        </div>
+                        <div class="mt-2 small text-muted">ID: ${coupon.id}</div>
+                    </div>
+                `;
+                
+                col.appendChild(card);
+                row.appendChild(col);
+            });
+            
+            container.appendChild(row);
+        }
+        
+        // Helper function to display coupon details
+        function displayCouponDetails(coupon) {
+            const container = document.getElementById('couponDetails');
+            
+            if (!coupon) {
+                container.innerHTML = '<div class="alert alert-warning">No coupon found</div>';
+                return;
+            }
+            
+            // Status badge
+            let statusBadge = '';
+            switch (coupon.status) {
+                case 'active':
+                    statusBadge = '<span class="badge bg-success">Active</span>';
+                    break;
+                case 'inactive':
+                    statusBadge = '<span class="badge bg-warning text-dark">Inactive</span>';
+                    break;
+                case 'expired':
+                    statusBadge = '<span class="badge bg-danger">Expired</span>';
+                    break;
+                default:
+                    statusBadge = '<span class="badge bg-secondary">Unknown</span>';
+            }
+            
+            // Deleted badge
+            let deletedBadge = '';
+            if (coupon.deleted_at) {
+                deletedBadge = '<span class="badge bg-danger ms-1">Deleted</span>';
+            }
+            
+            // Format dates
+            const createdAt = coupon.created_at ? formatDate(coupon.created_at) : 'Unknown';
+            const updatedAt = coupon.updated_at ? formatDate(coupon.updated_at) : 'Never';
+            const deletedAt = coupon.deleted_at ? formatDate(coupon.deleted_at) : 'Not deleted';
+            const startDate = coupon.start_date ? formatDate(coupon.start_date) : 'No start date';
+            const endDate = coupon.end_date ? formatDate(coupon.end_date) : 'No end date';
+            
+            // Product restrictions
+            let productRestrictions = 'All products';
+            if (coupon.product_restriction_type === 'specific' && coupon.product_ids) {
+                productRestrictions = `Specific products (${coupon.product_ids.length} selected)`;
+            } else if (coupon.product_restriction_type === 'exclude' && coupon.product_ids) {
+                productRestrictions = `Excludes specific products (${coupon.product_ids.length} excluded)`;
+            }
+            
+            // Category restrictions
+            let categoryRestrictions = 'All categories';
+            if (coupon.category_restriction_type === 'specific' && coupon.category_ids) {
+                categoryRestrictions = `Specific categories (${coupon.category_ids.length} selected)`;
+            } else if (coupon.category_restriction_type === 'exclude' && coupon.category_ids) {
+                categoryRestrictions = `Excludes specific categories (${coupon.category_ids.length} excluded)`;
+            }
+            
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h3>${coupon.code}</h3>
+                                <div class="mb-2">
+                                    ${statusBadge} ${deletedBadge}
+                                </div>
+                                <p>${coupon.description || 'No description'}</p>
+                                
+                                <div class="mb-3">
+                                    <h5>Discount Information</h5>
+                                    <p><strong>Discount Type:</strong> ${coupon.discount_type === 'percentage' ? 'Percentage' : 'Fixed Amount'}</p>
+                                    <p><strong>Discount Value:</strong> ${coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `₹${coupon.discount_value}`}</p>
+                                    <p><strong>Maximum Discount:</strong> ${coupon.max_discount_amount ? `₹${coupon.max_discount_amount}` : 'No limit'}</p>
+                                    <p><strong>Minimum Purchase:</strong> ${coupon.min_purchase_amount ? `₹${coupon.min_purchase_amount}` : 'No minimum'}</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5>Usage Information</h5>
+                                    <p><strong>Usage Limit:</strong> ${coupon.usage_limit ? coupon.usage_limit : 'Unlimited'}</p>
+                                    <p><strong>Current Usage:</strong> ${coupon.usage_count || 0}</p>
+                                    <p><strong>First Order Only:</strong> ${coupon.is_first_order_only ? 'Yes' : 'No'}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <h5>Validity Period</h5>
+                                    <p><strong>Start Date:</strong> ${startDate}</p>
+                                    <p><strong>End Date:</strong> ${endDate}</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5>Restrictions</h5>
+                                    <p><strong>Product Restrictions:</strong> ${productRestrictions}</p>
+                                    <p><strong>Category Restrictions:</strong> ${categoryRestrictions}</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5>Coupon Information</h5>
+                                    <p><strong>ID:</strong> ${coupon.id}</p>
+                                    <p><strong>Created By:</strong> ${coupon.created_by_name || 'System'}</p>
+                                    <p><strong>Created At:</strong> ${createdAt}</p>
+                                    <p><strong>Updated By:</strong> ${coupon.updated_by_name || 'Never updated'}</p>
+                                    <p><strong>Updated At:</strong> ${updatedAt}</p>
+                                    <p><strong>Deleted By:</strong> ${coupon.deleted_by_name || 'Not deleted'}</p>
+                                    <p><strong>Deleted At:</strong> ${deletedAt}</p>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-sm btn-primary" onclick="loadCouponForUpdate(${coupon.id})">Edit</button>
+                                    ${!coupon.deleted_at ? 
+                                        `<button type="button" class="btn btn-sm btn-danger" onclick="prepareDeleteCoupon(${coupon.id})">Delete</button>` : 
+                                        `<button type="button" class="btn btn-sm btn-success" onclick="prepareRestoreCoupon(${coupon.id})">Restore</button>`
+                                    }
+                                    <button type="button" class="btn btn-sm btn-info" onclick="viewCouponUsage(${coupon.id})">Usage History</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Helper function to display validation result
+        function displayValidationResult(result) {
+            const container = document.getElementById('validationResult');
+            
+            if (!result) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            if (result.status === 'success') {
+                container.innerHTML = `
+                    <div class="alert alert-success">
+                        <h5>Coupon is valid!</h5>
+                        <p><strong>Discount Amount:</strong> ${result.data.discount_amount ? `₹${result.data.discount_amount}` : 'N/A'}</p>
+                        <p><strong>Discount Percentage:</strong> ${result.data.discount_percentage ? `${result.data.discount_percentage}%` : 'N/A'}</p>
+                        <p><strong>Final Amount:</strong> ₹${result.data.final_amount}</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h5>Coupon is invalid!</h5>
+                        <p>${result.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Helper function to display apply result
+        function displayApplyResult(result) {
+            const container = document.getElementById('applyResult');
+            
+            if (!result) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            if (result.status === 'success') {
+                container.innerHTML = `
+                    <div class="alert alert-success">
+                        <h5>Coupon applied successfully!</h5>
+                        <p><strong>Original Amount:</strong> ₹${result.data.original_amount}</p>
+                        <p><strong>Discount Amount:</strong> ₹${result.data.discount_amount}</p>
+                        <p><strong>Final Amount:</strong> ₹${result.data.final_amount}</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h5>Failed to apply coupon!</h5>
+                        <p>${result.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Helper function to display usage history
+        function displayUsageHistory(usageHistory) {
+            const container = document.getElementById('usageHistoryList');
+            
+            if (!usageHistory || usageHistory.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No usage history found for this coupon</div>';
+                return;
+            }
+            
+            let html = `
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Order ID</th>
+                                <th>Original Amount</th>
+                                <th>Discount Amount</th>
+                                <th>Final Amount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            usageHistory.forEach(usage => {
+                html += `
+                    <tr>
+                        <td>${usage.id}</td>
+                        <td>${usage.user_name || usage.user_id || 'Guest'}</td>
+                        <td>${usage.order_id || 'N/A'}</td>
+                        <td>₹${usage.original_amount}</td>
+                        <td>₹${usage.discount_amount}</td>
+                        <td>₹${usage.final_amount}</td>
+                        <td>${formatDate(usage.created_at)}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // Function to load coupon data for update
+        function loadCouponForUpdate(couponId) {
+            document.getElementById('updateCouponId').value = couponId;
+            document.getElementById('loadCouponBtn').click();
+            document.getElementById('update-tab').click();
+        }
+        
+        // Function to prepare delete coupon
+        function prepareDeleteCoupon(couponId) {
+            document.getElementById('deleteCouponId').value = couponId;
+            document.getElementById('delete-tab').click();
+        }
+        
+        // Function to prepare restore coupon
+        function prepareRestoreCoupon(couponId) {
+            document.getElementById('restoreCouponId').value = couponId;
+            document.getElementById('restore-tab').click();
+        }
+        
+        // Function to view coupon usage
+        function viewCouponUsage(couponId) {
+            document.getElementById('usageCouponId').value = couponId;
+            document.getElementById('getCouponUsageBtn').click();
+            document.getElementById('usage-tab').click();
+        }
+        
+        // Function to update authentication status UI
+        function updateAuthStatusUI() {
+            const authStatus = document.getElementById('authStatus');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            if (accessToken) {
+                authStatus.className = 'auth-status logged-in';
+                authStatus.innerHTML = `<strong>Status:</strong> Authenticated${userData ? ' as ' + userData.username : ''}`;
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+            } else {
+                authStatus.className = 'auth-status logged-out';
+                authStatus.innerHTML = '<strong>Status:</strong> Not authenticated';
+                loginBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'none';
+            }
+        }
+        
+        // Function to load categories
+        async function loadCategories() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                console.error('Access token is required to load categories');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/categories?limit=100`, 'GET', null, token);
+            
+            if (response.status === 'success' && response.data) {
+                categories = response.data;
+                
+                // Populate category selections
+                populateCategorySelection('createCategorySelection', categories);
+                populateCategorySelection('updateCategorySelection', categories);
+            }
+        }
+        
+        // Function to populate category selection
+        function populateCategorySelection(containerId, categories) {
+            const container = document.getElementById(containerId);
+            
+            if (!container) return;
+            
+            let html = '';
+            
+            categories.forEach(category => {
+                html += `
+                    <div class="form-check">
+                        <input class="form-check-input category-checkbox" type="checkbox" value="${category.id}" id="${containerId}_${category.id}">
+                        <label class="form-check-label" for="${containerId}_${category.id}">
+                            ${category.name}
+                        </label>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            
+            // Add event listeners to checkboxes
+            const checkboxes = container.querySelectorAll('.category-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateSelectedCategories(containerId);
+                });
+            });
+        }
+        
+        // Function to update selected categories
+        function updateSelectedCategories(containerId) {
+            const container = document.getElementById(containerId);
+            const checkboxes = container.querySelectorAll('.category-checkbox:checked');
+            const selectedIds = Array.from(checkboxes).map(checkbox => checkbox.value);
+            
+            // Update hidden input
+            const hiddenInput = document.getElementById(containerId === 'createCategorySelection' ? 'createSelectedCategories' : 'updateSelectedCategories');
+            hiddenInput.value = selectedIds.join(',');
+        }
+        
+        // Function to search products
+        async function searchProducts(searchTerm, containerId) {
+            const token = getAccessToken();
+            
+            if (!token) {
+                console.error('Access token is required to search products');
+                return;
+            }
+            
+            const container = document.getElementById(containerId);
+            
+            if (!container) return;
+            
+            container.innerHTML = '<div class="text-center py-3"><small class="text-muted">Searching...</small></div>';
+            
+            const response = await apiRequest(`${baseUrl}/api/products/search?search=${searchTerm}&limit=20`, 'GET', null, token);
+            
+            if (response.status === 'success' && response.data) {
+                products = response.data;
+                
+                if (products.length === 0) {
+                    container.innerHTML = '<div class="text-center py-3"><small class="text-muted">No products found</small></div>';
+                    return;
+                }
+                
+                let html = '';
+                
+                products.forEach(product => {
+                    html += `
+                        <div class="form-check">
+                            <input class="form-check-input product-checkbox" type="checkbox" value="${product.id}" id="${containerId}_${product.id}">
+                            <label class="form-check-label" for="${containerId}_${product.id}">
+                                ${product.name} (SKU: ${product.sku || 'N/A'})
+                            </label>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                
+                // Add event listeners to checkboxes
+                const checkboxes = container.querySelectorAll('.product-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        updateSelectedProducts(containerId);
+                    });
+                });
+            } else {
+                container.innerHTML = '<div class="text-center py-3"><small class="text-muted">Error loading products</small></div>';
+            }
+        }
+        
+        // Function to update selected products
+        function updateSelectedProducts(containerId) {
+            const container = document.getElementById(containerId);
+            const checkboxes = container.querySelectorAll('.product-checkbox:checked');
+            const selectedIds = Array.from(checkboxes).map(checkbox => checkbox.value);
+            
+            // Update hidden input
+            const hiddenInput = document.getElementById(containerId === 'createProductSelection' ? 'createSelectedProducts' : 'updateSelectedProducts');
+            hiddenInput.value = selectedIds.join(',');
+        }
+        
+        // Login functionality
+        document.getElementById('loginBtn').addEventListener('click', async function() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                alert('Email/username and password are required');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/login`, 'POST', { email, password });
+            
+            if (response.status === 'success' && response.data) {
+                // Store tokens and user data
+                accessToken = response.data.access_token;
+                userData = response.data.user;
+                
+                // Update access token input
+                document.getElementById('accessToken').value = accessToken;
+                
+                // Store in localStorage
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('userData', JSON.stringify(userData));
+                
+                // Update UI
+                updateAuthStatusUI();
+                
+                // Load categories
+                loadCategories();
+                
+                alert('Login successful!');
+            } else {
+                alert('Login failed: ' + (response.message || 'Unknown error'));
+            }
+        });
+        
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            if (!accessToken) {
+                alert('Not logged in');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/auth/logout`, 'POST', {}, accessToken);
+            
+            // Clear tokens and user data regardless of response
+            accessToken = '';
+            userData = null;
+            
+            // Clear access token input
+            document.getElementById('accessToken').value = '';
+            
+            // Remove from localStorage
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('userData');
+            
+            // Update UI
+            updateAuthStatusUI();
+            
+            alert('Logged out successfully.');
+        });
+        
+        // List Coupons
+        document.getElementById('listCouponsBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const page = document.getElementById('listPage').value;
+            const limit = document.getElementById('listLimit').value;
+            const search = document.getElementById('listSearch').value;
+            const status = document.getElementById('listStatus').value;
+            const type = document.getElementById('listType').value;
+            
+            const filters = { page, limit, search, status, discount_type: type };
+            const queryString = buildQueryString(filters);
+            
+            const response = await apiRequest(`${baseUrl}/api/coupons?${queryString}`, 'GET', null, token);
+            displayResponse('listResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                createCouponCards(response.data);
+            }
+        });
+        
+        // View Coupon
+        document.getElementById('viewCouponBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const couponId = document.getElementById('viewCouponId').value;
+            
+            if (!couponId) {
+                alert('Coupon ID is required');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/coupons/${couponId}`, 'GET', null, token);
+            displayResponse('viewResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                displayCouponDetails(response.data);
+            }
+        });
+        
+        // Create Coupon
+        document.getElementById('createCouponForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            // Get form data
+            const formData = new FormData(this);
+            const data = {};
+            
+            // Convert FormData to JSON object
+            for (const [key, value] of formData.entries()) {
+                // Handle arrays (comma-separated values)
+                if (key === 'product_ids' || key === 'category_ids') {
+                    if (value) {
+                        data[key] = value.split(',').map(id => parseInt(id.trim()));
+                    }
+                } else if (key === 'is_first_order_only') {
+                    data[key] = value === '1';
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/coupons`, 'POST', data, token);
+            displayResponse('createResponse', response);
+            
+            if (response.status === 'success') {
+                alert('Coupon created successfully!');
+                this.reset();
+                
+                // Reset product and category selections
+                document.getElementById('createProductSelection').innerHTML = '<div class="text-center py-3"><small class="text-muted">Search for products to select</small></div>';
+                document.getElementById('createSelectedProducts').value = '';
+                document.getElementById('createSelectedCategories').value = '';
+                
+                // Refresh the coupons list
+                document.getElementById('listCouponsBtn').click();
+            }
+        });
+        
+        // Load Coupon for Update
+        document.getElementById('loadCouponBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const couponId = document.getElementById('updateCouponId').value;
+            
+            if (!couponId) {
+                alert('Coupon ID is required');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/coupons/${couponId}`, 'GET', null, token);
+            
+            if (response.status === 'success' && response.data) {
+                const coupon = response.data;
+                
+                // Populate form fields
+                document.getElementById('updateCode').value = coupon.code;
+                document.getElementById('updateDescription').value = coupon.description || '';
+                document.getElementById('updateDiscountValue').value = coupon.discount_value;
+                document.getElementById('updateMaxDiscountAmount').value = coupon.max_discount_amount || '';
+                document.getElementById('updateMinPurchaseAmount').value = coupon.min_purchase_amount || '';
+                document.getElementById('updateUsageLimit').value = coupon.usage_limit || '';
+                
+                // Set date fields
+                if (coupon.start_date) {
+                    document.getElementById('updateStartDate').value = formatDateForInput(coupon.start_date);
+                }
+                if (coupon.end_date) {
+                    document.getElementById('updateEndDate').value = formatDateForInput(coupon.end_date);
+                }
+                
+                // Set select fields to "No Change"
+                document.getElementById('updateDiscountType').value = '';
+                document.getElementById('updateStatus').value = '';
+                document.getElementById('updateIsFirstOrderOnly').value = '';
+                document.getElementById('updateProductRestrictionType').value = '';
+                document.getElementById('updateCategoryRestrictionType').value = '';
+                
+                alert('Coupon data loaded successfully!');
+            } else {
+                displayResponse('updateResponse', response);
+            }
+        });
+        
+        // Update Coupon
+        document.getElementById('updateCouponForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const couponId = document.getElementById('updateCouponId').value;
+            
+            if (!couponId) {
+                alert('Coupon ID is required');
+                return;
+            }
+            
+            // Get form data
+            const formData = new FormData(this);
+            const data = {};
+            
+            // Convert FormData to JSON object
+            for (const [key, value] of formData.entries()) {
+                // Skip empty fields
+                if (value === '') continue;
+                
+                // Handle arrays (comma-separated values)
+                if (key === 'product_ids' || key === 'category_ids') {
+                    if (value) {
+                        data[key] = value.split(',').map(id => parseInt(id.trim()));
+                    }
+                } else if (key === 'is_first_order_only') {
+                    data[key] = value === '1';
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/coupons/${couponId}`, 'PUT', data, token);
+            displayResponse('updateResponse', response);
+            
+            if (response.status === 'success') {
+                alert('Coupon updated successfully!');
+                
+                // Refresh the coupons list
+                document.getElementById('listCouponsBtn').click();
+            }
+        });
+        
+        // Delete Coupon
+        document.getElementById('deleteCouponBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const couponId = document.getElementById('deleteCouponId').value;
+            
+            if (!couponId) {
+                alert('Coupon ID is required');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to delete this coupon? This action can be undone by a Super Admin.')) {
+                const response = await apiRequest(`${baseUrl}/api/coupons/${couponId}`, 'DELETE', null, token);
+                displayResponse('deleteResponse', response);
+                
+                if (response.status === 'success') {
+                    alert('Coupon deleted successfully!');
+                    
+                    // Refresh the coupons list
+                    document.getElementById('listCouponsBtn').click();
+                }
+            }
+        });
+        
+        // Restore Coupon
+        document.getElementById('restoreCouponBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const couponId = document.getElementById('restoreCouponId').value;
+            
+            if (!couponId) {
+                alert('Coupon ID is required');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/coupons/${couponId}/restore`, 'POST', null, token);
+            displayResponse('restoreResponse', response);
+            
+            if (response.status === 'success') {
+                alert('Coupon restored successfully!');
+                
+                // Refresh the coupons list
+                document.getElementById('listCouponsBtn').click();
+            }
+        });
+        
+        // Validate Coupon
+        document.getElementById('validateCouponForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            // Get form data
+            const code = document.getElementById('validateCode').value;
+            const cartTotal = document.getElementById('validateCartTotal').value;
+            const userId = document.getElementById('validateUserId').value;
+            const productIds = document.getElementById('validateProductIds').value;
+            
+            // Build data object
+            const data = {
+                code,
+                cart_total: parseFloat(cartTotal)
+            };
+            
+            if (userId) {
+                data.user_id = parseInt(userId);
+            }
+            
+            if (productIds) {
+                data.product_ids = productIds.split(',').map(id => parseInt(id.trim()));
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/coupons/validate`, 'POST', data, token);
+            displayResponse('validateResponse', response);
+            displayValidationResult(response);
+        });
+        
+        // Apply Coupon
+        document.getElementById('applyCouponForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            // Get form data
+            const code = document.getElementById('applyCode').value;
+            const cartTotal = document.getElementById('applyCartTotal').value;
+            const userId = document.getElementById('applyUserId').value;
+            const orderId = document.getElementById('applyOrderId').value;
+            const productIds = document.getElementById('applyProductIds').value;
+            
+            // Build data object
+            const data = {
+                code,
+                cart_total: parseFloat(cartTotal)
+            };
+            
+            if (userId) {
+                data.user_id = parseInt(userId);
+            }
+            
+            if (orderId) {
+                data.order_id = parseInt(orderId);
+            }
+            
+            if (productIds) {
+                data.product_ids = productIds.split(',').map(id => parseInt(id.trim()));
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/coupons/apply`, 'POST', data, token);
+            displayResponse('applyResponse', response);
+            displayApplyResult(response);
+        });
+        
+        // Get Coupon Usage History
+        document.getElementById('getCouponUsageBtn').addEventListener('click', async function() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                alert('Access token is required');
+                return;
+            }
+            
+            const couponId = document.getElementById('usageCouponId').value;
+            
+            if (!couponId) {
+                alert('Coupon ID is required');
+                return;
+            }
+            
+            const response = await apiRequest(`${baseUrl}/api/coupons/${couponId}/usage`, 'GET', null, token);
+            displayResponse('usageResponse', response);
+            
+            if (response.status === 'success' && response.data) {
+                displayUsageHistory(response.data);
+            }
+        });
+        
+        // Product restriction type change handlers
+        document.getElementById('createProductRestrictionType').addEventListener('change', function() {
+            const container = document.getElementById('createProductSelectionContainer');
+            
+            if (this.value === 'specific' || this.value === 'exclude') {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('updateProductRestrictionType').addEventListener('change', function() {
+            const container = document.getElementById('updateProductSelectionContainer');
+            
+            if (this.value === 'specific' || this.value === 'exclude') {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        });
+        
+        // Category restriction type change handlers
+        document.getElementById('createCategoryRestrictionType').addEventListener('change', function() {
+            const container = document.getElementById('createCategorySelectionContainer');
+            
+            if (this.value === 'specific' || this.value === 'exclude') {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('updateCategoryRestrictionType').addEventListener('change', function() {
+            const container = document.getElementById('updateCategorySelectionContainer');
+            
+            if (this.value === 'specific' || this.value === 'exclude') {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        });
+        
+        // Product search button handlers
+        document.getElementById('createProductSearchBtn').addEventListener('click', function() {
+            const searchTerm = document.getElementById('createProductSearch').value;
+            
+            if (searchTerm) {
+                searchProducts(searchTerm, 'createProductSelection');
+            }
+        });
+        
+        document.getElementById('updateProductSearchBtn').addEventListener('click', function() {
+            const searchTerm = document.getElementById('updateProductSearch').value;
+            
+            if (searchTerm) {
+                searchProducts(searchTerm, 'updateProductSelection');
+            }
+        });
+        
+        // Initialize from localStorage on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load tokens and user data from localStorage
+            accessToken = localStorage.getItem('accessToken') || '';
+            
+            try {
+                const userDataStr = localStorage.getItem('userData');
+                if (userDataStr) {
+                    userData = JSON.parse(userDataStr);
+                }
+            } catch (e) {
+                console.error('Error parsing user data from localStorage:', e);
+                userData = null;
+            }
+            
+            // Set access token input
+            if (accessToken) {
+                document.getElementById('accessToken').value = accessToken;
+                
+                // Load categories
+                loadCategories();
+            }
+            
+            // Update UI
+            updateAuthStatusUI();
+            
+            // Save token to localStorage when changed manually
+            document.getElementById('accessToken').addEventListener('change', function() {
+                accessToken = this.value;
+                localStorage.setItem('accessToken', accessToken);
+                updateAuthStatusUI();
+                
+                // Load categories when token changes
+                if (accessToken) {
+                    loadCategories();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .panel {
+            flex: 1;
+            min-width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Category API Tester</h1>
+    
+    <div class="container">
+        <div class="panel">
+            <h2>List All Categories</h2>
+            <button id="listCategories">Get Categories</button>
+            <div id="categoriesResult">
+                <pre>Results will appear here...</pre>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Get Category by ID</h2>
+            <input type="number" id="categoryId" placeholder="Enter Category ID">
+            <button id="getCategory">Get Category</button>
+            <div id="categoryResult">
+                <pre>Results will appear here...</pre>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Get Category Tree</h2>
+            <button id="getCategoryTree">Get Category Tree</button>
+            <div id="categoryTreeResult">
+                <pre>Results will appear here...</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base URL for API
+        const BASE_URL = 'http://localhost/ramesh-be/be/api';
+        
+        // Helper function to display results
+        function displayResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            if (isError) {
+                element.innerHTML = `<pre class="error">${JSON.stringify(data, null, 2)}</pre>`;
+            } else {
+                element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+        }
+        
+        // List all categories
+        document.getElementById('listCategories').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${BASE_URL}/api/public/categories`);
+                const data = await response.json();
+                displayResult('categoriesResult', data);
+            } catch (error) {
+                displayResult('categoriesResult', { error: error.message }, true);
+            }
+        });
+        
+        // Get category by ID
+        document.getElementById('getCategory').addEventListener('click', async () => {
+            const categoryId = document.getElementById('categoryId').value;
+            if (!categoryId) {
+                displayResult('categoryResult', { error: 'Please enter a category ID' }, true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${BASE_URL}/api/public/categories/${categoryId}`);
+                const data = await response.json();
+                displayResult('categoryResult', data);
+            } catch (error) {
+                displayResult('categoryResult', { error: error.message }, true);
+            }
+        });
+        
+        // Get category tree
+        document.getElementById('getCategoryTree').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${BASE_URL}/api/public/categories/tree`);
+                const data = await response.json();
+                displayResult('categoryTreeResult', data);
+            } catch (error) {
+                displayResult('categoryTreeResult', { error: error.message }, true);
+            }
+        });
+    </script>
+</body>
+</html>

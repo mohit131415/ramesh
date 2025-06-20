@@ -1,0 +1,43 @@
+# Enable URL rewriting
+RewriteEngine On
+
+# Set the base directory - ADJUST THIS BASED ON YOUR SETUP
+RewriteBase /ramesh-be/be/api/
+
+# Handle Authorization header
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Prevent directory listing
+Options -Indexes
+
+# Redirect all requests to index.php except for existing files
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Force content type for API responses
+<IfModule mod_headers.c>
+    # Set default content type to JSON for API responses
+    Header always set Content-Type "application/json" env=API_RESPONSE
+    
+    # Protect against XSS attacks
+    Header set X-XSS-Protection "1; mode=block"
+    
+    # Prevent MIME-type sniffing
+    Header set X-Content-Type-Options "nosniff"
+    
+    # Prevent clickjacking
+    Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+# PHP settings
+<IfModule mod_php7.c>
+    # Ensure PHP errors don't output to browser
+    php_flag display_errors Off
+    php_flag display_startup_errors Off
+    
+    # Log errors instead
+    php_flag log_errors On
+    php_value error_log "storage/logs/php-errors.log"
+</IfModule>

@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile API Complete Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+        
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            grid-column: 1 / -1;
+        }
+        
+        h2 {
+            color: #34495e;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+            font-size: 1.5em;
+        }
+        
+        h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .form-row.single {
+            grid-template-columns: 1fr;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        
+        button.secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        }
+        
+        button.danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+        
+        button.success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+        
+        .token-status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .token-valid {
+            background: #d5f4e6;
+            color: #27ae60;
+            border: 2px solid #27ae60;
+        }
+        
+        .token-invalid {
+            background: #fdeaea;
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+        }
+        
+        .token-unknown {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffc107;
+        }
+        
+        .response-container {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .response-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-success {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+        
+        .status-error {
+            background: #fdeaea;
+            color: #e74c3c;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.4;
+            margin: 0;
+        }
+        
+        .token-debug {
+            background: #e8f4fd;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .file-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .completion-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .completion-fill {
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            height: 100%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="grid-column: 1 / -1;">User Profile API Complete Tester</h1>
+        
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h3>🔐 Authentication</h3>
+            
+            <div class="form-group">
+                <label for="jwtToken">JWT Token:</label>
+                <textarea id="jwtToken" placeholder="Paste your JWT token here..." rows="4"></textarea>
+            </div>
+            
+            <div id="tokenStatus" class="token-status token-unknown">
+                🔍 Token Status: Unknown
+            </div>
+            
+            <div id="tokenDebug" class="token-debug" style="display: none;">
+                <strong>Token Debug Info:</strong>
+                <div id="tokenInfo"></div>
+            </div>
+            
+            <button onclick="validateToken()" class="success">Validate Token</button>
+            <button onclick="clearToken()" class="danger">Clear Token</button>
+            
+            <h3 style="margin-top: 30px;">⚡ Quick Actions</h3>
+            <div class="quick-actions">
+                <button onclick="getProfile()" class="success">Get Profile</button>
+                <button onclick="getCompletion()" class="success">Check Completion</button>
+                <button onclick="loadSampleData()" class="secondary">Load Sample</button>
+            </div>
+            
+            <div id="completionStatus" style="margin-top: 20px; display: none;">
+                <h4>Profile Completion</h4>
+                <div class="completion-bar">
+                    <div id="completionFill" class="completion-fill" style="width: 0%;">0%</div>
+                </div>
+                <div id="completionDetails" style="font-size: 12px; margin-top: 10px;"></div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Create Profile -->
+            <div class="card">
+                <h2>➕ Create Profile</h2>
+                
+                <form id="createForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="createFirstName">First Name:</label>
+                            <input type="text" id="createFirstName" name="first_name" placeholder="Enter first name">
+                        </div>
+                        <div class="form-group">
+                            <label for="createLastName">Last Name:</label>
+                            <input type="text" id="createLastName" name="last_name" placeholder="Enter last name">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="createEmail">Email:</label>
+                            <input type="email" id="createEmail" name="email" placeholder="Enter email address">
+                        </div>
+                        <div class="form-group">
+                            <label for="createGender">Gender:</label>
+                            <select id="createGender" name="gender">
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                                <option value="prefer_not_to_say">Prefer not to say</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="createDateOfBirth">Date of Birth:</label>
+                            <input type="date" id="createDateOfBirth" name="date_of_birth">
+                        </div>
+                        <div class="form-group">
+                            <label for="createProfilePicture">Profile Picture:</label>
+                            <input type="file" id="createProfilePicture" name="profile_picture" accept="image/*" onchange="showFileInfo('createProfilePicture', 'createFileInfo')">
+                            <div id="createFileInfo" class="file-info" style="display: none;"></div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" onclick="createProfile()">Create Profile</button>
+                    <button type="button" onclick="clearForm('createForm')" class="secondary">Clear Form</button>
+                </form>
+                
+                <div id="createResponse" class="response-container" style="display: none;">
+                    <div class="response-header">
+                        <h4>Response:</h4>
+                        <span id="createStatus" class="response-status"></span>
+                    </div>
+                    <pre id="createResponseData"></pre>
+                </div>
+            </div>
+            
+            <!-- Update Profile -->
+            <div class="card">
+                <h2>✏️ Update Profile</h2>
+                
+                <form id="updateForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="updateFirstName">First Name:</label>
+                            <input type="text" id="updateFirstName" name="first_name" placeholder="Enter first name">
+                        </div>
+                        <div class="form-group">
+                            <label for="updateLastName">Last Name:</label>
+                            <input type="text" id="updateLastName" name="last_name" placeholder="Enter last name">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="updateEmail">Email:</label>
+                            <input type="email" id="updateEmail" name="email" placeholder="Enter email address">
+                        </div>
+                        <div class="form-group">
+                            <label for="updateGender">Gender:</label>
+                            <select id="updateGender" name="gender">
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                                <option value="prefer_not_to_say">Prefer not to say</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="updateDateOfBirth">Date of Birth:</label>
+                            <input type="date" id="updateDateOfBirth" name="date_of_birth">
+                        </div>
+                        <div class="form-group">
+                            <label for="updateProfilePicture">Profile Picture:</label>
+                            <input type="file" id="updateProfilePicture" name="profile_picture" accept="image/*" onchange="showFileInfo('updateProfilePicture', 'updateFileInfo')">
+                            <div id="updateFileInfo" class="file-info" style="display: none;"></div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" onclick="updateProfile()">Update Profile</button>
+                    <button type="button" onclick="loadCurrentProfile()" class="secondary">Load Current</button>
+                    <button type="button" onclick="clearForm('updateForm')" class="secondary">Clear Form</button>
+                </form>
+                
+                <div id="updateResponse" class="response-container" style="display: none;">
+                    <div class="response-header">
+                        <h4>Response:</h4>
+                        <span id="updateStatus" class="response-status"></span>
+                    </div>
+                    <pre id="updateResponseData"></pre>
+                </div>
+            </div>
+            
+            <!-- Get Profile & Completion -->
+            <div class="card">
+                <h2>📊 Profile Information</h2>
+                
+                <button onclick="getProfile()">Get My Profile</button>
+                <button onclick="getCompletion()" class="success">Check Completion Status</button>
+                
+                <div id="profileResponse" class="response-container" style="display: none;">
+                    <div class="response-header">
+                        <h4>Profile Data:</h4>
+                        <span id="profileStatus" class="response-status"></span>
+                    </div>
+                    <pre id="profileResponseData"></pre>
+                </div>
+                
+                <div id="completionResponse" class="response-container" style="display: none;">
+                    <div class="response-header">
+                        <h4>Completion Status:</h4>
+                        <span id="completionStatusResponse" class="response-status"></span>
+                    </div>
+                    <pre id="completionResponseData"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5173/api/api/public/user/profile';
+        
+        // Token Management
+        function getToken() {
+            return document.getElementById('jwtToken').value.trim();
+        }
+        
+        function updateTokenDebug(token) {
+            const debugDiv = document.getElementById('tokenDebug');
+            const infoDiv = document.getElementById('tokenInfo');
+            
+            if (!token) {
+                debugDiv.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const parts = token.split('.');
+                if (parts.length !== 3) {
+                    infoDiv.innerHTML = '❌ Invalid JWT format (should have 3 parts)';
+                    debugDiv.style.display = 'block';
+                    return;
+                }
+                
+                const payload = JSON.parse(atob(parts[1]));
+                const now = Math.floor(Date.now() / 1000);
+                
+                let info = `👤 User ID: ${payload.sub || 'Not found'}<br>`;
+                info += `📅 Issued: ${payload.iat ? new Date(payload.iat * 1000).toLocaleString() : 'Not found'}<br>`;
+                info += `⏰ Expires: ${payload.exp ? new Date(payload.exp * 1000).toLocaleString() : 'Not found'}<br>`;
+                
+                if (payload.exp) {
+                    if (payload.exp < now) {
+                        info += '🔴 Status: EXPIRED';
+                    } else {
+                        const remaining = Math.floor((payload.exp - now) / 60);
+                        info += `🟢 Status: Valid (${remaining} minutes remaining)`;
+                    }
+                }
+                
+                infoDiv.innerHTML = info;
+                debugDiv.style.display = 'block';
+            } catch (e) {
+                infoDiv.innerHTML = '❌ Error parsing token: ' + e.message;
+                debugDiv.style.display = 'block';
+            }
+        }
+        
+        function updateTokenStatus(status, message) {
+            const statusDiv = document.getElementById('tokenStatus');
+            statusDiv.className = `token-status token-${status}`;
+            
+            const icons = {
+                valid: '✅',
+                invalid: '❌',
+                unknown: '🔍'
+            };
+            
+            statusDiv.textContent = `${icons[status]} Token Status: ${message}`;
+        }
+        
+        async function validateToken() {
+            const token = getToken();
+            if (!token) {
+                updateTokenStatus('invalid', 'No token provided');
+                return;
+            }
+            
+            try {
+                const response = await fetch(API_BASE, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    updateTokenStatus('valid', 'Token is valid');
+                } else if (response.status === 401) {
+                    updateTokenStatus('invalid', 'Token is invalid or expired');
+                } else {
+                    updateTokenStatus('invalid', 'Token validation failed');
+                }
+            } catch (error) {
+                updateTokenStatus('invalid', 'Error validating token');
+            }
+        }
+        
+        function clearToken() {
+            document.getElementById('jwtToken').value = '';
+            updateTokenStatus('unknown', 'Unknown');
+            updateTokenDebug('');
+        }
+        
+        // File handling
+        function showFileInfo(inputId, infoId) {
+            const input = document.getElementById(inputId);
+            const infoDiv = document.getElementById(infoId);
+            
+            if (input.files.length > 0) {
+                const file = input.files[0];
+                infoDiv.innerHTML = `
+                    📁 <strong>File Selected:</strong><br>
+                    📝 Name: ${file.name}<br>
+                    📏 Size: ${(file.size / 1024).toFixed(2)} KB<br>
+                    🎨 Type: ${file.type}
+                `;
+                infoDiv.style.display = 'block';
+            } else {
+                infoDiv.style.display = 'none';
+            }
+        }
+        
+        // Response handling
+        function displayResponse(containerId, statusId, dataId, response, data) {
+            const container = document.getElementById(containerId);
+            const status = document.getElementById(statusId);
+            const dataElement = document.getElementById(dataId);
+            
+            container.style.display = 'block';
+            
+            if (response.ok) {
+                status.textContent = `${response.status} Success`;
+                status.className = 'response-status status-success';
+            } else {
+                status.textContent = `${response.status} Error`;
+                status.className = 'response-status status-error';
+            }
+            
+            dataElement.textContent = JSON.stringify(data, null, 2);
+        }
+        
+        // API Functions
+        async function createProfile() {
+            const token = getToken();
+            if (!token) {
+                alert('❌ Please enter a JWT token first');
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                
+                // Add form fields
+                const fields = ['first_name', 'last_name', 'email', 'gender', 'date_of_birth'];
+                fields.forEach(field => {
+                    const value = document.getElementById('create' + field.split('_').map(word => 
+                        word.charAt(0).toUpperCase() + word.slice(1)).join('')).value;
+                    if (value) {
+                        formData.append(field, value);
+                    }
+                });
+                
+                // Add profile picture
+                const profilePicture = document.getElementById('createProfilePicture').files[0];
+                if (profilePicture) {
+                    formData.append('profile_picture', profilePicture);
+                }
+                
+                const response = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                displayResponse('createResponse', 'createStatus', 'createResponseData', response, data);
+                
+                if (response.ok && data.status === 'success') {
+                    alert('✅ Profile created successfully!');
+                    getCompletion(); // Update completion status
+                }
+            } catch (error) {
+                console.error('Error creating profile:', error);
+                displayResponse('createResponse', 'createStatus', 'createResponseData', 
+                    {ok: false, status: 'Error'}, {error: error.message});
+            }
+        }
+        
+        async function updateProfile() {
+            const token = getToken();
+            if (!token) {
+                alert('❌ Please enter a JWT token first');
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                
+                // Add form fields (including empty ones for clearing)
+                const fields = ['first_name', 'last_name', 'email', 'gender', 'date_of_birth'];
+                
+                console.log('=== FRONTEND DEBUG: Building FormData ===');
+                
+                fields.forEach(field => {
+                    const elementId = 'update' + field.split('_').map(word => 
+                        word.charAt(0).toUpperCase() + word.slice(1)).join('');
+                    const element = document.getElementById(elementId);
+                    const value = element.value;
+                    
+                    console.log(`Field: ${field}, Element ID: ${elementId}, Value: "${value}"`);
+                    formData.append(field, value);
+                });
+                
+                // Add profile picture
+                const profilePicture = document.getElementById('updateProfilePicture').files[0];
+                if (profilePicture) {
+                    console.log('Profile picture found:', profilePicture.name, profilePicture.size, 'bytes');
+                    formData.append('profile_picture', profilePicture);
+                } else {
+                    console.log('No profile picture selected');
+                }
+                
+                // Debug: Log all FormData entries
+                console.log('=== FRONTEND DEBUG: FormData contents ===');
+                for (let [key, value] of formData.entries()) {
+                    console.log(`${key}:`, value);
+                }
+                
+                console.log('=== FRONTEND DEBUG: Sending request ===');
+                console.log('URL:', API_BASE);
+                console.log('Method: PUT');
+                console.log('Headers: Authorization: Bearer [token]');
+                
+                const response = await fetch(API_BASE, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                console.log('=== FRONTEND DEBUG: Response received ===');
+                console.log('Status:', response.status);
+                console.log('Content-Type:', response.headers.get('content-type'));
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                displayResponse('updateResponse', 'updateStatus', 'updateResponseData', response, data);
+                
+                if (response.ok && data.status === 'success') {
+                    alert('✅ Profile updated successfully!');
+                    getCompletion(); // Update completion status
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                displayResponse('updateResponse', 'updateStatus', 'updateResponseData', 
+                    {ok: false, status: 'Error'}, {error: error.message});
+            }
+        }
+        
+        async function getProfile() {
+            const token = getToken();
+            if (!token) {
+                alert('❌ Please enter a JWT token first');
+                return;
+            }
+            
+            try {
+                const response = await fetch(API_BASE, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                displayResponse('profileResponse', 'profileStatus', 'profileResponseData', response, data);
+                
+                if (response.ok && data.status === 'success' && data.data) {
+                    loadProfileToForm(data.data);
+                }
+            } catch (error) {
+                console.error('Error getting profile:', error);
+                displayResponse('profileResponse', 'profileStatus', 'profileResponseData', 
+                    {ok: false, status: 'Error'}, {error: error.message});
+            }
+        }
+        
+        async function getCompletion() {
+            const token = getToken();
+            if (!token) {
+                alert('❌ Please enter a JWT token first');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/completion`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                displayResponse('completionResponse', 'completionStatusResponse', 'completionResponseData', response, data);
+                
+                if (response.ok && data.status === 'success' && data.data) {
+                    updateCompletionDisplay(data.data);
+                }
+            } catch (error) {
+                console.error('Error getting completion:', error);
+                displayResponse('completionResponse', 'completionStatusResponse', 'completionResponseData', 
+                    {ok: false, status: 'Error'}, {error: error.message});
+            }
+        }
+        
+        // Helper functions
+        function loadProfileToForm(profileData) {
+            document.getElementById('updateFirstName').value = profileData.first_name || '';
+            document.getElementById('updateLastName').value = profileData.last_name || '';
+            document.getElementById('updateEmail').value = profileData.email || '';
+            document.getElementById('updateGender').value = profileData.gender || '';
+            document.getElementById('updateDateOfBirth').value = profileData.date_of_birth || '';
+        }
+        
+        function updateCompletionDisplay(completionData) {
+            const statusDiv = document.getElementById('completionStatus');
+            const fillDiv = document.getElementById('completionFill');
+            const detailsDiv = document.getElementById('completionDetails');
+            
+            statusDiv.style.display = 'block';
+            
+            const percentage = completionData.completion_percentage || 0;
+            fillDiv.style.width = `${percentage}%`;
+            fillDiv.textContent = `${percentage}%`;
+            
+            detailsDiv.innerHTML = `
+                ✅ Completed: ${completionData.completed_fields?.join(', ') || 'None'}<br>
+                ❌ Missing: ${completionData.missing_fields?.join(', ') || 'None'}
+            `;
+        }
+        
+        function loadCurrentProfile() {
+            getProfile();
+        }
+        
+        function clearForm(formId) {
+            document.getElementById(formId).reset();
+            // Clear file info displays
+            const fileInfos = document.querySelectorAll('.file-info');
+            fileInfos.forEach(info => info.style.display = 'none');
+        }
+        
+        function loadSampleData() {
+            document.getElementById('createFirstName').value = 'John';
+            document.getElementById('createLastName').value = 'Doe';
+            document.getElementById('createEmail').value = 'john.doe@example.com';
+            document.getElementById('createGender').value = 'male';
+            document.getElementById('createDateOfBirth').value = '1990-01-15';
+        }
+        
+        // Event listeners
+        document.getElementById('jwtToken').addEventListener('input', function() {
+            updateTokenDebug(this.value.trim());
+        });
+        
+        // Initialize
+        updateTokenStatus('unknown', 'Unknown');
+    </script>
+</body>
+</html>
